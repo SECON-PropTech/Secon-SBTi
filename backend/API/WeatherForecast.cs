@@ -1,4 +1,4 @@
-namespace Secon_SBTi_API;
+namespace api;
 
 public class WeatherForecast
 {

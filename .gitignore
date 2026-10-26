@@ -156,13 +156,11 @@ lerna-debug.log*
 *.iml
 *.iws
 *.ipr
-out/
  
 ## VS Code
 .vscode/
  
 ## Visual Studio
-*.suo
 *.ntvs*
 *.njsproj
 *.sw?
@@ -190,4 +188,18 @@ desktop.ini
 *~
 *.orig
 .history/
+
+flyway.conf
+
+# .NET build output
+**/bin/
+**/obj/
+
+# Local configuration and secrets
+.env.*
+!.env.example
+appsettings.Local.json
+
+# Test output
+TestResults/
  
