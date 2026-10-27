@@ -202,4 +202,6 @@ appsettings.Local.json
 
 # Test output
 TestResults/
+
+Directory.Build.props
  
