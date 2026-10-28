@@ -1,11 +1,17 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
+
 using Scalar.AspNetCore;
 using SeconSbtiBackend.Data;
+using SeconSbtiBackend.Core.Interfaces;
+using SeconSbtiBackend.Core.Services;
+using SeconSbtiBackend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

@@ -1,4 +1,4 @@
-namespace DefaultNamespace;
+namespace SeconSbtiBackend.API.Dtos;
 
 public class LoginRequestDto
 {
