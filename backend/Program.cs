@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 using SeconSbtiBackend.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +30,7 @@ if (dbConnectionError is not null)
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseAuthorization();
