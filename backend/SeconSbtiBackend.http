@@ -1,4 +1,4 @@
-@SeconSbtiBackend_HostAddress = http://localhost:5166
+@SeconSbtiBackend_HostAddress = http://localhost:5101
 
 GET {{SeconSbtiBackend_HostAddress}}/weatherforecast/
 Accept: application/json
