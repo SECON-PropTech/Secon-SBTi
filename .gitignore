@@ -199,6 +199,7 @@ flyway.conf
 .env.*
 !.env.example
 appsettings.Local.json
+appsettings.Development.json
 
 # Test output
 TestResults/
