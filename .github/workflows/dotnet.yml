@@ -22,10 +22,10 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore backend/Secon-SBTi.sln
+        run: dotnet restore backend/SeconSbtiBackend.sln
 
       - name: Build
-        run: dotnet build backend/Secon-SBTi.sln --no-restore --configuration Release
+        run: dotnet build backend/SeconSbtiBackend.sln --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test backend/Secon-SBTi.sln --no-build --configuration Release
+        run: dotnet test backend/SeconSbtiBackend.sln --no-build --configuration Release
