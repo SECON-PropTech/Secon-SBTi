@@ -1,4 +1,4 @@
-﻿namespace infrastructure_tests;
+﻿namespace api_tests;
 
 public class UnitTest1
 {
