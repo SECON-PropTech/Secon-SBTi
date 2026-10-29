@@ -203,4 +203,6 @@ appsettings.Development.json
 
 # Test output
 TestResults/
+
+Directory.Build.props
  
