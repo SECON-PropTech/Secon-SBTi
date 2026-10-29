@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using SeconSbtiBackend.Data;
+using SeconSbtiBackend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// Gör tjänsten tillgänglig för dependency injection.
+builder.Services.AddScoped<Scope312Service>();
 
 var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
