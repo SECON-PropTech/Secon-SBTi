@@ -41,4 +41,31 @@ public class Scope311CalculatorTests
     {
         Scope311Calculator.Activity(10, 0, null).Should().Be(0);
     }
+
+    /// <summary>
+    /// Tests the Missing method of the Scope311Calculator class to make sure it returns an empty list when the product is complete.
+    /// </summary>
+    [Fact]
+    public void Missing_is_empty_when_product_is_complete()
+    {
+        Scope311Calculator.Missing(50, 15, Guid.NewGuid()).Should().BeEmpty();
+    }
+
+    /// <summary>
+    /// Tests the Missing method of the Scope311Calculator class to make sure it lists everything that is missing for a new product.
+    /// </summary>
+    [Fact]
+    public void Missing_lists_everything_for_a_new_product()
+    {
+        Scope311Calculator.Missing(null, null, null).Should().Equal("kwh", "lifetime", "group");
+    }
+
+    /// <summary>
+    /// Tests the Missing method of the Scope311Calculator class to make sure it lists lifetime as missing when kWh/year is present but lifetime is missing.
+    /// </summary>
+    [Fact]
+    public void Missing_does_not_require_lifetime_when_kwh_is_zero()
+    {
+        Scope311Calculator.Missing(0, null, Guid.NewGuid()).Should().BeEmpty();
+    }
 }
