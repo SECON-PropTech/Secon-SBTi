@@ -465,10 +465,14 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("id");
+            entity.Property(e => e.Comment).HasColumnName("comment");
             entity.Property(e => e.Date)
                 .HasComment("Leveransdatum, avgör rapporteringsår")
                 .HasColumnName("date");
             entity.Property(e => e.ImportBatchId).HasColumnName("import_batch_id");
+            entity.Property(e => e.MeasurementQuality)
+                .HasDefaultValueSql("'measured'::text")
+                .HasColumnName("measurement_quality");
             entity.Property(e => e.MobigoWorkOrderId)
                 .HasComment("Uppdragsnummer")
                 .HasColumnName("mobigo_work_order_id");
@@ -477,6 +481,7 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.ImportBatch).WithMany(p => p.MobigoMaterialLines)
                 .HasForeignKey(d => d.ImportBatchId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("mobigo_material_line_import_batch_id_fkey");
 
             entity.HasOne(d => d.Product).WithMany(p => p.MobigoMaterialLines)
@@ -600,6 +605,10 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.AmountSek)
                 .HasComment("Kostnad som positivt belopp (rapportens tecken vänt)")
                 .HasColumnName("amount_sek");
+            entity.Property(e => e.Comment).HasColumnName("comment");
+            entity.Property(e => e.MeasurementQuality)
+                .HasDefaultValueSql("'measured'::text")
+                .HasColumnName("measurement_quality");
 
             entity.HasOne(d => d.Report).WithMany(p => p.PurchasedServices)
                 .HasForeignKey(d => d.ReportId)
@@ -674,6 +683,7 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.ImportBatch).WithOne(p => p.ServiceSpendReport)
                 .HasForeignKey<ServiceSpendReport>(d => d.ImportBatchId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("service_spend_report_import_batch_id_fkey");
         });
 
@@ -691,6 +701,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("id");
             entity.Property(e => e.ArticleNo).HasColumnName("article_no");
+            entity.Property(e => e.Comment).HasColumnName("comment");
             entity.Property(e => e.GroupId).HasColumnName("group_id");
             entity.Property(e => e.KwhPerYear)
                 .HasComment("Standardantagande. Null = ej satt")
@@ -698,6 +709,9 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.LifetimeYears)
                 .HasComment("Standardantagande. Null = ej satt")
                 .HasColumnName("lifetime_years");
+            entity.Property(e => e.MeasurementQuality)
+                .HasDefaultValueSql("'estimated'::text")
+                .HasColumnName("measurement_quality");
             entity.Property(e => e.Name).HasColumnName("name");
 
             entity.HasOne(d => d.Group).WithMany(p => p.SoldProducts)
