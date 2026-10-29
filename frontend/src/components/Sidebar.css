@@ -1,0 +1,91 @@
+/*Sidebar*/
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  background-color: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+.sidebar-logo {
+  height: 28px;
+  align-self: flex-start;
+  margin: 0 8px 32px;
+}
+
+
+.sidebar-heading {
+  margin: 0 8px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: 8px;
+  background: none;
+  color: var(--text);
+  font-size: 0.9rem;
+  text-align: left;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.sidebar-link:hover {
+  background-color: var(--bg);
+}
+
+
+.sidebar-link:focus-visible {
+  outline: 2px solid var(--secon-blue);
+  outline-offset: 2px;
+}
+
+/* The open page: light blue background, blue left border and blue text */
+.sidebar-link.active {
+  background-color: var(--secon-blue-light);
+  border-left-color: var(--secon-blue);
+  color: var(--secon-blue);
+  font-weight: 600;
+}
+
+.sidebar-number {
+  min-width: 44px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  background-color: var(--bg);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.sidebar-link.active .sidebar-number {
+  background-color: var(--secon-blue);
+  color: white;
+}
+
+/* margin-top, auto pushes the footer to the bottom of nav */
+.sidebar-footer {
+  margin: auto 8px 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
