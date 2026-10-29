@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SeconSbtiBackend.API.Dtos;
+namespace SeconSbtiBackend.DTOs;
 
-public class RegisterRequestDto
+public class RegisterRequestDTO
 {
 
     [Required, StringLength(100)]

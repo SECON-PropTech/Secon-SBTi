@@ -1,6 +1,6 @@
-namespace SeconSbtiBackend.API.Dtos;
+namespace SeconSbtiBackend.DTOs;
 
-public class UserDto
+public class UserDTO
 {
     public Guid Id {get; set;}
     public string FirstName {get; set;} = string.Empty;

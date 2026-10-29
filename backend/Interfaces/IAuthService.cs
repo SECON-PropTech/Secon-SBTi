@@ -1,10 +1,10 @@
-using SeconSbtiBackend.API.Dtos;
+using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Models;
 
-namespace SeconSbtiBackend.Core.Interfaces;
+namespace SeconSbtiBackend.Interfaces;
 
 public interface IAuthService
 {
-    Task<AppUser?> RegisterAsync(RegisterRequestDto request);
+    Task<AppUser?> RegisterAsync(RegisterRequestDTO request);
     Task<AppUser?> ValidateCredentialsAsync(string email, string password);
 }

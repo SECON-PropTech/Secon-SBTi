@@ -1,15 +1,15 @@
 using Microsoft.EntityFrameworkCore;
-using SeconSbtiBackend.API.Dtos;
-using SeconSbtiBackend.Core.Interfaces;
+using SeconSbtiBackend.DTOs;
+using SeconSbtiBackend.Interfaces;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.Models;
 using BCryptNet = BCrypt.Net.BCrypt;
 
-namespace SeconSbtiBackend.Core.Services;
+namespace SeconSbtiBackend.Services;
 
 public class AuthService(ApplicationDbContext db) : IAuthService
 {
-    public async Task<AppUser?> RegisterAsync(RegisterRequestDto request)
+    public async Task<AppUser?> RegisterAsync(RegisterRequestDTO request)
     {
         var email = Normalize(request.Email);
 
