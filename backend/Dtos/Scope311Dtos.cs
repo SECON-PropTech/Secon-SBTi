@@ -31,7 +31,7 @@ public record Scope311GroupSummary(
 
 
 /// <summary>
-/// Response for GET /api/scope31: totals per group and pne rpw per product sold that year.
+/// Response for GET /api/scope311: totals per group and one row per product sold that year.
 /// </summary>
 public record Scope311Response(
     int Year,
