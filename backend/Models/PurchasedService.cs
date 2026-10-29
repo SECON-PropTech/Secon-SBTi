@@ -17,5 +17,9 @@ public partial class PurchasedService
     /// </summary>
     public decimal AmountSek { get; set; }
 
+    public string MeasurementQuality { get; set; } = null!;
+
+    public string? Comment { get; set; }
+
     public virtual ServiceSpendReport Report { get; set; } = null!;
 }
