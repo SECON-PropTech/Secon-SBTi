@@ -19,11 +19,65 @@ namespace SeconSbtiBackend.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(
+    typeof(List<PurchasedGoodResponse>),
+    StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<List<PurchasedGoodResponse>>>
-        GetPurchasedGoods(CancellationToken cancellationToken)
+    GetPurchasedGoods(
+        [FromQuery] int? year,
+        [FromQuery] int? month,
+        CancellationToken cancellationToken)
         {
-            var goods = await _context.PurchasedGoods
-                .AsNoTracking()
+            if (month.HasValue && !year.HasValue)
+            {
+                return BadRequest(new
+                {
+                    field = "year",
+                    message = "Provide a year when filtering by month."
+                });
+            }
+
+            if (year is < 1 or > 9999)
+            {
+                return BadRequest(new
+                {
+                    field = "year",
+                    message = "Year must be between 1 and 9999."
+                });
+            }
+
+            if (month is < 1 or > 12)
+            {
+                return BadRequest(new
+                {
+                    field = "month",
+                    message = "Month must be between 1 and 12."
+                });
+            }
+
+            var query = _context.PurchasedGoods.AsNoTracking();
+
+            if (year.HasValue)
+            {
+                var startDate = new DateOnly(
+                    year.Value,
+                    month ?? 1,
+                    1);
+
+                var endDate = month.HasValue
+                    ? new DateOnly(
+                        year.Value,
+                        month.Value,
+                        DateTime.DaysInMonth(year.Value, month.Value))
+                    : new DateOnly(year.Value, 12, 31);
+
+                query = query.Where(good =>
+                    good.TransactionDate >= startDate &&
+                    good.TransactionDate <= endDate);
+            }
+
+            var goods = await query
                 .OrderByDescending(good => good.TransactionDate)
                 .ThenBy(good => good.Id)
                 .Select(good => new PurchasedGoodResponse
@@ -46,7 +100,7 @@ namespace SeconSbtiBackend.Controllers
             return Ok(goods);
         }
 
-            [HttpPost]
+        [HttpPost]
             [ProducesResponseType(
         typeof(PurchasedGoodResponse),
         StatusCodes.Status201Created)]
