@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Models;
+using System.Linq.Expressions;
 
 
 namespace SeconSbtiBackend.Controllers
@@ -13,10 +14,41 @@ namespace SeconSbtiBackend.Controllers
     public class PurchasedGoodsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+
+
         public PurchasedGoodsController(ApplicationDbContext context)
         {
             _context = context;
         }
+
+        private static readonly Expression<Func<PurchasedGood, PurchasedGoodResponse>>
+    ResponseProjection = good => new PurchasedGoodResponse
+    {
+        Id = good.Id,
+        SupplierId = good.SupplierId,
+
+        Categories = good.Supplier.SupplierCategoryAllocations
+            .OrderBy(allocation => allocation.PurchaseCategory.Name)
+            .ThenBy(allocation => allocation.PurchaseCategoryId)
+            .Select(allocation => new PurchasedGoodCategoryResponse
+            {
+                PurchaseCategoryId = allocation.PurchaseCategoryId,
+                Name = allocation.PurchaseCategory.Name,
+                Share = allocation.Share
+            })
+            .ToList(),
+
+        TransactionDate = good.TransactionDate,
+        Value = good.Value,
+        Unit = good.Unit,
+        MeasurementQuality = good.MeasurementQuality,
+        GoodsName = good.GoodsName,
+        Comment = good.Comment,
+        Specification = good.Specification,
+        AccountNo = good.AccountNo,
+        CreatedBy = good.CreatedBy,
+        CreatedAt = good.CreatedAt
+    };
 
         [HttpGet]
         [ProducesResponseType(
@@ -80,21 +112,7 @@ namespace SeconSbtiBackend.Controllers
             var goods = await query
                 .OrderByDescending(good => good.TransactionDate)
                 .ThenBy(good => good.Id)
-                .Select(good => new PurchasedGoodResponse
-                {
-                    Id = good.Id,
-                    SupplierId = good.SupplierId,
-                    TransactionDate = good.TransactionDate,
-                    Value = good.Value,
-                    Unit = good.Unit,
-                    MeasurementQuality = good.MeasurementQuality,
-                    GoodsName = good.GoodsName,
-                    Comment = good.Comment,
-                    Specification = good.Specification,
-                    AccountNo = good.AccountNo,
-                    CreatedBy = good.CreatedBy,
-                    CreatedAt = good.CreatedAt
-                })
+                .Select(ResponseProjection)
                 .ToListAsync(cancellationToken);
 
             return Ok(goods);
@@ -176,24 +194,14 @@ namespace SeconSbtiBackend.Controllers
                 _context.PurchasedGoods.Add(good);
                 await _context.SaveChangesAsync(cancellationToken);
 
-                var response = new PurchasedGoodResponse
-                {
-                    Id = good.Id,
-                    SupplierId = good.SupplierId,
-                    TransactionDate = good.TransactionDate,
-                    Value = good.Value,
-                    Unit = good.Unit,
-                    MeasurementQuality = good.MeasurementQuality,
-                    GoodsName = good.GoodsName,
-                    Comment = good.Comment,
-                    Specification = good.Specification,
-                    AccountNo = good.AccountNo,
-                    CreatedBy = good.CreatedBy,
-                    CreatedAt = good.CreatedAt
-                };
+                var response = await _context.PurchasedGoods
+                      .AsNoTracking()
+                      .Where(savedGood => savedGood.Id == good.Id)
+                      .Select(ResponseProjection)
+                      .SingleAsync(cancellationToken);
 
                 return StatusCode(StatusCodes.Status201Created, response);
-        }
+            }
 
 
             [HttpPut("{id:guid}")]
@@ -269,23 +277,13 @@ namespace SeconSbtiBackend.Controllers
                 // Creation metadata and import references remain unchanged.
                 await _context.SaveChangesAsync(cancellationToken);
 
-                var response = new PurchasedGoodResponse
-                {
-                    Id = good.Id,
-                    SupplierId = good.SupplierId,
-                    TransactionDate = good.TransactionDate,
-                    Value = good.Value,
-                    Unit = good.Unit,
-                    MeasurementQuality = good.MeasurementQuality,
-                    GoodsName = good.GoodsName,
-                    Comment = good.Comment,
-                    Specification = good.Specification,
-                    AccountNo = good.AccountNo,
-                    CreatedBy = good.CreatedBy,
-                    CreatedAt = good.CreatedAt
-                };
+                var response = await _context.PurchasedGoods
+                     .AsNoTracking()
+                     .Where(savedGood => savedGood.Id == good.Id)
+                     .Select(ResponseProjection)
+                     .SingleAsync(cancellationToken);
 
-                return Ok(response);
+            return Ok(response);
         }
     }
 }

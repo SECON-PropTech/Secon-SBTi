@@ -5,6 +5,7 @@
 
         public Guid Id { get; init; }
         public Guid SupplierId { get; init; }
+        public List<PurchasedGoodCategoryResponse> Categories { get; init; } = [];
         public DateOnly TransactionDate { get; init; }
 
         public decimal Value { get; init; }
