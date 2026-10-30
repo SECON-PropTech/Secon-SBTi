@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.DTOs;
@@ -51,9 +53,7 @@ namespace SeconSbtiBackend.Controllers
     };
 
         [HttpGet]
-        [ProducesResponseType(
-    typeof(List<PurchasedGoodResponse>),
-    StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<PurchasedGoodResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<List<PurchasedGoodResponse>>>
     GetPurchasedGoods(
@@ -118,16 +118,40 @@ namespace SeconSbtiBackend.Controllers
             return Ok(goods);
         }
 
-        [HttpPost]
-            [ProducesResponseType(
-        typeof(PurchasedGoodResponse),
-        StatusCodes.Status201Created)]
+            [Authorize]
+            [HttpPost]
+            [ProducesResponseType(typeof(PurchasedGoodResponse), StatusCodes.Status201Created)]
+            [ProducesResponseType(StatusCodes.Status400BadRequest)]
+            [ProducesResponseType(StatusCodes.Status401Unauthorized)]
             public async Task<ActionResult<PurchasedGoodResponse>>
-        CreatePurchasedGood(
-            [FromBody] CreatePurchasedGoodRequest request,
-            [FromQuery] Guid createdBy,
-            CancellationToken cancellationToken)
+                CreatePurchasedGood(
+                    [FromBody] CreatePurchasedGoodRequest request,
+                    CancellationToken cancellationToken)
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (!Guid.TryParse(userId, out var createdBy) ||
+                    createdBy == Guid.Empty)
+                {
+                    return Unauthorized(new
+                    {
+                        message = "The authenticated user ID is missing or invalid."
+                    });
+                }
+
+                var userExists = await _context.AppUsers
+                    .AnyAsync(
+                        user => user.Id == createdBy,
+                        cancellationToken);
+
+                if (!userExists)
+                {
+                    return Unauthorized(new
+                    {
+                        message = "The authenticated user no longer exists."
+                    });
+                }
+
                 var supplierExists = await _context.Suppliers
                     .AnyAsync(
                         supplier => supplier.Id == request.SupplierId,
@@ -139,21 +163,6 @@ namespace SeconSbtiBackend.Controllers
                     {
                         field = "supplierId",
                         message = "The supplier does not exist."
-                    });
-                }
-
-                // Temporary creator input for local testing until authentication is available.
-                var userExists = await _context.AppUsers
-                    .AnyAsync(
-                        user => user.Id == createdBy,
-                        cancellationToken);
-
-                if (!userExists)
-                {
-                    return BadRequest(new
-                    {
-                        field = "createdBy",
-                        message = "Provide the ID of an existing test user."
                     });
                 }
 
@@ -195,19 +204,17 @@ namespace SeconSbtiBackend.Controllers
                 await _context.SaveChangesAsync(cancellationToken);
 
                 var response = await _context.PurchasedGoods
-                      .AsNoTracking()
-                      .Where(savedGood => savedGood.Id == good.Id)
-                      .Select(ResponseProjection)
-                      .SingleAsync(cancellationToken);
+                    .AsNoTracking()
+                    .Where(savedGood => savedGood.Id == good.Id)
+                    .Select(ResponseProjection)
+                    .SingleAsync(cancellationToken);
 
                 return StatusCode(StatusCodes.Status201Created, response);
             }
 
 
-            [HttpPut("{id:guid}")]
-            [ProducesResponseType(
-        typeof(PurchasedGoodResponse),
-        StatusCodes.Status200OK)]
+        [HttpPut("{id:guid}")]
+            [ProducesResponseType(typeof(PurchasedGoodResponse), StatusCodes.Status200OK)]
             [ProducesResponseType(StatusCodes.Status400BadRequest)]
             [ProducesResponseType(StatusCodes.Status404NotFound)]
             public async Task<ActionResult<PurchasedGoodResponse>>
