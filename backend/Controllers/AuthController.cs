@@ -1,5 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Interfaces;
@@ -20,6 +22,31 @@ public class AuthController(IAuthService authService) : ControllerBase
             return Conflict(new { message = "Det finns redan ett konto med den e-postadressen."});
 
         return StatusCode(StatusCodes.Status201Created, ToDto(user));
+    }
+
+    [HttpPost("login")]
+    public async Task<ActionResult<UserDTO>> Login([FromBody] LoginRequestDTO request)
+    {
+        var user = await authService.LoginAsync(request);
+        if(user is null)
+        {
+            return Unauthorized(new
+            {
+                message = "Felaktig e-postadress eller lösenord."
+            });
+        }
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
+            new Claim(ClaimTypes.Email, user.Email!)
+        };
+
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+        return Ok(ToDto(user));
+        
     }
 
     [Authorize]
