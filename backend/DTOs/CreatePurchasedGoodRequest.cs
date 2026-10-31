@@ -1,7 +1,11 @@
-﻿namespace SeconSbtiBackend.DTOs;
+﻿using SeconSbtiBackend.Validation;
+
+
+namespace SeconSbtiBackend.DTOs;
 
 public class CreatePurchasedGoodRequest
 {
+    [NotEmptyGuid(ErrorMessage = "Select a valid supplier.")]
     public required Guid SupplierId { get; init; }
     public required DateOnly TransactionDate { get; init; }
 

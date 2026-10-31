@@ -6,6 +6,7 @@ using SeconSbtiBackend.Data;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Models;
 using System.Linq.Expressions;
+using SeconSbtiBackend.Validation;
 
 
 namespace SeconSbtiBackend.Controllers
@@ -159,15 +160,13 @@ namespace SeconSbtiBackend.Controllers
 
                 if (!supplierExists)
                 {
-                    return BadRequest(new
-                    {
-                        field = "supplierId",
-                        message = "The supplier does not exist."
-                    });
+                    return this.FieldValidationProblem(
+                        "supplierId",
+                        "The supplier does not exist.");
                 }
 
                 if (request.Unit != "sek")
-                {
+                    {
                     return BadRequest(new
                     {
                         field = "unit",
@@ -261,11 +260,9 @@ namespace SeconSbtiBackend.Controllers
 
                 if (!supplierExists)
                 {
-                    return BadRequest(new
-                    {
-                        field = "supplierId",
-                        message = "The supplier does not exist."
-                    });
+                    return this.FieldValidationProblem(
+                        "supplierId",
+                        "The supplier does not exist.");
                 }
 
                 good.SupplierId = request.SupplierId;
