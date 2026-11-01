@@ -11,7 +11,7 @@ public record UpdateSoldProductRequest
     /// <summary>
     /// Product group the product is reported in. Null = no group yet.
     /// </summary>
-    public Guid? GroupId { get; init; }
+    public Guid? groupId { get; init; }
 
     /// <summary>
     /// Energy use per year in kWh. 0 is allowed (product uses no electricity).

@@ -26,13 +26,13 @@ public class ProductsController(ApplicationDbContext dbContext) : ControllerBase
             return NotFound();
         }
 
-        if (request.GroupId is not null && !await dbContext.ProductGroups.AnyAsync(productGroup => productGroup.Id == request.GroupId))
+        if (request.groupId is not null && !await dbContext.ProductGroups.AnyAsync(productGroup => productGroup.Id == request.groupId))
         {
-            ModelState.AddModelError(nameof(request.GroupId), $"Product group {request.GroupId} does not exist.");
+            ModelState.AddModelError(nameof(request.groupId), $"Product group {request.groupId} does not exist.");
             return ValidationProblem();
         }
 
-        product.GroupId = request.GroupId;
+        product.GroupId = request.groupId;
         product.KwhPerYear = request.KwhPerYear;
         product.LifetimeYears = request.LifetimeYears;
         product.MeasurementQuality = request.MeasurementQuality;

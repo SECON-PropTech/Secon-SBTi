@@ -23,7 +23,7 @@ public class ProductsControllerTests
 
         var result = await new ProductsController(dbContext).Update(product.Id, new UpdateSoldProductRequest
         {
-            GroupId = fansGroup.Id,
+            groupId = fansGroup.Id,
             KwhPerYear = 50,
             LifetimeYears = 10,
             MeasurementQuality = "measured",
@@ -81,12 +81,12 @@ public class ProductsControllerTests
 
         var result = await new ProductsController(dbContext).Update(product.Id, new UpdateSoldProductRequest
         {
-            GroupId = Guid.NewGuid(),
+            groupId = Guid.NewGuid(),
             MeasurementQuality = "estimated"
         });
 
         var errorResult = result.Should().BeOfType<ObjectResult>().Subject;
-        errorResult.Value.Should().BeOfType<ValidationProblemDetails>().Which.Errors.Should().ContainKey(nameof(UpdateSoldProductRequest.GroupId));
+        errorResult.Value.Should().BeOfType<ValidationProblemDetails>().Which.Errors.Should().ContainKey(nameof(UpdateSoldProductRequest.groupId));
         product.GroupId.Should().BeNull();
     }
 
