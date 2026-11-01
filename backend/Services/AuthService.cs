@@ -52,5 +52,10 @@ public class AuthService(ApplicationDbContext db) : IAuthService
         return BCryptNet.Verify(password, user.PasswordHash) ? user : null;
     }
 
+    public async Task<AppUser?> LoginAsync(LoginRequestDTO request)
+    {
+        return await ValidateCredentialsAsync(request.Email, request.Password);
+    }
+
     private static string Normalize(string email) => email.Trim().ToLowerInvariant();
 }
