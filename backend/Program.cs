@@ -12,7 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 // Gör tjänsten tillgänglig för dependency injection.
-builder.Services.AddScoped<Scope312Service>();
+builder.Services.AddScoped<ProductMaterialQueryService>();
 
 var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
