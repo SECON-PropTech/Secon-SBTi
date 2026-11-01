@@ -1,6 +1,6 @@
 using FluentAssertions;
 using SeconSbtiBackend.Calculations;
-using SeconSbtiBackend.Dtos;
+using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Models;
 
 namespace api_tests;

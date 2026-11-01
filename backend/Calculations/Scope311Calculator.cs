@@ -1,4 +1,4 @@
-using SeconSbtiBackend.Dtos;
+using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Models;
 
 namespace SeconSbtiBackend.Calculations;

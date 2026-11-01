@@ -1,4 +1,4 @@
-namespace SeconSbtiBackend.Dtos;
+namespace SeconSbtiBackend.DTOs;
 
 /// <summary>
 /// One product group, e.g. "Fläktar". Should be used by the frontend to pick a group for a product.

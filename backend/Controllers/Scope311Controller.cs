@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using SeconSbtiBackend.Calculations;
 using SeconSbtiBackend.Data;
-using SeconSbtiBackend.Dtos;
+using SeconSbtiBackend.DTOs;
 
 namespace SeconSbtiBackend.Controllers;
 

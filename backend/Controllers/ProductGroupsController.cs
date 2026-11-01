@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SeconSbtiBackend.Data;
-using SeconSbtiBackend.Dtos;
+using SeconSbtiBackend.DTOs;
 
 namespace SeconSbtiBackend.Controllers;
 

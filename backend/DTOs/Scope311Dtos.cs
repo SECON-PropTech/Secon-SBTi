@@ -1,4 +1,4 @@
-namespace SeconSbtiBackend.Dtos;
+namespace SeconSbtiBackend.DTOs;
 
 /// <summary>
 /// One sold product in the scope 3.11 report (FK-S.05).
