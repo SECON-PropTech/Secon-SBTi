@@ -1,18 +1,25 @@
-﻿using SeconSbtiBackend.Validation;
-
+using System.ComponentModel.DataAnnotations;
+using SeconSbtiBackend.Validation;
 
 namespace SeconSbtiBackend.DTOs;
 
 public class UpdatePurchasedGoodRequest
 {
+    [Required]
     [NotEmptyGuid(ErrorMessage = "Select a valid supplier.")]
-    public required Guid SupplierId { get; init; }
-    public required DateOnly TransactionDate { get; init; }
+    public Guid? SupplierId { get; init; }
 
-    public required decimal Value { get; init; }
-    public required string Unit { get; init; }
+    [Required]
+    public DateOnly? TransactionDate { get; init; }
 
-    public required string MeasurementQuality { get; init; }
+    [Required]
+    public decimal? Value { get; init; }
+
+    [Required]
+    public string? Unit { get; init; }
+
+    [Required]
+    public string? MeasurementQuality { get; init; }
 
     public string? GoodsName { get; init; }
     public string? Comment { get; init; }

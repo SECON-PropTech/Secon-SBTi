@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
@@ -64,29 +64,23 @@ namespace SeconSbtiBackend.Controllers
         {
             if (month.HasValue && !year.HasValue)
             {
-                return BadRequest(new
-                {
-                    field = "year",
-                    message = "Provide a year when filtering by month."
-                });
+                return this.FieldValidationProblem(
+                    "year",
+                    "Provide a year when filtering by month.");
             }
 
             if (year is < 1 or > 9999)
             {
-                return BadRequest(new
-                {
-                    field = "year",
-                    message = "Year must be between 1 and 9999."
-                });
+                return this.FieldValidationProblem(
+                    "year",
+                    "Year must be between 1 and 9999.");
             }
 
             if (month is < 1 or > 12)
             {
-                return BadRequest(new
-                {
-                    field = "month",
-                    message = "Month must be between 1 and 12."
-                });
+                return this.FieldValidationProblem(
+                    "month",
+                    "Month must be between 1 and 12.");
             }
 
             var query = _context.PurchasedGoods.AsNoTracking();
@@ -155,7 +149,7 @@ namespace SeconSbtiBackend.Controllers
 
                 var supplierExists = await _context.Suppliers
                     .AnyAsync(
-                        supplier => supplier.Id == request.SupplierId,
+                        supplier => supplier.Id == request.SupplierId!.Value,
                         cancellationToken);
 
                 if (!supplierExists)
@@ -166,31 +160,27 @@ namespace SeconSbtiBackend.Controllers
                 }
 
                 if (request.Unit != "sek")
-                    {
-                    return BadRequest(new
-                    {
-                        field = "unit",
-                        message = "Only sek is supported in this purchase flow."
-                    });
+                {
+                    return this.FieldValidationProblem(
+                        "unit",
+                        "Only sek is supported in this purchase flow.");
                 }
 
                 if (request.MeasurementQuality is not ("measured" or "estimated"))
                 {
-                    return BadRequest(new
-                    {
-                        field = "measurementQuality",
-                        message = "Use measured or estimated."
-                    });
+                    return this.FieldValidationProblem(
+                        "measurementQuality",
+                        "Use measured or estimated.");
                 }
 
                 var good = new PurchasedGood
                 {
                     Id = Guid.NewGuid(),
-                    SupplierId = request.SupplierId,
-                    TransactionDate = request.TransactionDate,
-                    Value = request.Value,
-                    Unit = request.Unit,
-                    MeasurementQuality = request.MeasurementQuality,
+                    SupplierId = request.SupplierId!.Value,
+                    TransactionDate = request.TransactionDate!.Value,
+                    Value = request.Value!.Value,
+                    Unit = request.Unit!,
+                    MeasurementQuality = request.MeasurementQuality!,
                     GoodsName = request.GoodsName,
                     Comment = request.Comment,
                     Specification = request.Specification,
@@ -212,10 +202,12 @@ namespace SeconSbtiBackend.Controllers
             }
 
 
+        [Authorize]
         [HttpPut("{id:guid}")]
             [ProducesResponseType(typeof(PurchasedGoodResponse), StatusCodes.Status200OK)]
             [ProducesResponseType(StatusCodes.Status400BadRequest)]
             [ProducesResponseType(StatusCodes.Status404NotFound)]
+            [ProducesResponseType(StatusCodes.Status401Unauthorized)]
             public async Task<ActionResult<PurchasedGoodResponse>>
         UpdatePurchasedGood(
             Guid id,
@@ -237,25 +229,21 @@ namespace SeconSbtiBackend.Controllers
 
                 if (good.Unit != "sek" || request.Unit != "sek")
                 {
-                    return BadRequest(new
-                    {
-                        field = "unit",
-                        message = "Only purchases in sek can be edited in this flow."
-                    });
+                    return this.FieldValidationProblem(
+                        "unit",
+                        "Only purchases in sek can be edited in this flow.");
                 }
 
                 if (request.MeasurementQuality is not ("measured" or "estimated"))
                 {
-                    return BadRequest(new
-                    {
-                        field = "measurementQuality",
-                        message = "Use measured or estimated."
-                    });
+                    return this.FieldValidationProblem(
+                        "measurementQuality",
+                        "Use measured or estimated.");
                 }
 
                 var supplierExists = await _context.Suppliers
                     .AnyAsync(
-                        supplier => supplier.Id == request.SupplierId,
+                        supplier => supplier.Id == request.SupplierId!.Value,
                         cancellationToken);
 
                 if (!supplierExists)
@@ -265,18 +253,17 @@ namespace SeconSbtiBackend.Controllers
                         "The supplier does not exist.");
                 }
 
-                good.SupplierId = request.SupplierId;
-                good.TransactionDate = request.TransactionDate;
-                good.Value = request.Value;
-                good.Unit = request.Unit;
-                good.MeasurementQuality = request.MeasurementQuality;
+                good.SupplierId = request.SupplierId!.Value;
+                good.TransactionDate = request.TransactionDate!.Value;
+                good.Value = request.Value!.Value;
+                good.Unit = request.Unit!;
+                good.MeasurementQuality = request.MeasurementQuality!;
 
-                // Null or omitted text fields keep their previous values.
-                // An empty string clears the field.
-                good.GoodsName = request.GoodsName ?? good.GoodsName;
-                good.Comment = request.Comment ?? good.Comment;
-                good.Specification = request.Specification ?? good.Specification;
-                good.AccountNo = request.AccountNo ?? good.AccountNo;
+                // Null or omitted optional text fields are cleared.
+                good.GoodsName = request.GoodsName;
+                good.Comment = request.Comment;
+                good.Specification = request.Specification;
+                good.AccountNo = request.AccountNo;
 
                 // Creation metadata and import references remain unchanged.
                 await _context.SaveChangesAsync(cancellationToken);
