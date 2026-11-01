@@ -28,7 +28,8 @@ public class ProductsController(ApplicationDbContext dbContext) : ControllerBase
 
         if (request.GroupId is not null && !await dbContext.ProductGroups.AnyAsync(productGroup => productGroup.Id == request.GroupId))
         {
-            return BadRequest($"Product group {request.GroupId} does not exist.");
+            ModelState.AddModelError(nameof(request.GroupId), $"Product group {request.GroupId} does not exist.");
+            return ValidationProblem();
         }
 
         product.GroupId = request.GroupId;

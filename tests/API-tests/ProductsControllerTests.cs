@@ -85,7 +85,8 @@ public class ProductsControllerTests
             MeasurementQuality = "estimated"
         });
 
-        result.Should().BeOfType<BadRequestObjectResult>();
+        var errorResult = result.Should().BeOfType<ObjectResult>().Subject;
+        errorResult.Value.Should().BeOfType<ValidationProblemDetails>().Which.Errors.Should().ContainKey(nameof(UpdateSoldProductRequest.GroupId));
         product.GroupId.Should().BeNull();
     }
 
