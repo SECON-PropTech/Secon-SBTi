@@ -55,6 +55,27 @@ public class UpdateSoldProductRequestTests
     }
 
     /// <summary>
+    /// Tests the validation of UpdateSoldProductRequest to make sure a too large kWh/year is rejected, since it could crash the report.
+    /// </summary>
+    [Fact]
+    public void Too_large_kwh_is_rejected()
+    {
+        InvalidFields(new UpdateSoldProductRequest { KwhPerYear = 1_000_000_001, MeasurementQuality = "estimated" })
+            .Should().Equal(nameof(UpdateSoldProductRequest.KwhPerYear));
+    }
+
+    /// <summary>
+    /// Tests the validation of UpdateSoldProductRequest to make sure a too long lifetime is rejected, since it could crash the report.
+    /// </summary>
+    [Fact]
+    public void Too_long_lifetime_is_rejected()
+    {
+        InvalidFields(new UpdateSoldProductRequest { LifetimeYears = 1_001, MeasurementQuality = "estimated" })
+            .Should().Equal(nameof(UpdateSoldProductRequest.LifetimeYears));
+    }
+
+
+    /// <summary>
     /// Test helper: runs the same validation rules as the API and returns the names of the invalid fields.
     /// </summary>
     private static List<string> InvalidFields(UpdateSoldProductRequest request)

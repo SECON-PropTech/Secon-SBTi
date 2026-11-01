@@ -16,13 +16,13 @@ public record UpdateSoldProductRequest
     /// <summary>
     /// Energy use per year in kWh. 0 is allowed (product uses no electricity).
     /// </summary>
-    [Range(0d, double.MaxValue)]
+    [Range(0d, 1_000_000_000d)]
     public decimal? KwhPerYear { get; init; }
 
     /// <summary>
     /// Lifetime in years. Must be above 0, same rule as the database.
     /// </summary>
-    [Range(0d, double.MaxValue, MinimumIsExclusive = true)]
+    [Range(0d, 1_000d, MinimumIsExclusive = true)]
     public decimal? LifetimeYears { get; init; }
 
     /// <summary>
