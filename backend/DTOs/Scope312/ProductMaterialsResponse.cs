@@ -9,12 +9,3 @@ public sealed record ProductMaterialsResponse(
     IReadOnlyList<ProductMaterialResponse> Materials
 );
 
-// Beskriver en materialdel med lagrad vikt i kg och slutbehandling.
-// Behandlingen hämtas från materialet
-public sealed record ProductMaterialResponse(
-    Guid MaterialId,
-    string MaterialName,
-    decimal WeightKg,
-    Guid TreatmentId,
-    string TreatmentName
-);
