@@ -12,9 +12,11 @@ namespace SeconSbtiBackend.Controllers;
 public class PurchasedGoodsController(
     IPurchasedGoodsService purchasedGoodsService) : ControllerBase
 {
+    [Authorize]
     [HttpGet]
     [ProducesResponseType(typeof(List<PurchasedGoodResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<List<PurchasedGoodResponse>>> GetPurchasedGoods(
         [FromQuery] int? year,
         [FromQuery] int? month,
