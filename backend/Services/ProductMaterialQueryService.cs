@@ -6,7 +6,7 @@ namespace SeconSbtiBackend.Services;
 
 // Hämtar produktens materialuppgifter för Scope 3.12.
 // Periodens antal och rapporteringsuppgifter hanteras inte här.
-public sealed class Scope312Service(ApplicationDbContext dbContext)
+public sealed class ProductMaterialQueryService(ApplicationDbContext dbContext)
 {
     // Returnerar null om produkten saknas.
     // CancellationToken gör att databasfrågorna kan avbrytas.
