@@ -12,7 +12,7 @@ type Props = {
     total: number;
 };
 
-function ProductEnergyTable({ products, total }: Props) {
+function ProductTable({ products, total }: Props) {
     //The ids of the rows that are open. Empty list = all rows close
     const[openIds, setOpenIds] = useState<string[] > ([]);
 
@@ -91,4 +91,4 @@ function ProductEnergyTable({ products, total }: Props) {
     );
 }
 
-export default ProductEnergyTable;
+export default ProductTable;
