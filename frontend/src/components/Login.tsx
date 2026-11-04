@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { login } from "../Services/authService";
 import "./Login.css";
 import seconLogo from "../assets/secon_logo.svg";
 
@@ -12,39 +13,26 @@ function Login() {
 
     const navigate = useNavigate();
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrorMessage("");
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setLoading(true);
+        setErrorMessage("");
 
-    try {
-        const response = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-                email,
-                password,
-            }),
-        });
+        try {
+            await login(email, password);
+            navigate("/home");
 
-        const data = await response.json();
-
-        if (!response.ok) {
-            setErrorMessage(data.message || "Inloggningen misslyckades.");
-            return;
+        } catch (error) {
+            if (error instanceof Error) {
+                setErrorMessage(error.message);
+            } else {
+                setErrorMessage("Något gick fel vid inloggningen.");
+            }
+        } finally {
+            setLoading(false);
         }
+    };
 
-        navigate("/home");
-
-    } catch {
-        setErrorMessage("Kunde inte kontakta servern.");
-    } finally {
-        setLoading(false);
-    }
-};
 
     return (
         
