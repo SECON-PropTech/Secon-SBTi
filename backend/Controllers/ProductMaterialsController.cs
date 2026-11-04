@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using SeconSbtiBackend.DTOs.Scope312;
 using SeconSbtiBackend.Services;
 
+
 namespace SeconSbtiBackend.Controllers;
 
 [ApiController]
@@ -23,5 +24,17 @@ public sealed class ProductMaterialsController(
         }
 
         return Ok(product);
+    }
+
+
+
+    [HttpGet]
+    public async Task<ActionResult<IReadOnlyList<ProductMaterialsResponse>>> GetAllProductMaterials(
+    CancellationToken cancellationToken)
+    {
+        var products = await productMaterialQueryService
+            .GetAllProductMaterialsAsync(cancellationToken);
+
+        return Ok(products);
     }
 }

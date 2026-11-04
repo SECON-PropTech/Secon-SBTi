@@ -52,5 +52,37 @@ public sealed class ProductMaterialQueryService(ApplicationDbContext dbContext)
             product.ArticleNo,
             materials
         );
+
+
+
     }
+
+    // Hämtar alla produkter med deras material och slutbehandling.
+    public async Task<IReadOnlyList<ProductMaterialsResponse>> GetAllProductMaterialsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var products = await dbContext.SoldProducts
+            .OrderBy(p => p.Name)
+            .ThenBy(p => p.Id)
+            .Select(p => new ProductMaterialsResponse(
+                p.Id,
+                p.Name,
+                p.ArticleNo,
+                p.SoldProductMaterials
+                    .OrderBy(m => m.Material.Name)
+                    .ThenBy(m => m.MaterialId)
+                    .Select(m => new ProductMaterialResponse(
+                        m.MaterialId,
+                        m.Material.Name,
+                        m.WeightKg,
+                        m.Material.EolTreatmentId,
+                        m.Material.EolTreatment.Name
+                    ))
+                    .ToList()
+            ))
+            .ToListAsync(cancellationToken);
+
+        return products;
+    }
+
 }
