@@ -24,7 +24,7 @@ function Scope311() {
     })
     .catch(() => {
       setReport(null);
-      setError("Kunde inte hämta data. Försök igen");
+      setError("Kunde inte hämta data. Kontrollera att backend körs och att databasen är igång");
     });
   }, [year]);
   
