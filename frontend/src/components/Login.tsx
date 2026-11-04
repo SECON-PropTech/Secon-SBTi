@@ -12,24 +12,39 @@ function Login() {
 
     const navigate = useNavigate();
 
-    const handleSubmit = async (
-        e: React.FormEvent<HTMLFormElement>
-    ) => {
-        e.preventDefault();
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMessage("");
 
-        setLoading(true);
-        setErrorMessage("");
+    try {
+        const response = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                email,
+                password,
+            }),
+        });
 
-// Tillfällig test av navigeringen – inget API-anrop görs
-        try {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            navigate("/home");
-        } catch {
-            setErrorMessage("Something went wrong");
-        } finally {
-            setLoading(false);
+        const data = await response.json();
+
+        if (!response.ok) {
+            setErrorMessage(data.message || "Inloggningen misslyckades.");
+            return;
         }
-    };
+
+        navigate("/home");
+
+    } catch {
+        setErrorMessage("Kunde inte kontakta servern.");
+    } finally {
+        setLoading(false);
+    }
+};
 
     return (
         
