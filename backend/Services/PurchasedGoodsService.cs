@@ -110,11 +110,7 @@ public sealed class PurchasedGoodsService(
                 "The authenticated user no longer exists.");
         }
 
-        var supplierExists = await context.Suppliers
-            .AnyAsync(supplier => supplier.Id == request.SupplierId!.Value,
-                cancellationToken);
-
-        if (!supplierExists)
+        if (!await SupplierExistsAsync(request.SupplierId!.Value, cancellationToken))
         {
             return PurchasedGoodsResult<PurchasedGoodResponse>.ValidationError(
                 "supplierId",
@@ -128,7 +124,7 @@ public sealed class PurchasedGoodsService(
                 "Only sek is supported in this purchase flow.");
         }
 
-        if (request.MeasurementQuality is not ("measured" or "estimated"))
+        if (!IsValidMeasurementQuality(request.MeasurementQuality))
         {
             return PurchasedGoodsResult<PurchasedGoodResponse>.ValidationError(
                 "measurementQuality",
@@ -179,18 +175,14 @@ public sealed class PurchasedGoodsService(
                 "Only purchases in sek can be edited in this flow.");
         }
 
-        if (request.MeasurementQuality is not ("measured" or "estimated"))
+        if (!IsValidMeasurementQuality(request.MeasurementQuality))
         {
             return PurchasedGoodsResult<PurchasedGoodResponse>.ValidationError(
                 "measurementQuality",
                 "Use measured or estimated.");
         }
 
-        var supplierExists = await context.Suppliers
-            .AnyAsync(supplier => supplier.Id == request.SupplierId!.Value,
-                cancellationToken);
-
-        if (!supplierExists)
+        if (!await SupplierExistsAsync(request.SupplierId!.Value, cancellationToken))
         {
             return PurchasedGoodsResult<PurchasedGoodResponse>.ValidationError(
                 "supplierId",
@@ -212,6 +204,14 @@ public sealed class PurchasedGoodsService(
         var response = await GetResponseAsync(good.Id, cancellationToken);
         return PurchasedGoodsResult<PurchasedGoodResponse>.Success(response);
     }
+
+    private static bool IsValidMeasurementQuality(string? measurementQuality) =>
+        measurementQuality is "measured" or "estimated";
+
+    private Task<bool> SupplierExistsAsync(
+        Guid supplierId,
+        CancellationToken cancellationToken) =>
+        context.Suppliers.AnyAsync(supplier => supplier.Id == supplierId, cancellationToken);
 
     private async Task<PurchasedGoodResponse> GetResponseAsync(
         Guid id,
