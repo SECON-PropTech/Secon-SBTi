@@ -18,6 +18,7 @@ type Props = {
 };
 
 function MissingBadges({ missing }: Props) {
+    //if nothing is missing, show nothing
     if (missing.length === 0 ) {
         return null;
     }

@@ -3,7 +3,7 @@ import { formatNumber, formatOptional } from "../../utils/format";
 import MissingBadges from "./MissingBadges";
 import ProductDetails from "./ProductDetails";
 
-//One product in the table, the row itself and the details below it when the row is open
+
 //product = the product to show
 //isOpen = true if the details should be shown
 //onToggle = called when the row is clicked
@@ -15,6 +15,7 @@ type Props = {
 
 };
 
+//One product in the table, the row itself and the details below it when the row is open
 function ProductRow({ product, isOpen, onToggle }: Props) {
     return (
      <>

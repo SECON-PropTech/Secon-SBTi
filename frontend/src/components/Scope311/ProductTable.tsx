@@ -41,7 +41,7 @@ function ProductEnergyTable({ products, total }: Props) {
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, []);
+        }, []);
 
     return (
         <div ref={tableRef}>

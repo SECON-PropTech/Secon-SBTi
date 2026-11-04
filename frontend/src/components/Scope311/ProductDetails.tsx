@@ -6,9 +6,10 @@ type Props = {
     product: EnergyProductRow;
 
 };
-
+//The product details-part that shows when a row is opened
 function ProductDetails({ product }: Props) {
-    let lifetimeText = "-";
+    //Add the value only when there is a value, otherwise there's a dash
+    let lifetimeText = "-"; //TODO: ändra detta till något mer visuellt tilltalande i senare skede
     if (product.lifetimeYears !== null) {
         lifetimeText = formatNumber(product.lifetimeYears) + " år";
     }

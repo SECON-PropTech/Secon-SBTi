@@ -6,8 +6,10 @@ import "../components/Scope311/EnergyConsumption.css"
 import { getEnergyConsumption } from "../Services/energyConsumptionService";
 //components for this page
 import YearPicker from "../components/Scope311/YearPicker";
-import ProductEnergyTable from "../components/Scope311/ProductEnergyTable";
+import ProductTable from "../components/Scope311/ProductTable";
 
+// Scope 3.11: how much energy the products use during their lifetime.
+// The page fetches the data and decides what to show. The table handles the rest.
 function Scope311() {
   //the reporting year
   const [year, setYear] = useState(new Date().getFullYear());
@@ -28,35 +30,52 @@ function Scope311() {
     });
   }, [year]);
   
-  const isLoading = error === null && (report === null || report.year !== year);
+  //Throws away the old data when a new year is selected
+  // the page shows "Hämtar data .." until the new data comes
+  function handleYearChange(newYear: number) {
+    setYear(newYear);
+    setReport(null);
+    setError(null);
+  }
+
+  // Decide what to show under the heading
+  let content;
+  if (error !== null) {
+    content = <div className="alert alert-danger">{error}</div>;
+  } else if (report === null) {
+    content = (
+      <section className="energy-box">
+        <p className="text-secondary mb-0">Hämtar data ..</p>
+      </section>
+    );
+  } else if (report.products.length === 0) {
+    content = (
+      <section className="energy-box">
+        <p className="text-secondary mb-0">Inga sålda produkter för {year}.</p>
+      </section>
+    );
+  } else {
+    content = (
+      <section className="energy-box">
+        <ProductTable products={report.products} total={report.totalActivityKwh} />
+      </section>
+    );
+  }
 
   return (
     <div className="energy-page">
-      {/*Heading on the left, year picker on the right */}
       <div className="d-flex justify-content-between align-items-start mb-4">
         <div>
-          <p className="text-uppercase small text-secondary mb-1">ProduktRapport</p>
+          <p className="text-uppercase small text-secondary mb-1">Produktrapport</p>
           <h1 className="fs-2 my-1">Energiförbrukning per produkt</h1>
           <p>En översikt över sålda produkter och hur mycket energi de förbrukar under sin livslängd.</p>
         </div>
-        <YearPicker year={year} onChange={setYear}/>
+        <YearPicker year={year} onChange={handleYearChange} />
       </div>
 
-      {/*Show one of four things: error, loading, no products or the table*/}
-      {error !== null ? (
-      <div className="alert alert-danger">{error}</div> ) : isLoading || report === null ? (
-        <section className="energy-box">
-          <p className="text-secondary mb-0">Hämtar data ..</p>
-        </section> ) : report.products.length === 0 ? (
-          <section className="energy-box">
-            <p className="text-secondary mb-0">Inga sålda produkter för {year}.</p>
-          </section> ) : (
-            <section className="energy-box">
-              <ProductEnergyTable products={report.products} total={report.totalActivityKwh}/>
-            </section>
-          )}
+      {content}
     </div>
-  )
+  );
 }
 
 export default Scope311;
