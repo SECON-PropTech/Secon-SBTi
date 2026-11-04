@@ -52,11 +52,11 @@ public sealed class PurchasedGoodsService(
                 "Provide a year when filtering by month.");
         }
 
-        if (year is < 1 or > 9999)
+        if (year is < 2000 or > 2100)
         {
             return PurchasedGoodsResult<List<PurchasedGoodResponse>>.ValidationError(
                 "year",
-                "Year must be between 1 and 9999.");
+                "Year must be between 2000 and 2100.");
         }
 
         if (month is < 1 or > 12)
