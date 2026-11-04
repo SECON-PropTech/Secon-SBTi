@@ -141,4 +141,38 @@ public class AuthControllerTests
         });
     }
 
+    [Fact]
+    public void Me_UserWithoutRoles_ReturnsEmptyRoles()
+    {
+        SetUser(
+            new Claim(ClaimTypes.NameIdentifier, "111"),
+            new Claim(ClaimTypes.Name, "Anna Testsson"),
+            new Claim(ClaimTypes.Email, "anna@secon.se")
+        );
+
+        var result = _sut.Me();
+        result.Result.Should().BeOfType<OkObjectResult>().Which.Value.Should().BeEquivalentTo(new
+            {
+                id = "111",
+                name = "Anna Testsson",
+                email = "anna@secon.se",
+                roles = Array.Empty<string>()
+            }
+        );
+    }
+
+    [Fact]
+    public void Me_UserWithoutClaims_ReturnsNullValuesAndEmptyRoles()
+    {
+        SetUser();
+        var result = _sut.Me();
+        result.Result.Should().BeOfType<OkObjectResult>().Which.Value.Should().BeEquivalentTo(new
+            {
+                id = (string?)null,
+                name = (string?)null,
+                email = (string?)null,
+                roles = Array.Empty<string>()
+            }
+        );
+    }
 }
