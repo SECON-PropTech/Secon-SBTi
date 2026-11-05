@@ -7,7 +7,7 @@ public partial class ServiceSpendReport
 {
     public Guid Id { get; set; }
 
-    public Guid ImportBatchId { get; set; }
+    public Guid? ImportBatchId { get; set; }
 
     /// <summary>
     /// Från rapportens Period-rad
@@ -16,7 +16,7 @@ public partial class ServiceSpendReport
 
     public DateOnly PeriodTo { get; set; }
 
-    public virtual ImportBatch ImportBatch { get; set; } = null!;
+    public virtual ImportBatch? ImportBatch { get; set; }
 
     public virtual ICollection<PurchasedService> PurchasedServices { get; set; } = new List<PurchasedService>();
 }

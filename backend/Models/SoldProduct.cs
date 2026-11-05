@@ -23,6 +23,10 @@ public partial class SoldProduct
     /// </summary>
     public decimal? LifetimeYears { get; set; }
 
+    public string MeasurementQuality { get; set; } = null!;
+
+    public string? Comment { get; set; }
+
     public virtual ProductGroup? Group { get; set; }
 
     public virtual ICollection<MobigoMaterialLine> MobigoMaterialLines { get; set; } = new List<MobigoMaterialLine>();
