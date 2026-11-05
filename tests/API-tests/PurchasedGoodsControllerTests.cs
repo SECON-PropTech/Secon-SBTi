@@ -14,7 +14,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SeconSbtiBackend.Controllers;
 using SeconSbtiBackend.Data;
+using SeconSbtiBackend.Interfaces;
 using SeconSbtiBackend.Models;
+using SeconSbtiBackend.Services;
 using Xunit;
 
 namespace api_tests;
@@ -196,6 +198,7 @@ public class PurchasedGoodsControllerTests
             builder.Logging.ClearProviders();
             var databaseName = Guid.NewGuid().ToString();
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase(databaseName));
+            builder.Services.AddScoped<IPurchasedGoodsService, PurchasedGoodsService>();
             builder.Services.AddControllers(options => options.ModelMetadataDetailsProviders.Add(new SystemTextJsonValidationMetadataProvider()))
                 .AddApplicationPart(typeof(PurchasedGoodsController).Assembly);
             builder.Services.AddAuthentication("PurchasedGoodsTest")

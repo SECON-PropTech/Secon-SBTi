@@ -6,7 +6,7 @@ namespace SeconSbtiBackend.Validation;
 public sealed class NotEmptyGuidAttribute : ValidationAttribute
 {
     public NotEmptyGuidAttribute()
-        : base("A non-empty ID is required.")
+        : base("Ange ett giltigt ID som inte är tomt.")
     {
     }
 
