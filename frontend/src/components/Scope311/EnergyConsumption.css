@@ -1,0 +1,95 @@
+/* The colors come from the global variables in index.css. */
+
+/* White box around the table  */
+.energy-page .energy-box {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+}
+
+
+/* blue header row with white text */
+.energy-page .energy-table-header th {
+  background-color: var(--secon-blue-soft);
+  color: white;
+  white-space: nowrap;
+}
+
+
+/* The mouse becomes a hand so you can see that the row can be clicked */
+.energy-page .energy-row {
+  cursor: pointer;
+}
+
+/* light blue background when the mouse is over the row. */
+.energy-page .energy-row:hover > td {
+  background-color: var(--secon-blue-light);
+}
+
+
+.energy-page .energy-row-open > td {
+  border-bottom-width: 0;
+}
+
+
+.energy-page .energy-chevron-cell {
+  width: 40px;
+}
+
+/* The arrow points right when closed ... */
+.energy-page .energy-chevron {
+  display: inline-block;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--text-muted);
+  transition: transform 0.15s;
+}
+
+/* ... and turns to point down when the row is open */
+.energy-page .energy-row-open .energy-chevron {
+  transform: rotate(90deg);
+}
+
+/* The pencil button: no frame, just the symbol */
+.energy-page .energy-edit-button {
+  border: none;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+
+.energy-page .energy-details-row > td {
+  background-color: var(--bg);
+}
+
+.energy-page .energy-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 32px;
+  margin: 0;
+}
+
+/* The label small grey text */
+.energy-page .energy-details-grid dt {
+  font-size: 0.875rem;
+  font-weight: normal;
+  color: var(--text-muted);
+}
+
+/* The value, bold text */
+.energy-page .energy-details-grid dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.energy-page .energy-details-full {
+  grid-column: 1 / -1;
+}
+
+/* One column on small screens */
+@media (max-width: 576px) {
+  .energy-page .energy-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
