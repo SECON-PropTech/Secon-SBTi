@@ -43,7 +43,7 @@ public class PurchasedGoodsController(
         {
             return Unauthorized(new
             {
-                message = "The authenticated user ID is missing or invalid."
+                message = "Din inloggning kunde inte verifieras. Logga in igen."
             });
         }
 
@@ -84,7 +84,7 @@ public class PurchasedGoodsController(
                 NotFound(new { message = result.Message }),
             PurchasedGoodsResultStatus.InvalidUser =>
                 Unauthorized(new { message = result.Message }),
-            _ => throw new InvalidOperationException("Unknown purchased goods result.")
+            _ => throw new InvalidOperationException("Okänt resultat för köpta varor.")
         };
     }
 }

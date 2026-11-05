@@ -49,21 +49,21 @@ public sealed class PurchasedGoodsService(
         {
             return PurchasedGoodsResult<List<PurchasedGoodResponse>>.ValidationError(
                 "year",
-                "Provide a year when filtering by month.");
+                "Ange ett år när du filtrerar på månad.");
         }
 
-        if (year is < 2000 or > 2100)
+        if (year is < 1 or > 9999)
         {
             return PurchasedGoodsResult<List<PurchasedGoodResponse>>.ValidationError(
                 "year",
-                "Year must be between 2000 and 2100.");
+                "Ange siffror mellan 1 och 9999.");
         }
 
         if (month is < 1 or > 12)
         {
             return PurchasedGoodsResult<List<PurchasedGoodResponse>>.ValidationError(
                 "month",
-                "Month must be between 1 and 12.");
+                "Ange en månad mellan 1 och 12.");
         }
 
         var query = context.PurchasedGoods.AsNoTracking();
@@ -107,28 +107,28 @@ public sealed class PurchasedGoodsService(
         if (!userExists)
         {
             return PurchasedGoodsResult<PurchasedGoodResponse>.InvalidUser(
-                "The authenticated user no longer exists.");
+                "Användarkontot finns inte längre. Kontakta en administratör.");
         }
 
         if (!await SupplierExistsAsync(request.SupplierId!.Value, cancellationToken))
         {
             return PurchasedGoodsResult<PurchasedGoodResponse>.ValidationError(
                 "supplierId",
-                "The supplier does not exist.");
+                "Leverantören finns inte. Välj en annan leverantör.");
         }
 
         if (request.Unit != "sek")
         {
             return PurchasedGoodsResult<PurchasedGoodResponse>.ValidationError(
                 "unit",
-                "Only sek is supported in this purchase flow.");
+                "Endast belopp i SEK stöds för köpta varor.");
         }
 
         if (!IsValidMeasurementQuality(request.MeasurementQuality))
         {
             return PurchasedGoodsResult<PurchasedGoodResponse>.ValidationError(
                 "measurementQuality",
-                "Use measured or estimated.");
+                "Välj uppmätt eller uppskattat.");
         }
 
         var good = new PurchasedGood
@@ -165,28 +165,28 @@ public sealed class PurchasedGoodsService(
         if (good is null)
         {
             return PurchasedGoodsResult<PurchasedGoodResponse>.NotFound(
-                "The purchased good was not found.");
+                "Den köpta varan kunde inte hittas.");
         }
 
         if (good.Unit != "sek" || request.Unit != "sek")
         {
             return PurchasedGoodsResult<PurchasedGoodResponse>.ValidationError(
                 "unit",
-                "Only purchases in sek can be edited in this flow.");
+                "Endast inköp i SEK kan redigeras i detta flöde.");
         }
 
         if (!IsValidMeasurementQuality(request.MeasurementQuality))
         {
             return PurchasedGoodsResult<PurchasedGoodResponse>.ValidationError(
                 "measurementQuality",
-                "Use measured or estimated.");
+                "Välj uppmätt eller uppskattat.");
         }
 
         if (!await SupplierExistsAsync(request.SupplierId!.Value, cancellationToken))
         {
             return PurchasedGoodsResult<PurchasedGoodResponse>.ValidationError(
                 "supplierId",
-                "The supplier does not exist.");
+                "Leverantören finns inte. Välj en annan leverantör.");
         }
 
         good.SupplierId = request.SupplierId!.Value;
