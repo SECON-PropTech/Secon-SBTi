@@ -20,7 +20,7 @@ public class MaterialLineRequest
     /// Number of units delivered. 0 is allowed, negative is not (#44).
     /// </summary>
     [Required(ErrorMessage = "Ange ett antal.")]
-    [Range(0d, 1_000_000_000d, ErrorMessage = "Antalet får inte vara negativt.")]
+    [Range(0d, 1_000_000_000d, ErrorMessage = "Ange ett antal mellan 0 och 1 000 000 000.")]
     public decimal? Quantity { get; init; }
 
     /// <summary>

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Models;
+using SeconSbtiBackend.Validation;
 
 namespace SeconSbtiBackend.Controllers;
 
@@ -22,10 +23,10 @@ public class MaterialLinesController(ApplicationDbContext dbContext) : Controlle
     public async Task<IActionResult> Create(MaterialLineRequest request)
     {
         // The product must exist, otherwise the foreign key would throw a 500 on save.
+        // "productId" in camelCase so the error lands on the same field as the automatic validation errors.
         if (!await dbContext.SoldProducts.AnyAsync(product => product.Id == request.ProductId))
         {
-            ModelState.AddModelError(nameof(request.ProductId), "Produkten finns inte.");
-            return ValidationProblem();
+            return this.FieldValidationProblem("productId", "Produkten finns inte.");
         }
 
         var materialLine = new MobigoMaterialLine
@@ -63,8 +64,7 @@ public class MaterialLinesController(ApplicationDbContext dbContext) : Controlle
 
         if (!await dbContext.SoldProducts.AnyAsync(product => product.Id == request.ProductId))
         {
-            ModelState.AddModelError(nameof(request.ProductId), "Produkten finns inte.");
-            return ValidationProblem();
+            return this.FieldValidationProblem("productId", "Produkten finns inte.");
         }
 
         materialLine.ProductId = request.ProductId!.Value;
