@@ -13,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IPurchasedGoodsService, PurchasedGoodsService>();
 builder.Services.AddControllers(options =>
 {
     options.ModelMetadataDetailsProviders.Add(

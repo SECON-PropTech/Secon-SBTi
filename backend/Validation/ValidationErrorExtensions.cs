@@ -11,6 +11,6 @@ public static class ValidationErrorExtensions
     {
         controller.ModelState.AddModelError(field, message);
 
-        return controller.ValidationProblem();
+        return controller.ValidationProblem(title: "En eller flera uppgifter behöver rättas.");
     }
 }
