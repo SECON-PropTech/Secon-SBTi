@@ -4,10 +4,10 @@ using SeconSbtiBackend.Validation;
 namespace SeconSbtiBackend.DTOs;
 
 /// <summary>
-/// Request body for POST /api/material-lines: a manually registered quantity of a sold product (FK-DI.02).
+/// Request body for POST and PUT /api/material-lines: a manually registered quantity of a sold product (FK-DI.02).
 /// Fields are nullable so a missing value fails [Required] instead of silently becoming 0.
 /// </summary>
-public class CreateMaterialLineRequest
+public class MaterialLineRequest
 {
     /// <summary>
     /// The sold product the quantity belongs to. Must not be an empty Guid.

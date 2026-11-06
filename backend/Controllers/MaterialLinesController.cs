@@ -19,7 +19,7 @@ public class MaterialLinesController(ApplicationDbContext dbContext) : Controlle
     /// 201 with the new id when saved, 400 if the request is invalid or the product does not exist.
     /// </summary>
     [HttpPost]
-    public async Task<IActionResult> Create(CreateMaterialLineRequest request)
+    public async Task<IActionResult> Create(MaterialLineRequest request)
     {
         // The product must exist, otherwise the foreign key would throw a 500 on save.
         if (!await dbContext.SoldProducts.AnyAsync(product => product.Id == request.ProductId))
