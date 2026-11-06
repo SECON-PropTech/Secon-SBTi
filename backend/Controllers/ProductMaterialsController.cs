@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using SeconSbtiBackend.DTOs.Scope312;
 using SeconSbtiBackend.Services;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 
 namespace SeconSbtiBackend.Controllers;
@@ -36,5 +38,26 @@ public sealed class ProductMaterialsController(
             .GetAllProductMaterialsAsync(cancellationToken);
 
         return Ok(products);
+    }
+
+
+    [HttpGet("{productId:guid}/entries")]
+    public async Task<ActionResult<IReadOnlyList<ProductPeriodEntryResponse>>> GetProductPeriodEntries(
+    Guid productId,
+    [FromQuery, BindRequired, Range(2000, 2100)] int year,
+    CancellationToken cancellationToken)
+    {
+        var entries = await productMaterialQueryService
+            .GetProductPeriodEntriesAsync(
+                productId,
+                year,
+                cancellationToken);
+
+        if (entries is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(entries);
     }
 }

@@ -85,4 +85,45 @@ public sealed class ProductMaterialQueryService(ApplicationDbContext dbContext)
         return products;
     }
 
+
+
+
+    // Hämtar produktens registreringar för ett kalenderår.
+    // Returnerar null om produkten saknas.
+    public async Task<IReadOnlyList<ProductPeriodEntryResponse>?> GetProductPeriodEntriesAsync(
+        Guid productId,
+        int year,
+        CancellationToken cancellationToken = default)
+    {
+        var productExists = await dbContext.SoldProducts
+            .AnyAsync(p => p.Id == productId, cancellationToken);
+
+        if (!productExists)
+        {
+            return null;
+        }
+
+        var periodStart = new DateOnly(year, 1, 1);
+        var periodEnd = new DateOnly(year + 1, 1, 1);
+
+        var entries = await dbContext.MobigoMaterialLines
+            .Where(entry =>
+                entry.ProductId == productId &&
+                entry.Date >= periodStart &&
+                entry.Date < periodEnd)
+            .OrderBy(entry => entry.Date)
+            .ThenBy(entry => entry.Id)
+            .Select(entry => new ProductPeriodEntryResponse(
+                entry.Id,
+                entry.ProductId,
+                entry.Quantity,
+                entry.Date,
+                entry.MeasurementQuality,
+                entry.Comment
+            ))
+            .ToListAsync(cancellationToken);
+
+        return entries;
+    }
+
 }
