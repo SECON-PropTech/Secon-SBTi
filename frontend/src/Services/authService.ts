@@ -1,7 +1,12 @@
+import type { LoginUser, CurrentUser, ApiError } from "../types/auth";
+
 //Communicates with AuthController in backend API
 
 // Sends login credentials to the backend API and handles the response
-export async function login(email: string, password: string) {
+export async function login(
+    email: string,
+    password: string
+): Promise<LoginUser> {
     const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -14,17 +19,19 @@ export async function login(email: string, password: string) {
         }),
     });
 
-    const data = await response.json();
+    const data: unknown = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || "Inloggningen misslyckades.");
+        const errorData = data as ApiError;
+        throw new Error(
+            errorData.message || "Inloggningen misslyckades.");
     }
 
-    return data;
+    return data as LoginUser;
 }
 
 // Retrieves information about the currently authenticated user
-export async function getCurrentUser() {
+export async function getCurrentUser(): Promise<CurrentUser | null> {
     const response = await fetch("/api/auth/me", {
         method: "GET",
         credentials: "include",
@@ -38,5 +45,5 @@ export async function getCurrentUser() {
         throw new Error("Kunde inte kontrollera inloggningsstatus.");
     }
 
-    return await response.json();
+    return await response.json() as CurrentUser;
 }
