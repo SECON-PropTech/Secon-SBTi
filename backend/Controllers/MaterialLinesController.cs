@@ -44,4 +44,37 @@ public class MaterialLinesController(ApplicationDbContext dbContext) : Controlle
 
         return StatusCode(StatusCodes.Status201Created, new { materialLine.Id });
     }
+
+    /// <summary>
+    /// Replaces all fields of a manually registered line. Imported lines cannot be changed here.
+    /// 204 when saved, 404 if no manual line has that id, 400 if the request is invalid or the product does not exist.
+    /// </summary>
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, MaterialLineRequest request)
+    {
+        // Only manual lines (no import batch) may be edited, imported lines must match Mobigo.
+        var materialLine = await dbContext.MobigoMaterialLines
+            .FirstOrDefaultAsync(line => line.Id == id && line.ImportBatchId == null);
+
+        if (materialLine is null)
+        {
+            return NotFound();
+        }
+
+        if (!await dbContext.SoldProducts.AnyAsync(product => product.Id == request.ProductId))
+        {
+            ModelState.AddModelError(nameof(request.ProductId), "Produkten finns inte.");
+            return ValidationProblem();
+        }
+
+        materialLine.ProductId = request.ProductId!.Value;
+        materialLine.Quantity = request.Quantity!.Value;
+        materialLine.Date = request.Date!.Value;
+        materialLine.MeasurementQuality = request.MeasurementQuality!;
+        materialLine.Comment = request.Comment;
+
+        await dbContext.SaveChangesAsync();
+
+        return NoContent();
+    }
 }
