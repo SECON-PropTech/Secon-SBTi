@@ -77,4 +77,19 @@ public class MaterialLinesController(ApplicationDbContext dbContext) : Controlle
 
         return NoContent();
     }
+
+    /// <summary>
+    /// Deletes a manually registered line. Imported lines cannot be deleted here.
+    /// 204 when deleted, 404 if no manual line has that id.
+    /// </summary>
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        // Deletes straight in the database and returns how many rows were removed (0 or 1).
+        var deletedCount = await dbContext.MobigoMaterialLines
+            .Where(line => line.Id == id && line.ImportBatchId == null)
+            .ExecuteDeleteAsync();
+
+        return deletedCount == 0 ? NotFound() : NoContent();
+    }
 }
