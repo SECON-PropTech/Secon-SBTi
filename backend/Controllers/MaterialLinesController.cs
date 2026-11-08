@@ -33,6 +33,7 @@ public class MaterialLinesController(ApplicationDbContext dbContext) : Controlle
         return await dbContext.MobigoMaterialLines
             .Where(line => line.ProductId == productId && line.Date >= yearStart && line.Date < nextYearStart)
             .OrderBy(line => line.Date)
+            .ThenBy(line => line.Id)
             .Select(line => new MaterialLineResponse(
                 line.Id,
                 line.ProductId,

@@ -18,6 +18,10 @@ builder.Services.AddControllers(options =>
 {
     options.ModelMetadataDetailsProviders.Add(
         new SystemTextJsonValidationMetadataProvider());
+
+    // Swedish text when a [BindRequired] parameter is missing, e.g. ?year= (IF-G.01).
+    options.ModelBindingMessageProvider.SetMissingBindRequiredValueAccessor(
+        fieldName => $"Värdet för {fieldName} saknas.");
 });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
