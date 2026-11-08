@@ -1,11 +1,11 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Models;
 using SeconSbtiBackend.Validation;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace SeconSbtiBackend.Controllers;
 
@@ -17,7 +17,6 @@ namespace SeconSbtiBackend.Controllers;
 [Route("api/material-lines")]
 public class MaterialLinesController(ApplicationDbContext dbContext) : ControllerBase
 {
-
     /// <summary>
     /// The individual lines of one product in one calendar year, sorted by date (FK-DI.02).
     /// IsManual tells the frontend which lines can be changed or deleted.

@@ -37,18 +37,18 @@ public record UpdateSoldProductRequest
     public string? Comment { get; init; }
 }
 
-    /// <summary>
-    /// One sold product with its standard values, for GET /api/products (FK-AB.3).
-    /// Should be used by the frontend to pick a product when registering a manual line.
-    /// Null means "not set" and is not the same as 0 (IF-SG.03).
-    /// </summary>
-    public record SoldProductResponse(
-        Guid Id,
-        string? ArticleNo,
-        string Name,
-        Guid? GroupId,
-        string? GroupName,
-        decimal? KwhPerYear,
-        decimal? LifetimeYears,
-        string MeasurementQuality,
-        string? Comment);
+/// <summary>
+/// One sold product with its standard values, for GET /api/products (FK-AB.3).
+/// Should be used by the frontend to pick a product when registering a manual line.
+/// Null means "not set" and is not the same as 0 (IF-SG.03).
+/// </summary>
+public record SoldProductResponse(
+    Guid Id,
+    string? ArticleNo,
+    string Name,
+    Guid? GroupId,
+    string? GroupName,
+    decimal? KwhPerYear,
+    decimal? LifetimeYears,
+    string MeasurementQuality,
+    string? Comment);
