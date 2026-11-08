@@ -35,6 +35,7 @@ public record UpdateSoldProductRequest
     /// Free text, e.g. where an estimate comes from (FK-DI.08).
     /// </summary>
     public string? Comment { get; init; }
+}
 
     /// <summary>
     /// One sold product with its standard values, for GET /api/products (FK-AB.3).
@@ -51,4 +52,3 @@ public record UpdateSoldProductRequest
         decimal? LifetimeYears,
         string MeasurementQuality,
         string? Comment);
-}
