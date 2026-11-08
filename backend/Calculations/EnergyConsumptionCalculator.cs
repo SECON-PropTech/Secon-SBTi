@@ -5,7 +5,7 @@ namespace SeconSbtiBackend.Calculations;
 /// <summary>
 /// Calculations for scope 3.11, use of sold products (FK-S.05).
 /// </summary>
-public static class Scope311Calculator
+public static class EnergyConsumptionCalculator
 {
     /// <summary>
     /// Lifetime energy use in kWh: quantity × kWh/year × lifetime.
@@ -14,7 +14,7 @@ public static class Scope311Calculator
     /// 
     /// Static since it is a pure calculation, no state or dependencies needed.
     /// </summary>
-    public static decimal? Activity(decimal quantity, decimal? kwhPerYear, decimal? lifetimeYears)
+    public static decimal? CalculateActivityKwh(decimal quantity, decimal? kwhPerYear, decimal? lifetimeYears)
     {
         if (kwhPerYear is null)
         {
@@ -40,7 +40,7 @@ public static class Scope311Calculator
     /// 
     /// Static since it is a pure calculation, no state or dependencies needed.
     /// </summary>
-    public static IReadOnlyList<string> Missing(decimal? kwhPerYear, decimal? lifetimeYears, Guid? groupId)
+    public static IReadOnlyList<string> FindMissingFields(decimal? kwhPerYear, decimal? lifetimeYears, Guid? groupId)
     {
         var missing = new List<string>();
 
@@ -66,7 +66,7 @@ public static class Scope311Calculator
     /// Builds the full scope 3.11 report from the products sold during the year.
     /// Only products with a calculated activity count towards totals and shares.
     /// </summary>
-    public static Scope311Response Build(int year, IReadOnlyList<(SoldProduct Product, decimal Quantity)> soldProducts)
+    public static EnergyConsumptionResponse BuildReport(int year, IReadOnlyList<(SoldProduct Product, decimal Quantity)> soldProducts)
     {
         var productRows = soldProducts
             .Select(soldProduct => ToProductRow(soldProduct.Product, soldProduct.Quantity))
@@ -81,15 +81,15 @@ public static class Scope311Calculator
             .OrderByDescending(groupSummary => groupSummary.ActivityKwh)
             .ToList();
 
-        return new Scope311Response(year, totalActivityKwh, groupSummaries, productRows);
+        return new EnergyConsumptionResponse(year, totalActivityKwh, groupSummaries, productRows);
     }
 
     /// <summary>
     /// Turns one sold product into a report row with activity and warnings.
     /// </summary>
-    private static Scope311ProductRow ToProductRow(SoldProduct product, decimal quantity)
+    private static EnergyProductRow ToProductRow(SoldProduct product, decimal quantity)
     {
-        return new Scope311ProductRow(
+        return new EnergyProductRow(
             ProductId: product.Id,
             ArticleNo: product.ArticleNo,
             Name: product.Name,
@@ -100,20 +100,20 @@ public static class Scope311Calculator
             LifetimeYears: product.LifetimeYears,
             MeasurementQuality: product.MeasurementQuality,
             Comment: product.Comment,
-            ActivityKwh: Activity(quantity, product.KwhPerYear, product.LifetimeYears),
-            Missing: Missing(product.KwhPerYear, product.LifetimeYears, product.GroupId));
+            ActivityKwh: CalculateActivityKwh(quantity, product.KwhPerYear, product.LifetimeYears),
+            Missing: FindMissingFields(product.KwhPerYear, product.LifetimeYears, product.GroupId));
     }
 
     /// <summary>
     /// Sums the products in one group and calculates the group's share of the total.
     /// Products without a group end up in "Ingen grupp".
     /// </summary>
-    private static Scope311GroupSummary ToGroupSummary(
-        Guid? groupId, string? groupName, List<Scope311ProductRow> rowsInGroup, decimal totalActivityKwh)
+    private static EnergyGroupSummary ToGroupSummary(
+        Guid? groupId, string? groupName, List<EnergyProductRow> rowsInGroup, decimal totalActivityKwh)
     {
         var groupActivityKwh = rowsInGroup.Sum(productRow => productRow.ActivityKwh ?? 0);
 
-        return new Scope311GroupSummary(
+        return new EnergyGroupSummary(
             GroupId: groupId,
             GroupName: groupName ?? "Ingen grupp",
             ActivityKwh: groupActivityKwh,
