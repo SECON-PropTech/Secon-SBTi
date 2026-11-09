@@ -3,7 +3,7 @@ using SeconSbtiBackend.Calculations;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Models;
 
-namespace api_tests;
+namespace tests.CalculationsTests;
 
 public class EnergyConsumptionCalculatorTests
 {

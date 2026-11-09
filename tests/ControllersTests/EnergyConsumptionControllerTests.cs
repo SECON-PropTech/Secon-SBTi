@@ -2,8 +2,9 @@ using FluentAssertions;
 using SeconSbtiBackend.Controllers;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.Models;
+using tests.DatabaseTests;
 
-namespace api_tests;
+namespace tests.ControllersTests;
 
 public class EnergyConsumptionControllerTests
 {
