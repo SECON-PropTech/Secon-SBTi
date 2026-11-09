@@ -194,10 +194,10 @@ public sealed class PurchasedGoodsService(
         good.Value = request.Value!.Value;
         good.Unit = request.Unit!;
         good.MeasurementQuality = request.MeasurementQuality!;
-        good.GoodsName = request.GoodsName;
-        good.Comment = request.Comment;
-        good.Specification = request.Specification;
-        good.AccountNo = request.AccountNo;
+        good.GoodsName = request.GoodsName ?? good.GoodsName;
+        good.Comment = request.Comment ?? good.Comment;
+        good.Specification = request.Specification ?? good.Specification;
+        good.AccountNo = request.AccountNo ?? good.AccountNo;
 
         await context.SaveChangesAsync(cancellationToken);
 

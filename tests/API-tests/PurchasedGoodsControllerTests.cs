@@ -26,7 +26,6 @@ public class PurchasedGoodsControllerTests
     private static readonly Guid SupplierId = Guid.Parse("10000000-0000-0000-0000-000000000001");
     private static readonly Guid UserId = Guid.Parse("20000000-0000-0000-0000-000000000001");
     private static readonly Guid GoodId = Guid.Parse("30000000-0000-0000-0000-000000000001");
-    private static readonly string[] TextFields = ["goodsName", "comment", "specification", "accountNo"];
     private static readonly string[] RequiredFields = ["supplierId", "transactionDate", "value", "unit", "measurementQuality"];
 
     public static IEnumerable<object[]> MissingFields()
@@ -121,26 +120,40 @@ public class PurchasedGoodsControllerTests
     }
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task Put_clears_null_or_omitted_optional_fields(bool omitted)
+    [InlineData(false, null)]
+    [InlineData(true, null)]
+    [InlineData(false, "")]
+    [InlineData(false, "Updated text")]
+    public async Task Put_preserves_or_replaces_optional_text_fields(bool omitted, string? text)
     {
         await using var api = await TestApi.Start();
+        var originalTextFields = new Dictionary<string, string>
+        {
+            ["goodsName"] = "Original good",
+            ["comment"] = "Faktura saknades",
+            ["specification"] = "Original specification",
+            ["accountNo"] = "4010"
+        };
         var body = Payload();
-        foreach (var field in TextFields)
+        body["value"] = 250m;
+        foreach (var field in originalTextFields.Keys)
         {
             if (omitted) body.Remove(field);
-            else body[field] = null;
+            else body[field] = text;
         }
         using var response = await api.Send("PUT", WritePath("PUT"), body);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var json = await Json(response);
-        foreach (var field in TextFields)
-            Assert.Equal(JsonValueKind.Null, json.GetProperty(field).ValueKind);
+        Assert.Equal(250m, json.GetProperty("value").GetDecimal());
         using var list = await api.Send("GET", "/api/purchased-goods?year=2025");
         var saved = (await Json(list)).EnumerateArray().Single(item => item.GetProperty("id").GetGuid() == GoodId);
-        foreach (var field in TextFields)
-            Assert.Equal(JsonValueKind.Null, saved.GetProperty(field).ValueKind);
+        Assert.Equal(250m, saved.GetProperty("value").GetDecimal());
+        foreach (var (field, original) in originalTextFields)
+        {
+            var expected = text ?? original;
+            Assert.Equal(expected, json.GetProperty(field).GetString());
+            Assert.Equal(expected, saved.GetProperty(field).GetString());
+        }
     }
 
     [Theory]
