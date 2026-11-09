@@ -4,7 +4,7 @@ import type { PageId } from "./types/navigation";
 import Sidebar from "./components/Sidebar"; 
 import Scope31 from "./pages/Scope31";
 import Scope311 from "./pages/Scope311";
-import Scope312 from "./pages/Scope312";
+import Scope312 from "./pages/SoldProductsManagement";
 
 //Which component to show for each page.
 //Record<PageId, ComponentType> = every PageId in types/navigation.ts
