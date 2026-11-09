@@ -1,280 +1,90 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Microsoft.EntityFrameworkCore;
-using SeconSbtiBackend.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SeconSbtiBackend.DTOs;
-using SeconSbtiBackend.Models;
-using System.Linq.Expressions;
+using SeconSbtiBackend.Interfaces;
 using SeconSbtiBackend.Validation;
 
+namespace SeconSbtiBackend.Controllers;
 
-namespace SeconSbtiBackend.Controllers
+[ApiController]
+[Route("api/purchased-goods")]
+public class PurchasedGoodsController(
+    IPurchasedGoodsService purchasedGoodsService) : ControllerBase
 {
-
-    [ApiController]
-    [Route("api/purchased-goods")]
-    public class PurchasedGoodsController : ControllerBase
-    {
-        private readonly ApplicationDbContext _context;
-
-
-        public PurchasedGoodsController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        private static readonly Expression<Func<PurchasedGood, PurchasedGoodResponse>>
-    ResponseProjection = good => new PurchasedGoodResponse
-    {
-        Id = good.Id,
-        SupplierId = good.SupplierId,
-
-        Categories = good.Supplier.SupplierCategoryAllocations
-            .OrderBy(allocation => allocation.PurchaseCategory.Name)
-            .ThenBy(allocation => allocation.PurchaseCategoryId)
-            .Select(allocation => new PurchasedGoodCategoryResponse
-            {
-                PurchaseCategoryId = allocation.PurchaseCategoryId,
-                Name = allocation.PurchaseCategory.Name,
-                Share = allocation.Share
-            })
-            .ToList(),
-
-        TransactionDate = good.TransactionDate,
-        Value = good.Value,
-        Unit = good.Unit,
-        MeasurementQuality = good.MeasurementQuality,
-        GoodsName = good.GoodsName,
-        Comment = good.Comment,
-        Specification = good.Specification,
-        AccountNo = good.AccountNo,
-        CreatedBy = good.CreatedBy,
-        CreatedAt = good.CreatedAt
-    };
-
-        [HttpGet]
-        [ProducesResponseType(typeof(List<PurchasedGoodResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<List<PurchasedGoodResponse>>>
-    GetPurchasedGoods(
+    [Authorize]
+    [HttpGet]
+    [ProducesResponseType(typeof(List<PurchasedGoodResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<List<PurchasedGoodResponse>>> GetPurchasedGoods(
         [FromQuery] int? year,
         [FromQuery] int? month,
         CancellationToken cancellationToken)
+    {
+        var result = await purchasedGoodsService.GetAllAsync(
+            year, month, cancellationToken);
+
+        return ToActionResult(result);
+    }
+
+    [Authorize]
+    [HttpPost]
+    [ProducesResponseType(typeof(PurchasedGoodResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<PurchasedGoodResponse>> CreatePurchasedGood(
+        [FromBody] CreatePurchasedGoodRequest request,
+        CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userId, out var createdBy) || createdBy == Guid.Empty)
         {
-            if (month.HasValue && !year.HasValue)
+            return Unauthorized(new
             {
-                return this.FieldValidationProblem(
-                    "year",
-                    "Provide a year when filtering by month.");
-            }
-
-            if (year is < 1 or > 9999)
-            {
-                return this.FieldValidationProblem(
-                    "year",
-                    "Year must be between 1 and 9999.");
-            }
-
-            if (month is < 1 or > 12)
-            {
-                return this.FieldValidationProblem(
-                    "month",
-                    "Month must be between 1 and 12.");
-            }
-
-            var query = _context.PurchasedGoods.AsNoTracking();
-
-            if (year.HasValue)
-            {
-                var startDate = new DateOnly(
-                    year.Value,
-                    month ?? 1,
-                    1);
-
-                var endDate = month.HasValue
-                    ? new DateOnly(
-                        year.Value,
-                        month.Value,
-                        DateTime.DaysInMonth(year.Value, month.Value))
-                    : new DateOnly(year.Value, 12, 31);
-
-                query = query.Where(good =>
-                    good.TransactionDate >= startDate &&
-                    good.TransactionDate <= endDate);
-            }
-
-            var goods = await query
-                .OrderByDescending(good => good.TransactionDate)
-                .ThenBy(good => good.Id)
-                .Select(ResponseProjection)
-                .ToListAsync(cancellationToken);
-
-            return Ok(goods);
+                message = "Din inloggning kunde inte verifieras. Logga in igen."
+            });
         }
 
-            [Authorize]
-            [HttpPost]
-            [ProducesResponseType(typeof(PurchasedGoodResponse), StatusCodes.Status201Created)]
-            [ProducesResponseType(StatusCodes.Status400BadRequest)]
-            [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-            public async Task<ActionResult<PurchasedGoodResponse>>
-                CreatePurchasedGood(
-                    [FromBody] CreatePurchasedGoodRequest request,
-                    CancellationToken cancellationToken)
-            {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var result = await purchasedGoodsService.CreateAsync(
+            request, createdBy, cancellationToken);
 
-                if (!Guid.TryParse(userId, out var createdBy) ||
-                    createdBy == Guid.Empty)
-                {
-                    return Unauthorized(new
-                    {
-                        message = "The authenticated user ID is missing or invalid."
-                    });
-                }
+        return ToActionResult(result, StatusCodes.Status201Created);
+    }
 
-                var userExists = await _context.AppUsers
-                    .AnyAsync(
-                        user => user.Id == createdBy,
-                        cancellationToken);
+    [Authorize]
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(PurchasedGoodResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<PurchasedGoodResponse>> UpdatePurchasedGood(
+        Guid id,
+        [FromBody] UpdatePurchasedGoodRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await purchasedGoodsService.UpdateAsync(
+            id, request, cancellationToken);
 
-                if (!userExists)
-                {
-                    return Unauthorized(new
-                    {
-                        message = "The authenticated user no longer exists."
-                    });
-                }
+        return ToActionResult(result);
+    }
 
-                var supplierExists = await _context.Suppliers
-                    .AnyAsync(
-                        supplier => supplier.Id == request.SupplierId!.Value,
-                        cancellationToken);
-
-                if (!supplierExists)
-                {
-                    return this.FieldValidationProblem(
-                        "supplierId",
-                        "The supplier does not exist.");
-                }
-
-                if (request.Unit != "sek")
-                {
-                    return this.FieldValidationProblem(
-                        "unit",
-                        "Only sek is supported in this purchase flow.");
-                }
-
-                if (request.MeasurementQuality is not ("measured" or "estimated"))
-                {
-                    return this.FieldValidationProblem(
-                        "measurementQuality",
-                        "Use measured or estimated.");
-                }
-
-                var good = new PurchasedGood
-                {
-                    Id = Guid.NewGuid(),
-                    SupplierId = request.SupplierId!.Value,
-                    TransactionDate = request.TransactionDate!.Value,
-                    Value = request.Value!.Value,
-                    Unit = request.Unit!,
-                    MeasurementQuality = request.MeasurementQuality!,
-                    GoodsName = request.GoodsName,
-                    Comment = request.Comment,
-                    Specification = request.Specification,
-                    AccountNo = request.AccountNo,
-                    CreatedBy = createdBy,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                _context.PurchasedGoods.Add(good);
-                await _context.SaveChangesAsync(cancellationToken);
-
-                var response = await _context.PurchasedGoods
-                    .AsNoTracking()
-                    .Where(savedGood => savedGood.Id == good.Id)
-                    .Select(ResponseProjection)
-                    .SingleAsync(cancellationToken);
-
-                return StatusCode(StatusCodes.Status201Created, response);
-            }
-
-
-        [Authorize]
-        [HttpPut("{id:guid}")]
-            [ProducesResponseType(typeof(PurchasedGoodResponse), StatusCodes.Status200OK)]
-            [ProducesResponseType(StatusCodes.Status400BadRequest)]
-            [ProducesResponseType(StatusCodes.Status404NotFound)]
-            [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-            public async Task<ActionResult<PurchasedGoodResponse>>
-        UpdatePurchasedGood(
-            Guid id,
-            [FromBody] UpdatePurchasedGoodRequest request,
-            CancellationToken cancellationToken)
-            {
-                var good = await _context.PurchasedGoods
-                    .SingleOrDefaultAsync(
-                        good => good.Id == id,
-                        cancellationToken);
-
-                if (good is null)
-                {
-                    return NotFound(new
-                    {
-                        message = "The purchased good was not found."
-                    });
-                }
-
-                if (good.Unit != "sek" || request.Unit != "sek")
-                {
-                    return this.FieldValidationProblem(
-                        "unit",
-                        "Only purchases in sek can be edited in this flow.");
-                }
-
-                if (request.MeasurementQuality is not ("measured" or "estimated"))
-                {
-                    return this.FieldValidationProblem(
-                        "measurementQuality",
-                        "Use measured or estimated.");
-                }
-
-                var supplierExists = await _context.Suppliers
-                    .AnyAsync(
-                        supplier => supplier.Id == request.SupplierId!.Value,
-                        cancellationToken);
-
-                if (!supplierExists)
-                {
-                    return this.FieldValidationProblem(
-                        "supplierId",
-                        "The supplier does not exist.");
-                }
-
-                good.SupplierId = request.SupplierId!.Value;
-                good.TransactionDate = request.TransactionDate!.Value;
-                good.Value = request.Value!.Value;
-                good.Unit = request.Unit!;
-                good.MeasurementQuality = request.MeasurementQuality!;
-
-                // Null or omitted optional text fields are cleared.
-                good.GoodsName = request.GoodsName;
-                good.Comment = request.Comment;
-                good.Specification = request.Specification;
-                good.AccountNo = request.AccountNo;
-
-                // Creation metadata and import references remain unchanged.
-                await _context.SaveChangesAsync(cancellationToken);
-
-                var response = await _context.PurchasedGoods
-                     .AsNoTracking()
-                     .Where(savedGood => savedGood.Id == good.Id)
-                     .Select(ResponseProjection)
-                     .SingleAsync(cancellationToken);
-
-            return Ok(response);
-        }
+    private ActionResult<T> ToActionResult<T>(
+        PurchasedGoodsResult<T> result,
+        int successStatusCode = StatusCodes.Status200OK)
+    {
+        return result.Status switch
+        {
+            PurchasedGoodsResultStatus.Success =>
+                StatusCode(successStatusCode, result.Value),
+            PurchasedGoodsResultStatus.ValidationError =>
+                this.FieldValidationProblem(result.Field!, result.Message!),
+            PurchasedGoodsResultStatus.NotFound =>
+                NotFound(new { message = result.Message }),
+            PurchasedGoodsResultStatus.InvalidUser =>
+                Unauthorized(new { message = result.Message }),
+            _ => throw new InvalidOperationException("Okänt resultat för köpta varor.")
+        };
     }
 }

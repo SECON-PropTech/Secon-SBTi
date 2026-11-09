@@ -5,20 +5,20 @@ namespace SeconSbtiBackend.DTOs;
 
 public class UpdatePurchasedGoodRequest
 {
-    [Required]
-    [NotEmptyGuid(ErrorMessage = "Select a valid supplier.")]
+    [Required(ErrorMessage = "Välj en leverantör.")]
+    [NotEmptyGuid(ErrorMessage = "Välj en giltig leverantör.")]
     public Guid? SupplierId { get; init; }
 
-    [Required]
+    [Required(ErrorMessage = "Ange ett datum för inköpet.")]
     public DateOnly? TransactionDate { get; init; }
 
-    [Required]
+    [Required(ErrorMessage = "Ange ett belopp.")]
     public decimal? Value { get; init; }
 
-    [Required]
+    [Required(ErrorMessage = "Ange en enhet.")]
     public string? Unit { get; init; }
 
-    [Required]
+    [Required(ErrorMessage = "Ange om värdet är uppmätt eller uppskattat.")]
     public string? MeasurementQuality { get; init; }
 
     public string? GoodsName { get; init; }
