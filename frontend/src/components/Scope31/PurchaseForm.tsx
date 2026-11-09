@@ -7,6 +7,7 @@ type Scope31FormProps = {
     type: PurchaseType;
     initialData?: PurchaseFormData;
     isEditing: boolean;
+    selectedPeriod: string;
     onSave: (formData: PurchaseFormData) => void;
     onCancel: () => void;
 
@@ -16,7 +17,7 @@ type Scope31FormProps = {
 }
 
 /**Values for new registrations */
-export const emptyForm: PurchaseFormData = {
+const emptyForm: PurchaseFormData = {
     name: "",
     supplierId: "",
     accountNo: "",
@@ -27,10 +28,11 @@ export const emptyForm: PurchaseFormData = {
 }
 
 /**Form used for both purchased goods and services */
-export default function Scope31Form({
+export default function PurchaseForm({
     type,
     initialData,
     isEditing,
+    selectedPeriod,
     onSave,
     onCancel,
     isSaving = false,
@@ -63,6 +65,12 @@ export default function Scope31Form({
         if (missingRequiredField || !Number.isFinite(amount) || amount <0 ) {
             setValidationError("Kontrollera att alla obligatoriska fält är ifyllda.")
             return;
+        }
+
+        // Check that the purchase date matches the selected reporting year.
+        if (!formData.transactionDate.startsWith(selectedPeriod + "-")) {
+          setValidationError("Datumet måste tillhöra den valda rapporteringsperioden.");
+          return;
         }
 
         setValidationError("");
@@ -124,6 +132,8 @@ return (
         <input
           id="transactionDate"
           type="date"
+          min={`${selectedPeriod}-01-01`}
+          max={`${selectedPeriod}-12-31`}
           value={formData.transactionDate}
           onChange={(event) => handleChange("transactionDate", event.target.value)}
         />

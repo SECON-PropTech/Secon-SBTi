@@ -1,5 +1,5 @@
 import {useState} from "react";
-import Scope31form, {emptyForm} from "./Scope31form";
+import PurchaseForm from "./PurchaseForm";
 import type {PurchaseFormData, PurchaseType} from "./Types";
 
 //**Row for testing frontend before backend */
@@ -185,11 +185,12 @@ export default function Scope31Overview() {
 
         {/* Reuse the same form for adding and editing goods or services. */}
         {isFormOpen && (
-          <Scope31form
+          <PurchaseForm
             key={`${activeTab}-${editingId ?? "new"}`}
             type={activeTab}
-            initialData={editingPurchase ? { ...editingPurchase.data } : { ...emptyForm }}
+            initialData={editingPurchase?.data}
             isEditing={editingId !== null}
+            selectedPeriod={selectedPeriod}
             onSave={handleSave}
             onCancel={handleCancel}
           />
