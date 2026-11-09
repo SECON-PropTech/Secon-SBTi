@@ -13,14 +13,14 @@ namespace SeconSbtiBackend.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/scope311")]
-public class Scope311Controller(ApplicationDbContext dbContext) : ControllerBase
+public class EnergyConsumptionController(ApplicationDbContext dbContext) : ControllerBase
 {
     /// <summary>
     /// Report for one calendar year (FK-RE.3), based on the products sold that year.
     /// A year outside 2000–2100, or no year at all, gives 400 Bad Request.
     /// </summary>
     [HttpGet]
-    public async Task<Scope311Response> Get([FromQuery, BindRequired, Range(2000, 2100)] int year)
+    public async Task<EnergyConsumptionResponse> GetEnergyConsumption([FromQuery, BindRequired, Range(2000, 2100)] int year)
     {
         var yearStart = new DateOnly(year, 1, 1);
         var nextYearStart = new DateOnly(year + 1, 1, 1);
@@ -42,6 +42,6 @@ public class Scope311Controller(ApplicationDbContext dbContext) : ControllerBase
             .Select(soldProduct => (soldProduct.Product, soldProduct.Quantity))
             .ToList();
 
-        return Scope311Calculator.Build(year, soldProducts);
+        return EnergyConsumptionCalculator.BuildReport(year, soldProducts);
     }
 }
