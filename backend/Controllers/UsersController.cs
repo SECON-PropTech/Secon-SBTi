@@ -24,6 +24,7 @@ public class UsersController(IRoleService roleService) : ControllerBase
             RoleOutcome.Ok => NoContent(),
             RoleOutcome.NotFound => NotFound(),
             RoleOutcome.UnknownRole => this.FieldValidationProblem("roleIds", "En eller flera roller finns inte."),
+            RoleOutcome.LastRoleManager => Conflict(new { message = "Minst en användare måste kunna hantera roller." }),
             _ => throw new InvalidOperationException($"Unexpected outcome: {outcome}")
         };
     }

@@ -7,7 +7,8 @@ public enum RoleOutcome
     Ok,
     NotFound,
     NameTaken,
-    UnknownRole
+    UnknownRole,
+    LastRoleManager
 }
 
 public interface IRoleService
@@ -20,7 +21,7 @@ public interface IRoleService
 
     Task<RoleOutcome> UpdateAsync(Guid id, RoleRequest request);
 
-    Task<bool> DeleteAsync(Guid id);
+    Task<RoleOutcome> DeleteAsync(Guid id);
 
     Task<List<UserWithRolesResponse>> GetUsersAsync();
 

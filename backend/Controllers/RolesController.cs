@@ -11,6 +11,7 @@ namespace SeconSbtiBackend.Controllers;
 public class RolesController(IRoleService roleService) : ControllerBase
 {
     private const string NameTakenMessage = "Det finns redan en roll med det namnet.";
+    private const string LastRoleManagerMessage = "Minst en användare måste kunna hantera roller.";
 
     [HttpGet]
     public async Task<List<RoleResponse>> GetAll() => await roleService.GetAllAsync();
@@ -46,6 +47,7 @@ public class RolesController(IRoleService roleService) : ControllerBase
             RoleOutcome.Ok => NoContent(),
             RoleOutcome.NotFound => NotFound(),
             RoleOutcome.NameTaken => Conflict(new { message = NameTakenMessage }),
+            RoleOutcome.LastRoleManager => Conflict(new { message = LastRoleManagerMessage }),
             _ => throw new InvalidOperationException($"Unexpected outcome: {outcome}")
         };
     }
@@ -53,6 +55,14 @@ public class RolesController(IRoleService roleService) : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        return await roleService.DeleteAsync(id) ? NoContent() : NotFound();
+        var outcome = await roleService.DeleteAsync(id);
+
+        return outcome switch
+        {
+            RoleOutcome.Ok => NoContent(),
+            RoleOutcome.NotFound => NotFound(),
+            RoleOutcome.LastRoleManager => Conflict(new { message = LastRoleManagerMessage }),
+            _ => throw new InvalidOperationException($"Unexpected outcome: {outcome}")
+        };
     }
 }
