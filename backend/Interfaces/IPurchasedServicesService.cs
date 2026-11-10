@@ -4,6 +4,5 @@ namespace SeconSbtiBackend.Interfaces;
 
 public interface IPurchasedServicesService
 {
-    Task<List<PurchasedServiceResponse>> GetAllAsync(
-        CancellationToken cancellationToken);
+    Task<List<PurchasedServiceResponse>> GetAllAsync(PurchasedServicesQuery filter, CancellationToken cancellationToken);
 }

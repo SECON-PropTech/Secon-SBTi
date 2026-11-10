@@ -7,8 +7,7 @@ namespace SeconSbtiBackend.Controllers;
 
 [ApiController]
 [Route("api/purchased-services")]
-public class PurchasedServicesController(
-    IPurchasedServicesService purchasedServicesService) : ControllerBase
+public class PurchasedServicesController(IPurchasedServicesService purchasedServicesService) : ControllerBase
 {
     [Authorize]
     [HttpGet]
@@ -17,10 +16,9 @@ public class PurchasedServicesController(
         StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<List<PurchasedServiceResponse>>>
-        GetPurchasedServices(CancellationToken cancellationToken)
+        GetPurchasedServices([FromQuery] PurchasedServicesQuery filter, CancellationToken cancellationToken)
     {
-        var services = await purchasedServicesService.GetAllAsync(
-            cancellationToken);
+        var services = await purchasedServicesService.GetAllAsync(filter, cancellationToken);
 
         return Ok(services);
     }

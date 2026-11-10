@@ -8,8 +8,7 @@ namespace SeconSbtiBackend.Services;
 public sealed class PurchasedServicesService(
     ApplicationDbContext context) : IPurchasedServicesService
 {
-    public async Task<List<PurchasedServiceResponse>> GetAllAsync(
-        CancellationToken cancellationToken)
+    public async Task<List<PurchasedServiceResponse>> GetAllAsync(PurchasedServicesQuery filter, CancellationToken cancellationToken)
     {
         var query =
             from service in context.PurchasedServices.AsNoTracking()
@@ -40,6 +39,16 @@ public sealed class PurchasedServicesService(
                 MeasurementQuality = service.MeasurementQuality,
                 Comment = service.Comment
             };
+
+        if (filter.Year is int year)
+        {
+            var startDate = new DateOnly(year, filter.Month ?? 1, 1);
+            var endMonth = filter.Month ?? 12;
+            var endDate = new DateOnly(year, endMonth, DateTime.DaysInMonth(year, endMonth));
+
+            query = query.Where(service =>
+                service.PeriodFrom >= startDate && service.PeriodTo <= endDate);
+        }
 
         return await query.ToListAsync(cancellationToken);
     }
