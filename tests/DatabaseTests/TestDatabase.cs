@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SeconSbtiBackend.Data;
 
-namespace api_tests;
+namespace tests.DatabaseTests;
 
 /// <summary>
 /// Test helper: gives each test its own empty in-memory database, so the tests don't need PostgreSQL.
