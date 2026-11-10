@@ -1,5 +1,8 @@
+
+import Scope31Overview from "../components/Scope31/Scope31overview";
+
 function Scope31() {
-  return <h1 className="fs-3">3.1 Köpta varor och tjänster</h1>;
+  return <Scope31Overview />;
 }
 
 export default Scope31;

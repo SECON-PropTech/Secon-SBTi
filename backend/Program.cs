@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 
 using Scalar.AspNetCore;
+using SeconSbtiBackend.Authorization;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.Interfaces;
 using SeconSbtiBackend.Services;
@@ -14,6 +16,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPurchasedGoodsService, PurchasedGoodsService>();
+builder.Services.AddScoped<IPermissionService, PermissionService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
 builder.Services.AddScoped<
     IPurchasedServicesService,
     PurchasedServicesService>();
