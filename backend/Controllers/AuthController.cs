@@ -58,13 +58,18 @@ public class AuthController(IAuthService authService) : ControllerBase
 
     [Authorize]
     [HttpGet("me")]
-    public ActionResult<object> Me() => Ok(new
+    public async Task<ActionResult<CurrentUserDTO>> Me()
     {
-        id = User.FindFirstValue(ClaimTypes.NameIdentifier),
-        name = User.Identity?.Name,
-        email = User.FindFirstValue(ClaimTypes.Email),
-        roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value)
-    });
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+            return Unauthorized();
+
+        var user = await authService.GetCurrentUserAsync(userId);
+
+        if (user is null)
+            return Unauthorized();
+
+        return Ok(user);
+    }
 
     private static UserDTO ToDto(AppUser u) => new()
     {
