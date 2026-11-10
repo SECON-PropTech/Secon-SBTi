@@ -1,5 +1,6 @@
 import {useState} from "react";
 import PurchaseForm from "./PurchaseForm";
+import "./Scope31.css";
 import type {PurchaseFormData, PurchaseType} from "./Types";
 
 //**Row for testing frontend before backend */
@@ -102,7 +103,7 @@ export default function Scope31Overview() {
     }
 
     return (
-      <main>
+      <main className="scope31">
         <h1>Scope 3.1: Köpta varor och tjänster</h1>
         <p>Registrera och redigera inköp för en vald rapporteringsperiod.</p>
         <p>(Just nu i demoläge. Allt försvinner när sidan laddas om.)</p>
@@ -137,13 +138,20 @@ export default function Scope31Overview() {
         </nav>
 
         {/* Open the form for a new registration */}
-        <button type="button" onClick={handleAdd}>
+        <button type="button" className="scope31__primary" onClick={handleAdd}>
           Lägg till {activeTab === "goods" ? "vara" : "tjänst"}
         </button>
 
         {message && <p role="status">{message}</p>}
 
         {/* Simple overview. Backend data can replace the demo list later. */}
+        <div
+        className="scope31__table-scroll"
+        role="region"
+        aria-label="Registrerade inköp"
+        tabIndex={0}
+        
+        >
         <table>
           <thead>
             <tr>
@@ -178,6 +186,7 @@ export default function Scope31Overview() {
             ))}
           </tbody>
         </table>
+        </div>
 
         {visiblePurchases.length === 0 && (
           <p>Inga registreringar för den valda perioden.</p>
