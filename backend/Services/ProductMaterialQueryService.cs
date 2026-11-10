@@ -4,8 +4,9 @@ using SeconSbtiBackend.DTOs.Scope312;
 
 namespace SeconSbtiBackend.Services;
 
-// Hämtar produktens materialuppgifter för Scope 3.12.
-// Periodens antal och rapporteringsuppgifter hanteras inte här.
+
+// Hämtar produktmaterial och produktens registreringar per år eller månad.
+
 public sealed class ProductMaterialQueryService(ApplicationDbContext dbContext)
 {
     // Returnerar null om produkten saknas.
@@ -88,13 +89,19 @@ public sealed class ProductMaterialQueryService(ApplicationDbContext dbContext)
 
 
 
-    // Hämtar produktens registreringar för ett kalenderår.
+    // Hämtar produktens registreringar för ett år eller en viss månad.
     // Returnerar null om produkten saknas.
     public async Task<IReadOnlyList<ProductPeriodEntryResponse>?> GetProductPeriodEntriesAsync(
         Guid productId,
         int year,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        int? month = null)
     {
+        if (month is < 1 or > 12)
+        {
+            throw new ArgumentOutOfRangeException(nameof(month));
+        }
+
         var productExists = await dbContext.SoldProducts
             .AnyAsync(p => p.Id == productId, cancellationToken);
 
@@ -103,8 +110,10 @@ public sealed class ProductMaterialQueryService(ApplicationDbContext dbContext)
             return null;
         }
 
-        var periodStart = new DateOnly(year, 1, 1);
-        var periodEnd = new DateOnly(year + 1, 1, 1);
+        var periodStart = new DateOnly(year, month ?? 1, 1);
+        var periodEnd = month.HasValue
+            ? periodStart.AddMonths(1)
+            : periodStart.AddYears(1);
 
         var entries = await dbContext.MobigoMaterialLines
             .Where(entry =>
@@ -125,5 +134,4 @@ public sealed class ProductMaterialQueryService(ApplicationDbContext dbContext)
 
         return entries;
     }
-
 }
