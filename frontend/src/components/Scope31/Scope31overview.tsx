@@ -1,6 +1,6 @@
 import {useState} from "react";
 import PurchaseForm from "./PurchaseForm";
-import "./Scope31.css";
+import "./scope31.css";
 import type {PurchaseFormData, PurchaseType} from "./Types";
 
 //**Row for testing frontend before backend */
