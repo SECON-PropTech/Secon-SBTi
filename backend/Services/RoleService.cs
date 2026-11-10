@@ -137,9 +137,9 @@ public class RoleService(ApplicationDbContext dbContext) : IRoleService
 
     private Task<bool> IsNameTakenAsync(string name, Guid? exceptId = null)
     {
-        var trimmed = name.Trim();
+        var lowered = name.Trim().ToLower();
 
-        return dbContext.Roles.AnyAsync(role => role.Name == trimmed && role.Id != exceptId);
+        return dbContext.Roles.AnyAsync(role => role.Name.ToLower() == lowered && role.Id != exceptId);
     }
 
     private Task<bool> AnyoneElseCanManageRolesAsync(Guid? exceptRoleId = null, Guid? exceptUserId = null)
