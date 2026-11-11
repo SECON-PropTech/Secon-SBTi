@@ -24,7 +24,7 @@
 
 /* light blue background when the mouse is over the row. */
 .energy-page .energy-row:hover > td {
-  background-color: var(--secon-blue-light);
+  background-color: var(--secon-blue-light-background);
 }
 
 
