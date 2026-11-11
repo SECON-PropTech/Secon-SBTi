@@ -1,4 +1,6 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.DTOs;
@@ -15,6 +17,36 @@ namespace SeconSbtiBackend.Controllers;
 [Route("api/material-lines")]
 public class MaterialLinesController(ApplicationDbContext dbContext) : ControllerBase
 {
+    /// <summary>
+    /// The individual lines of one product in one calendar year, sorted by date (FK-DI.02).
+    /// IsManual tells the frontend which lines can be changed or deleted.
+    /// No product id, or a year outside 2000–2100, gives 400 Bad Request.
+    /// </summary>
+    [HttpGet]
+    public async Task<IReadOnlyList<MaterialLineResponse>> GetByProductAndYear(
+        [FromQuery, BindRequired] Guid productId,
+        [FromQuery, BindRequired, Range(2000, 2100, ErrorMessage = "Ange ett år mellan 2000 och 2100.")] int year)
+    {
+        var yearStart = new DateOnly(year, 1, 1);
+        var nextYearStart = new DateOnly(year + 1, 1, 1);
+
+        return await dbContext.MobigoMaterialLines
+            .Where(line => line.ProductId == productId && line.Date >= yearStart && line.Date < nextYearStart)
+            .OrderBy(line => line.Date)
+            .ThenBy(line => line.Id)
+            .Select(line => new MaterialLineResponse(
+                line.Id,
+                line.ProductId,
+                line.Quantity,
+                line.Date,
+                line.MeasurementQuality,
+                line.Comment,
+                // Null import batch means the line was registered manually.
+                line.ImportBatchId == null))
+            .ToListAsync();
+    }
+
+
     /// <summary>
     /// Registers a quantity of a product manually (FK-DI.02).
     /// 201 with the new id when saved, 400 if the request is invalid or the product does not exist.
