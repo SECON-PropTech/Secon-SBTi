@@ -1,6 +1,6 @@
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SeconSbtiBackend.Authorization;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Interfaces;
 using SeconSbtiBackend.Validation;
@@ -12,11 +12,12 @@ namespace SeconSbtiBackend.Controllers;
 public class PurchasedGoodsController(
     IPurchasedGoodsService purchasedGoodsService) : ControllerBase
 {
-    [Authorize]
+    [HasPermission(Permission.ReadScope31)]
     [HttpGet]
     [ProducesResponseType(typeof(List<PurchasedGoodResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<List<PurchasedGoodResponse>>> GetPurchasedGoods(
         [FromQuery] int? year,
         [FromQuery] int? month,
@@ -28,11 +29,12 @@ public class PurchasedGoodsController(
         return ToActionResult(result);
     }
 
-    [Authorize]
+    [HasPermission(Permission.WriteScope31)]
     [HttpPost]
     [ProducesResponseType(typeof(PurchasedGoodResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<PurchasedGoodResponse>> CreatePurchasedGood(
         [FromBody] CreatePurchasedGoodRequest request,
         CancellationToken cancellationToken)
@@ -53,12 +55,13 @@ public class PurchasedGoodsController(
         return ToActionResult(result, StatusCodes.Status201Created);
     }
 
-    [Authorize]
+    [HasPermission(Permission.WriteScope31)]
     [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(PurchasedGoodResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<PurchasedGoodResponse>> UpdatePurchasedGood(
         Guid id,
         [FromBody] UpdatePurchasedGoodRequest request,

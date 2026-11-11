@@ -16,4 +16,10 @@ public enum Permission
 
     /// <summary>Create, edit, delete roles and choose which permissions they give. Assign roles to users.</summary>
     ManageRoles,
+
+    /// <summary>Read purchased goods in Scope 3.1.</summary>
+    ReadScope31,
+
+    /// <summary>Create and edit purchased goods in Scope 3.1.</summary>
+    WriteScope31,
 }
