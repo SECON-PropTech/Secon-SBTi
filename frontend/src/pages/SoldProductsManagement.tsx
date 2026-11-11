@@ -1,13 +1,23 @@
 import {
-  getProductGroups, type ProductGroup,
+    //getProductGroups,
+    getAllProductMaterials,
+    getProductPeriod,
+    //type ProductGroup,
+    type ProductMaterials,
+    type ProductPeriodEntry,
 } from "../Services/soldProductsService";
+
 import { useEffect, useState } from "react";
+
 import ImportedDataTable from "../components/SoldProductsManagement/ImportedDataTable";
+
 import type {
-  Product,
-  ProductInclusion,
-  SoldProductsManagementView,
+    Product,
+    ProductInclusion,
+    SoldProductsManagementView,
 } from "../types/soldProductsManagement";
+
+import "../../src/components/SoldProductsManagement/SoldProductManagement.css";
 
 const months = [
   { value: "01", label: "Januari" },
@@ -23,8 +33,6 @@ const months = [
   { value: "11", label: "November" },
   { value: "12", label: "December" },
 ];
-// Tillfällig tom lista tills vi kopplar in API:t.
-const importedProducts: Product[] = [];
 
 function createInclusion(products: Product[],
 ): ProductInclusion {
@@ -42,10 +50,63 @@ function createInclusion(products: Product[],
   );
 }
 
+function mapProductsToFrontend(
+    products: ProductMaterials[],
+    entries: ProductPeriodEntry[]
+): Product[] {
+
+    return products.map((product) => {
+        // Hitta alla registreringar som tillhör produkten
+        const productEntries = entries.filter(
+            (entry) => entry.productId === product.productId
+        );
+
+        // Summera antal för produktens registreringar
+        const totalQuantity = productEntries.reduce(
+            (sum, entry) => sum + entry.quantity,
+            0
+        );
+
+        // Bestäm mätkvalitet för den summerade produkten
+        const measurementQuality =
+            productEntries.length > 0 &&
+            productEntries.every(
+                (entry) => entry.measurementQuality === "measured"
+            )
+                ? "measured"
+                : "estimated";
+
+        // Senaste registreringsdatum
+        const latestDate = productEntries.length > 0
+            ? productEntries.reduce((latest, entry) =>
+                entry.date > latest ? entry.date : latest,
+                productEntries[0].date
+            )
+            : "";
+
+        return {
+            id: product.productId,
+            name: product.productName,
+            articleNo: product.articleNo ?? undefined,
+            quantity: totalQuantity,
+            date: latestDate,
+            materials: product.materials.map((material) => ({
+                id: material.materialId,
+                name: material.materialName,
+                kg: material.weightKg,
+            })),
+            measurementQuality,
+        };
+    });
+}
+
+
 function SoldProductsManagement() {
-  const [products, setProducts] = useState<Product[]>(importedProducts);
-  const [productGroups, setProductGroups] = useState<ProductGroup[]>([]);
-  console.log("Test av produktgrupp från backend", productGroups); //test
+  const [backendProducts, setBackendProducts] =
+    useState<ProductMaterials[]>([]);
+
+  const [periodEntries, setPeriodEntries] =
+    useState<ProductPeriodEntry[]>([]);
 
   const today = new Date();
   const currentYear = String(today.getFullYear());
@@ -54,20 +115,45 @@ function SoldProductsManagement() {
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [selectedView, setSelectedView] = useState<SoldProductsManagementView>("products");
 
-  const [productInclusion, setProductInclusion] = useState<ProductInclusion>(() => createInclusion(importedProducts));
+  const [productInclusion, setProductInclusion] = useState<ProductInclusion>({});
 
-  useEffect(() => {
-    async function loadProductGroups() {
-      try {
-        const groups = await getProductGroups();
-        setProductGroups(groups);
-      } catch (error) {
-        console.error("Kunde inte hämta produktgrupper:", error);
-      }
+
+useEffect(() => {
+    async function loadData() {
+        try {
+            // Hämta produkter och deras material
+            const fetchedProducts = await getAllProductMaterials();
+
+            // Hämta periodregistreringar för alla produkter
+            const entriesPerProduct = await Promise.all(
+                fetchedProducts.map((product) =>
+                    getProductPeriod(
+                        product.productId,
+                        Number(currentYear)
+                    )
+                )
+            );
+
+            // Slå ihop alla registreringar
+            const allEntries = entriesPerProduct.flat();
+
+            // Spara backendinformationen separat
+            setBackendProducts(fetchedProducts);
+            const mappedProducts = mapProductsToFrontend(fetchedProducts, allEntries);
+            setProductInclusion(createInclusion(mappedProducts));
+            setPeriodEntries(allEntries);
+
+
+        } catch (error) {
+            console.error("Kunde inte hämta produktdata:", error);
+        }
     }
 
-    loadProductGroups();
-  }, []);
+    loadData();
+}, []);
+
+
+
 
   function toggleProductInclusion(productId: string) {
     setProductInclusion((previous) => ({
@@ -75,29 +161,32 @@ function SoldProductsManagement() {
     }));
   }
 
-  function editProductRow(
-    productId: string,
-    updatedProduct: Product) {
-    setProducts((previousProducts) =>
-      previousProducts.map((product) =>
-        product.id === productId
-          ? { ...updatedProduct, id: productId }
-          : product,
-      ),
-    );
-  }
+  //function editProductRow(
+    //productId: string,
+    //updatedProduct: Product) {
+    //setProducts((previousProducts) =>
+      //previousProducts.map((product) =>
+        //product.id === productId
+          //? { ...updatedProduct, id: productId }
+          //: product,
+      //),
+    //);
+  //}
 
-  const filteredProducts = products.filter((product) => {
-    if (!product.date) {
-      return false;
+const entriesForSelectedPeriod = periodEntries.filter((entry) => {
+    if (selectedMonth === "all") {
+        return true;
     }
 
-    const [year, month] = product.date.split("-");
+    const month = entry.date.split("-")[1];
 
-    return (
-      year === currentYear && (selectedMonth ==="all" || month === selectedMonth)
-    );
-  });
+    return month === selectedMonth;
+});
+
+const filteredProducts = mapProductsToFrontend(
+    backendProducts,
+    entriesForSelectedPeriod
+).filter((product) => product.quantity > 0);
 
   return (
     <div>
@@ -130,7 +219,7 @@ function SoldProductsManagement() {
               products={filteredProducts}
               productInclusion={productInclusion}
               onToggleInclusion={toggleProductInclusion}
-              onEditProduct={editProductRow}
+              //onEditProduct={editProductRow}
             /> 
           ) : (
               <p>Inga produkter hittades för den valda perioden</p>

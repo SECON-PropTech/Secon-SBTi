@@ -3,7 +3,23 @@ export type ProductMaterial = {
     name: string;
     kg: number;
 };
-//använt ? efter nyckeln ifall fältet för värdet är valfritt
+
+export type ProductMaterials = {
+    productId: string;
+    productName: string;
+    articleNo: string | null;
+    materials: ProductMaterial[];
+};
+
+export type ProductPeriodEntry = {
+    id: string;
+    productId: string;
+    quantity: number;
+    date: string;
+    measurementQuality: "measured" | "estimated";
+    comment: string | null;
+};
+
 export type Product = {
     id: string;
     articleNo?: string;
@@ -17,8 +33,8 @@ export type Product = {
     included?: boolean;
     "life-cycle"?: number;
     "waste-managing"?: string;
-    projects?: string[];
-};
+    projects?: string[];     
+}
 
 export type SoldProductsManagementView =
     | "products"

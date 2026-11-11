@@ -4,15 +4,20 @@ type Props = {
     products: Product[];
     productInclusion: ProductInclusion;
     onToggleInclusion: (productId: string) => void;
-    onEditProduct: (productId: string, updatedProduct: Product) => void;
+    onEditProduct?: (productId: string, updatedProduct: Product) => void;
 };
 
-function ImportedDataTable({ products }: Props) {
+function ImportedDataTable({
+    products,
+    productInclusion,
+    onToggleInclusion,
+}: Props) {
     return (
         <div className="table-responsive">
             <table className="table">
                 <thead>
                     <tr>
+                        <th>Inkludera</th>
                         <th>Produkt</th>
                         <th>Antal</th>
                         <th>Material</th>
@@ -22,6 +27,13 @@ function ImportedDataTable({ products }: Props) {
                 <tbody>
                     {products.map((product) => (
                         <tr key={product.id}>
+                            <td>
+                                <input
+                                    type="checkbox"
+                                    checked={productInclusion[product.id] === true}
+                                    onChange={() => onToggleInclusion(product.id)}
+                                />
+                            </td>
                             <td>{product.name}</td>
                             <td>{product.quantity}</td>
                             <td>
