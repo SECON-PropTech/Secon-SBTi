@@ -2,6 +2,7 @@
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Interfaces;
+using SeconSbtiBackend.Models;
 
 namespace SeconSbtiBackend.Services;
 
@@ -51,5 +52,60 @@ public sealed class PurchasedServicesService(
         }
 
         return await query.ToListAsync(cancellationToken);
+    }
+
+    public async Task<PurchasedServiceResponse?> CreateAsync(
+        CreatePurchasedServiceRequest request,
+        CancellationToken cancellationToken)
+    {
+        var accountNo = request.AccountNo!.Trim();
+
+        var mapping = await context.AccountCategoryMappings
+            .AsNoTracking()
+            .Include(mapping => mapping.ServiceCategory)
+            .SingleOrDefaultAsync(
+                mapping => mapping.AccountNo == accountNo,
+                cancellationToken);
+
+        if (mapping is null)
+        {
+            return null;
+        }
+
+        var report = new ServiceSpendReport
+        {
+            Id = Guid.NewGuid(),
+            ImportBatchId = null,
+            PeriodFrom = request.PeriodFrom!.Value,
+            PeriodTo = request.PeriodTo!.Value
+        };
+
+        var service = new PurchasedService
+        {
+            ReportId = report.Id,
+            Report = report,
+            AccountNo = accountNo,
+            AmountSek = request.Value!.Value,
+            MeasurementQuality = request.MeasurementQuality!,
+            Comment = request.Comment
+        };
+
+        context.PurchasedServices.Add(service);
+        await context.SaveChangesAsync(cancellationToken);
+
+        return new PurchasedServiceResponse
+        {
+            ReportId = report.Id,
+            AccountNo = service.AccountNo,
+            ServiceLabel = mapping.ServiceLabel,
+            ServiceCategoryId = mapping.ServiceCategoryId,
+            ServiceCategoryName = mapping.ServiceCategory.Name,
+            PeriodFrom = report.PeriodFrom,
+            PeriodTo = report.PeriodTo,
+            Value = service.AmountSek,
+            Unit = "sek",
+            MeasurementQuality = service.MeasurementQuality,
+            Comment = service.Comment
+        };
     }
 }
