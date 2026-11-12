@@ -121,58 +121,63 @@ public class AuthControllerTests
 
     /**********************Me**********************/
     [Fact]
-    public void Me_ReturnsCurrentUserClaims()
+    public async Task Me_ReturnsCurrentUserClaims()
     {
+        var userId = Guid.NewGuid();
         SetUser(
-            new Claim(ClaimTypes.NameIdentifier, "111"),
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
             new Claim(ClaimTypes.Name, "Anna Testsson"),
             new Claim(ClaimTypes.Email, "anna@secon.se"),
             new Claim(ClaimTypes.Role, "Admin")
         );
 
-        var result = _sut.Me();
-        result.Result.Should().BeOfType<OkObjectResult>()
-        .Which.Value.Should().BeEquivalentTo(new
+        var expected = new CurrentUserDTO
         {
-            id = "111",
-            name = "Anna Testsson",
-            email = "anna@secon.se",
-            roles = new[] { "Admin" }
-        });
+            Id = userId,
+            Name = "Anna Testsson",
+            Email = "anna@secon.se",
+            Roles = new List<string> { "Admin" }
+        };
+
+        _authService.GetCurrentUserAsync(userId).Returns(expected);
+
+        var result = await _sut.Me();
+        result.Result.Should().BeOfType<OkObjectResult>()
+        .Which.Value.Should().BeOfType<CurrentUserDTO>()
+        .Which.Should().BeEquivalentTo(expected);
     }
 
     [Fact]
-    public void Me_UserWithoutRoles_ReturnsEmptyRoles()
+    public async Task Me_UserWithoutRoles_ReturnsEmptyRoles()
     {
+        var userId = Guid.NewGuid();
         SetUser(
-            new Claim(ClaimTypes.NameIdentifier, "111"),
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
             new Claim(ClaimTypes.Name, "Anna Testsson"),
             new Claim(ClaimTypes.Email, "anna@secon.se")
         );
 
-        var result = _sut.Me();
-        result.Result.Should().BeOfType<OkObjectResult>().Which.Value.Should().BeEquivalentTo(new
-            {
-                id = "111",
-                name = "Anna Testsson",
-                email = "anna@secon.se",
-                roles = Array.Empty<string>()
-            }
-        );
+        var expected = new CurrentUserDTO
+        {
+            Id = userId,
+            Name = "Anna Testsson",
+            Email = "anna@secon.se",
+            Roles = new List<string>()
+        };
+
+        _authService.GetCurrentUserAsync(userId).Returns(expected);
+
+        var result = await _sut.Me();
+        result.Result.Should().BeOfType<OkObjectResult>()
+        .Which.Value.Should().BeOfType<CurrentUserDTO>()
+        .Which.Should().BeEquivalentTo(expected);
     }
 
     [Fact]
-    public void Me_UserWithoutClaims_ReturnsNullValuesAndEmptyRoles()
+    public async Task Me_UserWithoutClaims_ReturnsUnauthorized()
     {
         SetUser();
-        var result = _sut.Me();
-        result.Result.Should().BeOfType<OkObjectResult>().Which.Value.Should().BeEquivalentTo(new
-            {
-                id = (string?)null,
-                name = (string?)null,
-                email = (string?)null,
-                roles = Array.Empty<string>()
-            }
-        );
+        var result = await _sut.Me();
+        result.Result.Should().BeOfType<UnauthorizedResult>();
     }
 }

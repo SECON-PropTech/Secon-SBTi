@@ -1,5 +1,5 @@
 using Npgsql;
-using tests.DatabaseTests.Infrastructure;
+using tests.DatabaseTests.PostgresTests.Infrastructure;
 
 namespace tests.DatabaseTests;
 

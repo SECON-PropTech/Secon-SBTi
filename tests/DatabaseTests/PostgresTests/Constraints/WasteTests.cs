@@ -1,6 +1,6 @@
-using tests.DatabaseTests.Infrastructure;
+using tests.DatabaseTests.PostgresTests.Infrastructure;
 
-namespace tests.DatabaseTests.Constraints;
+namespace tests.DatabaseTests.PostgresTests.Constraints;
 
 public sealed class WasteTests(PostgresFixture fixture) : DbTestBase(fixture)
 {

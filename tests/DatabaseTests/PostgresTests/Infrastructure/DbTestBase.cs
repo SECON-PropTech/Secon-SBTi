@@ -3,7 +3,7 @@ using Xunit;
 using SeconSbtiBackend.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace tests.DatabaseTests.Infrastructure;
+namespace tests.DatabaseTests.PostgresTests.Infrastructure;
 
 [Collection("db")]
 public abstract class DbTestBase(PostgresFixture fixture)

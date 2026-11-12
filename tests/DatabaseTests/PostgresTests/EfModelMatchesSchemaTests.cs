@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Npgsql;
-using tests.DatabaseTests.Infrastructure;
+using tests.DatabaseTests.PostgresTests.Infrastructure;
 
-namespace tests.DatabaseTests;
+namespace tests.DatabaseTests.PostgresTests;
 
 public sealed class EfModelMatchesSchemaTests(PostgresFixture fixture) : DbTestBase(fixture)
 {

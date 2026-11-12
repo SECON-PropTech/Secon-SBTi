@@ -1,8 +1,8 @@
 
 using Npgsql;
-using tests.DatabaseTests.Infrastructure;
+using tests.DatabaseTests.PostgresTests.Infrastructure;
 
-namespace tests.DatabaseTests;
+namespace tests.DatabaseTests.PostgresTests;
 
 public sealed class BackupRestoreTests(PostgresFixture fixture)
     : DbTestBase(fixture)
