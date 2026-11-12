@@ -31,6 +31,9 @@ builder.Services.AddControllers(options =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// Gör tjänsten tillgänglig för dependency injection.
+builder.Services.AddScoped<ProductMaterialQueryService>();
+
 var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 //Cookie Authentication
