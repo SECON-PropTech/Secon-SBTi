@@ -73,6 +73,7 @@ function ProductRow({ product, isOpen, onToggle }: Props) {
             <td className="text-end fw-semibold">{totalCell}</td>
             
             <td className="text-end" onClick={(event) => event.stopPropagation()}>
+            {/* TODO: open the edit form (not built yet, disabled for now) */}
                 <Tooltip text="Redigera produkt">
                  <button type="button" className="btn btn-sm energy-edit-button" disabled>
                    <Pencil size={18}/>

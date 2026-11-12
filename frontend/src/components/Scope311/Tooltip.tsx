@@ -6,7 +6,7 @@ type Props = {
 };
 
 //shows a small dark box with an explanation when the mouse is over the children
-//it's only CSS (see .energy-tooltip in energyConsumption.css)
+//it's only CSS (see .energy-tooltip in EnergyConsumption.css)
 function Tooltip({ text, children }: Props) {
     return (
         <span className="energy-tooltip" data-tooltip={text}>

@@ -10,8 +10,8 @@ type Props = {
 };
 //The product details-part that shows when a row is opened
 function ProductDetails({ product }: Props) {
-    //A product that uses 0 kWh doesnt need a lifetime
-    const lifetimeNotNeeded = product.kwhPerYear === 0 && product.lifetimeYears === null;
+    // The backend decides if a lifetime is needed (not when kWh is 0)
+    const lifetimeNotNeeded = product.lifetimeYears === null && !product.missing.includes("lifetime");
     
     // kWh per year: the value or a button when it's missing
     let kwhValue;
