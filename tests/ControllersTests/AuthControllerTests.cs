@@ -13,7 +13,7 @@ using SeconSbtiBackend.Interfaces;
 using SeconSbtiBackend.Models;
 using SeconSbtiBackend.Services;
 
-namespace api_tests;
+namespace tests.ControllersTests;
 
 public class AuthControllerTests
 {

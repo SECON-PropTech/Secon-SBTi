@@ -1,13 +1,12 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Models;
 using SeconSbtiBackend.Services;
 using BCryptNet = BCrypt.Net.BCrypt;
 
-namespace api_tests;
+namespace tests.ServicesTests;
 
 public class AuthServiceTests
 {
