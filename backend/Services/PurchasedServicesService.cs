@@ -11,35 +11,7 @@ public sealed class PurchasedServicesService(
 {
     public async Task<List<PurchasedServiceResponse>> GetAllAsync(PurchasedServicesQuery filter, CancellationToken cancellationToken)
     {
-        var query =
-            from service in context.PurchasedServices.AsNoTracking()
-            join mapping in context.AccountCategoryMappings 
-            on service.AccountNo 
-            equals mapping.AccountNo 
-            into mappings 
-            from mapping 
-            in mappings.DefaultIfEmpty()
-            orderby service.Report.PeriodFrom descending, service.AccountNo, service.ReportId
-            select new PurchasedServiceResponse
-            {
-                ReportId = service.ReportId,
-                AccountNo = service.AccountNo,
-                ServiceLabel = mapping == null
-                    ? null
-                    : mapping.ServiceLabel,
-                ServiceCategoryId = mapping == null
-                    ? null
-                    : mapping.ServiceCategoryId,
-                ServiceCategoryName = mapping == null
-                    ? null
-                    : mapping.ServiceCategory.Name,
-                PeriodFrom = service.Report.PeriodFrom,
-                PeriodTo = service.Report.PeriodTo,
-                Value = service.AmountSek,
-                Unit = "sek",
-                MeasurementQuality = service.MeasurementQuality,
-                Comment = service.Comment
-            };
+        var query = QueryServices();
 
         if (filter.Year is int year)
         {
@@ -107,5 +79,83 @@ public sealed class PurchasedServicesService(
             MeasurementQuality = service.MeasurementQuality,
             Comment = service.Comment
         };
+    }
+
+    public async Task<PurchasedServiceUpdateResult> UpdateAsync(
+        Guid reportId,
+        string accountNo,
+        UpdatePurchasedServiceRequest request,
+        CancellationToken cancellationToken)
+    {
+        var service = await context.PurchasedServices
+            .Include(service => service.Report)
+            .SingleOrDefaultAsync(
+                service => service.ReportId == reportId && service.AccountNo == accountNo,
+                cancellationToken);
+
+        if (service is null)
+        {
+            return PurchasedServiceUpdateResult.NotFound("Den köpta tjänsten kunde inte hittas.");
+        }
+
+        var periodChanged = service.Report.PeriodFrom != request.PeriodFrom!.Value ||
+            service.Report.PeriodTo != request.PeriodTo!.Value;
+
+        if (periodChanged &&
+            (service.Report.ImportBatchId.HasValue ||
+             await context.PurchasedServices.AnyAsync(
+                 other => other.ReportId == reportId && other.AccountNo != accountNo,
+                 cancellationToken)))
+        {
+            return PurchasedServiceUpdateResult.ValidationError(
+                "periodTo",
+                "Perioden kan bara ändras för en manuell rapport med en tjänsterad.");
+        }
+
+        service.AmountSek = request.Value!.Value;
+        service.MeasurementQuality = request.MeasurementQuality!;
+        service.Comment = request.Comment ?? service.Comment;
+        service.Report.PeriodFrom = request.PeriodFrom!.Value;
+        service.Report.PeriodTo = request.PeriodTo!.Value;
+
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return PurchasedServiceUpdateResult.NotFound("Den köpta tjänsten kunde inte hittas.");
+        }
+
+        var response = await QueryServices()
+            .SingleAsync(
+                service => service.ReportId == reportId && service.AccountNo == accountNo,
+                cancellationToken);
+
+        return PurchasedServiceUpdateResult.Success(response);
+    }
+
+    private IQueryable<PurchasedServiceResponse> QueryServices()
+    {
+        return
+            from service in context.PurchasedServices.AsNoTracking()
+            join mapping in context.AccountCategoryMappings
+                on service.AccountNo equals mapping.AccountNo into mappings
+            from mapping in mappings.DefaultIfEmpty()
+            orderby service.Report.PeriodFrom descending, service.AccountNo, service.ReportId
+            select new PurchasedServiceResponse
+            {
+                ReportId = service.ReportId,
+                AccountNo = service.AccountNo,
+                ServiceLabel = mapping == null ? null : mapping.ServiceLabel,
+                ServiceCategoryId = mapping == null ? null : mapping.ServiceCategoryId,
+                ServiceCategoryName = mapping == null ? null : mapping.ServiceCategory.Name,
+                PeriodFrom = service.Report.PeriodFrom,
+                PeriodTo = service.Report.PeriodTo,
+                Value = service.AmountSek,
+                Unit = "sek",
+                MeasurementQuality = service.MeasurementQuality,
+                Comment = service.Comment
+            };
     }
 }

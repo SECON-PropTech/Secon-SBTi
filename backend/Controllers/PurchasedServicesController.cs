@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Interfaces;
 using SeconSbtiBackend.Validation;
@@ -38,5 +39,28 @@ public class PurchasedServicesController(IPurchasedServicesService purchasedServ
         }
 
         return StatusCode(StatusCodes.Status201Created, response);
+    }
+
+    [HttpPut("{reportId:guid}")]
+    [ProducesResponseType(typeof(PurchasedServiceResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<PurchasedServiceResponse>> UpdatePurchasedService(
+        Guid reportId,
+        [FromQuery, Required(ErrorMessage = "Ange ett kontonummer.")] string accountNo,
+        [FromBody] UpdatePurchasedServiceRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await purchasedServicesService.UpdateAsync(
+            reportId, accountNo, request, cancellationToken);
+
+        return result.Status switch
+        {
+            PurchasedServiceUpdateStatus.Success => Ok(result.Value),
+            PurchasedServiceUpdateStatus.ValidationError =>
+                this.FieldValidationProblem(result.Field!, result.Message!),
+            PurchasedServiceUpdateStatus.NotFound => NotFound(new { message = result.Message }),
+            _ => throw new InvalidOperationException("Okänt resultat för köpta tjänster.")
+        };
     }
 }

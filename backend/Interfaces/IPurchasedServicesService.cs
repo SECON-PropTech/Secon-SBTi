@@ -9,4 +9,10 @@ public interface IPurchasedServicesService
     Task<PurchasedServiceResponse?> CreateAsync(
         CreatePurchasedServiceRequest request,
         CancellationToken cancellationToken);
+
+    Task<PurchasedServiceUpdateResult> UpdateAsync(
+        Guid reportId,
+        string accountNo,
+        UpdatePurchasedServiceRequest request,
+        CancellationToken cancellationToken);
 }
