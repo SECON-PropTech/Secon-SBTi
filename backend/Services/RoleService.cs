@@ -9,6 +9,8 @@ namespace SeconSbtiBackend.Services;
 
 public class RoleService(ApplicationDbContext dbContext) : IRoleService
 {
+    private const string ManageRolesPermission = nameof(Permission.ManageRoles);
+
     public Task<List<RoleResponse>> GetAllAsync() => ToResponsesAsync(dbContext.Roles);
 
     public async Task<RoleResponse?> GetAsync(Guid id)
@@ -44,19 +46,26 @@ public class RoleService(ApplicationDbContext dbContext) : IRoleService
         if (await IsNameTakenAsync(request.Name!, exceptId: id))
             return RoleOutcome.NameTaken;
 
+        var keepsManageRoles = request.Permissions!.Contains(Permission.ManageRoles);
+        if (!keepsManageRoles && !await AnyoneElseCanManageRolesAsync(exceptRoleId: id))
+            return RoleOutcome.LastRoleManager;
+
         Apply(role, request);
         await dbContext.SaveChangesAsync();
 
         return RoleOutcome.Ok;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<RoleOutcome> DeleteAsync(Guid id)
     {
+        if (!await AnyoneElseCanManageRolesAsync(exceptRoleId: id))
+            return RoleOutcome.LastRoleManager;
+
         var deletedCount = await dbContext.Roles
             .Where(role => role.Id == id)
             .ExecuteDeleteAsync();
 
-        return deletedCount > 0;
+        return deletedCount > 0 ? RoleOutcome.Ok : RoleOutcome.NotFound;
     }
 
     public async Task<List<UserWithRolesResponse>> GetUsersAsync()
@@ -85,11 +94,18 @@ public class RoleService(ApplicationDbContext dbContext) : IRoleService
 
         var roleIds = request.RoleIds!.Distinct().ToList();
         var roles = await dbContext.Roles
+            .Include(role => role.RolePermissions)
             .Where(role => roleIds.Contains(role.Id))
             .ToListAsync();
 
         if (roles.Count != roleIds.Count)
             return RoleOutcome.UnknownRole;
+
+        var keepsManageRoles = roles
+            .SelectMany(role => role.RolePermissions)
+            .Any(rolePermission => rolePermission.Permission == ManageRolesPermission);
+        if (!keepsManageRoles && !await AnyoneElseCanManageRolesAsync(exceptUserId: userId))
+            return RoleOutcome.LastRoleManager;
 
         user.Roles.Clear();
         foreach (var role in roles)
@@ -121,9 +137,19 @@ public class RoleService(ApplicationDbContext dbContext) : IRoleService
 
     private Task<bool> IsNameTakenAsync(string name, Guid? exceptId = null)
     {
-        var trimmed = name.Trim();
+        var lowered = name.Trim().ToLower();
 
-        return dbContext.Roles.AnyAsync(role => role.Name == trimmed && role.Id != exceptId);
+        return dbContext.Roles.AnyAsync(role => role.Name.ToLower() == lowered && role.Id != exceptId);
+    }
+
+    private Task<bool> AnyoneElseCanManageRolesAsync(Guid? exceptRoleId = null, Guid? exceptUserId = null)
+    {
+        return dbContext.AppUsers
+            .Where(user => user.Id != exceptUserId)
+            .SelectMany(user => user.Roles)
+            .Where(role => role.Id != exceptRoleId)
+            .SelectMany(role => role.RolePermissions)
+            .AnyAsync(rolePermission => rolePermission.Permission == ManageRolesPermission);
     }
 
     private static async Task<List<RoleResponse>> ToResponsesAsync(IQueryable<Role> roles)
