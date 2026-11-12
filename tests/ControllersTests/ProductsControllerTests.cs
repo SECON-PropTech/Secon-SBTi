@@ -4,7 +4,6 @@ using SeconSbtiBackend.Controllers;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Models;
-using tests.DatabaseTests;
 
 namespace tests.ControllersTests;
 

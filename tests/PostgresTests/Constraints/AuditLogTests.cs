@@ -1,6 +1,6 @@
-using tests.DatabaseTests.PostgresTests.Infrastructure;
+using tests.PostgresTests.Infrastructure;
 
-namespace tests.DatabaseTests.PostgresTests.Constraints;
+namespace tests.PostgresTests.Constraints;
 
 public sealed class AuditLogTests(PostgresFixture fixture) : DbTestBase(fixture)
 {

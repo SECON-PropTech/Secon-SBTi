@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using tests.DatabaseTests.PostgresTests.Infrastructure;
+using tests.PostgresTests.Infrastructure;
 
-namespace tests.DatabaseTests.PostgresTests;
+namespace tests.PostgresTests;
 
 public sealed class QueryBehaviorTests(PostgresFixture fixture) : DbTestBase(fixture)
 {
