@@ -127,6 +127,7 @@ out/
 ## Testing
 coverage/
 *.lcov
+coveragereport/
  
 ## Logs
 npm-debug.log*

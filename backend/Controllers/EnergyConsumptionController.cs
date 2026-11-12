@@ -20,7 +20,7 @@ public class EnergyConsumptionController(ApplicationDbContext dbContext) : Contr
     /// A year outside 2000–2100, or no year at all, gives 400 Bad Request.
     /// </summary>
     [HttpGet]
-    public async Task<EnergyConsumptionResponse> GetEnergyConsumption([FromQuery, BindRequired, Range(2000, 2100)] int year)
+    public async Task<EnergyConsumptionResponse> GetEnergyConsumption([FromQuery, BindRequired, Range(2000, 2100, ErrorMessage = "Ange ett år mellan 2000 och 2100.")] int year)
     {
         var yearStart = new DateOnly(year, 1, 1);
         var nextYearStart = new DateOnly(year + 1, 1, 1);

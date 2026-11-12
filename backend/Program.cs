@@ -23,9 +23,16 @@ builder.Services.AddControllers(options =>
 {
     options.ModelMetadataDetailsProviders.Add(
         new SystemTextJsonValidationMetadataProvider());
+
+    // Swedish text when a [BindRequired] parameter is missing, e.g. no year in the query (IF-G.01).
+    options.ModelBindingMessageProvider.SetMissingBindRequiredValueAccessor(
+        fieldName => $"Värdet för {fieldName} saknas.");
 });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// Gör tjänsten tillgänglig för dependency injection.
+builder.Services.AddScoped<ProductMaterialQueryService>();
 
 var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
