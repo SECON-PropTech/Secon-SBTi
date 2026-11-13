@@ -1,7 +1,20 @@
-export type ProductMaterial = {
+export type SoldProducts = {
     id: string;
+    articleNo: string | null;
     name: string;
-    kg: number;
+    groupId: string | null;
+    groupName: string | null;
+    lifetimeYears: number | null;
+    measurementQuality: "measured" | "estimated";
+    comment: string | null;
+}    
+
+export type ProductMaterial = {
+    materialId: string;
+    materialName: string;
+    weightKg: number;
+    treatmentId: string;
+    treatmentName: string;
 };
 
 export type ProductMaterials = {
@@ -20,6 +33,18 @@ export type ProductPeriodEntry = {
     comment: string | null;
 };
 
+export type ProductGroup = {
+    id: string;
+    name: string;
+    description: string | null;
+};
+
+export type SoldProductsManagementView =
+    | "products"
+    | "materials"
+    | "topTen"
+    | "projects";
+
 export type Product = {
     id: string;
     articleNo?: string;
@@ -36,12 +61,5 @@ export type Product = {
     projects?: string[];     
 }
 
-export type SoldProductsManagementView =
-    | "products"
-    | "materials"
-    | "topTen"
-    | "projects";
 
-
-
-export type ProductInclusion = Record<string, boolean | null>;
+export type ProductInclusion = Record<string, boolean>;

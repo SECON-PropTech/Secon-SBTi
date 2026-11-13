@@ -1,32 +1,9 @@
-export type ProductGroup = {
-    id: string;
-    name: string;
-    description: string | null;
-};
-
-export type ProductMaterial = {
-    materialId: string;
-    materialName: string;
-    weightKg: number;
-    treatmentId: string;
-    treatmentName: string;
-};
-
-export type ProductMaterials = {
-    productId: string;
-    productName: string;
-    articleNo: string | null;
-    materials: ProductMaterial[];
-};
-
-export type ProductPeriodEntry = {
-    id: string;
-    productId: string;
-    quantity: number;
-    date: string;
-    measurementQuality: string;
-    comment: string | null;
-}
+import type {
+    SoldProducts,
+    ProductGroup,
+    ProductMaterials,
+    ProductPeriodEntry
+} from "../types/soldProducts";
 
 export async function getProductGroups(): Promise<ProductGroup[]> {
     const response = await fetch("/api/product-groups", {
@@ -37,6 +14,7 @@ export async function getProductGroups(): Promise<ProductGroup[]> {
     if (!response.ok) {
         throw new Error("Kunde inte hämta produktgrupper");
     }
+
     return await response.json() as ProductGroup[];
 }
 
@@ -49,22 +27,39 @@ export async function getAllProductMaterials(): Promise<ProductMaterials[]> {
     if (!response.ok) {
         throw new Error("Kunde inte hämta produktmaterial");
     }
+
     return await response.json() as ProductMaterials[];
 }
 
+// Hämtar periodposter för en produkt och ett år
 export async function getProductPeriod(
     productId: string,
     year: number
 ): Promise<ProductPeriodEntry[]> {
-        const response = await fetch( `/api/product-materials/${productId}/entries?year=${year}`, {
+    const response = await fetch(
+        `/api/product-materials/${productId}/entries?year=${year}`,
+        {
             method: "GET",
-            credentials: "include"
+            credentials: "include",
         }
     );
 
     if (!response.ok) {
-        throw new Error("Kunde inte hämta produktregister");
+        throw new Error("Kunde inte hämta produktens periodposter");
     }
 
     return await response.json() as ProductPeriodEntry[];
+}
+
+export async function getSoldProducts(): Promise<SoldProducts[]> {
+    const response = await fetch("/api/products", {
+        method: "GET",
+        credentials: "include",
+    });
+
+    if (!response.ok) {
+        throw new Error("Kunde inte hämta produkter");
+    }
+
+    return await response.json() as SoldProducts[];
 }
