@@ -1,258 +1,218 @@
-#month-filter{
-   background-color: #9ca9bb;
-   color: black;
-   width: 25%;
-}
 
-.d-flex.flex-wrap.gap-2.mb-3 .btn-info {
-   background-color: #4a6fa5;
-   border-color: #4a6fa5;
-   color: white;
-}
+/* =========================================
+   SCOPE 3.12 - Slutbehandling av produkter
+   ========================================= */
 
-/* The colors come from the global variables in index.css. */
-
-/* White box around the table  */
-.energy-page .energy-box {
-  background-color: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
-}
-
-
-/* blue header row with white text */
-.energy-page .energy-table-header th {
-  background-color: var(--secon-blue-soft);
-  color: white;
-  white-space: nowrap;
-}
-
-
-/* The mouse becomes a hand so you can see that the row can be clicked */
-.energy-page .energy-row {
-  cursor: pointer;
-}
-
-/* light blue background when the mouse is over the row. */
-.energy-page .energy-row:hover > td {
-  background-color: var(--secon-blue-light-background);
-}
-
-
-.energy-page .energy-row-open > td {
-  border-bottom-width: 0;
-}
-
-
-.energy-page .energy-chevron-cell {
-  width: 40px;
-}
-
-/* The arrow points right when closed ... */
-.energy-page .energy-chevron {
-  color: var(--text-muted);
-  transition: transform 0.15s;
-}
-
-/* ... and turns to point down when the row is open */
-.energy-page .energy-row-open .energy-chevron {
-  transform: rotate(90deg);
-}
-
-/* The pencil button: no frame, just the symbol */
-.energy-page .energy-edit-button {
-  border: none;
-  color: var(--text-muted);
-}
-
-
-.energy-page .energy-details-row > td {
-  background-color: var(--bg);
-  padding: 16px 8px;
-}
-
-.energy-page .energy-details-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px 32px;
-  margin: 0;
-}
-
-/* The label small grey text */
-.energy-page .energy-details-grid dt {
-  font-size: 0.875rem;
-  font-weight: normal;
-  color: var(--text-muted);
-  margin-bottom: 4px;
-}
-
-/* The value, bold text */
-.energy-page .energy-details-grid dd {
-  margin: 0;
-  font-weight: 600;
-}
-
-
-/* Colors that only this page uses */
 .energy-page {
-  --energy-warning: #d9922e;
-  --energy-warning-light: #fdf3dc;
-  --energy-green: #3f7a52;
-  --energy-green-light: #e3efe6;
-  --energy-grey-light: #eceef1;
-  --energy-dashed: #9aa3b2;
+    --energy-warning: #d9922e;
+    --energy-warning-light: #fdf3dc;
+    --energy-green: #3f7a52;
+    --energy-green-light: #e3efe6;
+    --energy-grey-light: #eceef1;
+    --energy-dashed: #9aa3b2;
 }
 
+/* Vit ruta runt tabellen */
+.energy-page .energy-box {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+}
+
+/* Månadsfilter */
+.energy-page #month-filter {
+    max-width: 250px;
+}
+
+/* Blå tabellrubrik */
+.energy-page .energy-table-header th {
+    background-color: var(--secon-blue-soft);
+    color: #e8eef8;
+    white-space: nowrap;
+}
+
+/* Klickbara produktrader */
+.energy-page .energy-row {
+    cursor: pointer;
+}
+
+.energy-page .energy-row:hover > td {
+    background-color: var(--secon-blue-light-background);
+}
+
+/* Utfälld produktrad */
+.energy-page .energy-row-open > td {
+    border-bottom-width: 0;
+}
+
+/* Pil längst till vänster */
+.energy-page .energy-chevron-cell {
+    width: 40px;
+}
+
+.energy-page .energy-chevron {
+    color: var(--text-muted);
+    transition: transform 0.15s;
+}
+
+.energy-page .energy-row-open .energy-chevron {
+    transform: rotate(90deg);
+}
+
+/* Bakgrund för utfällda detaljer */
+.energy-page .energy-details-row > td {
+    background-color: var(--bg);
+    padding: 16px 8px;
+}
+
+/* Detaljer i rutnät */
+.energy-page .energy-details-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px 32px;
+    margin: 0;
+}
+
+.energy-page .energy-details-grid dt {
+    font-size: 0.875rem;
+    font-weight: normal;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.energy-page .energy-details-grid dd {
+    margin: 0;
+    font-weight: 600;
+}
+
+/* Filterknappar ovanför tabellen */
 .energy-page .energy-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background-color: var(--surface);
-  color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background-color: var(--surface);
+    color: var(--text);
+    cursor: pointer;
 }
-
 
 .energy-page .energy-chip-count {
-  color: var(--text-muted);
+    color: var(--text-muted);
 }
 
-
 .energy-page .energy-chip-active {
-  border-color: var(--energy-dashed);
-  background-color: var(--energy-grey-light);
+    border-color: var(--energy-dashed);
+    background-color: var(--energy-grey-light);
 }
 
 .energy-page .energy-chip-warning {
-  border-color: var(--energy-warning);
-  background-color: var(--energy-warning-light);
+    border-color: var(--energy-warning);
+    background-color: var(--energy-warning-light);
+    color: #242424;
 }
 
-
+/* Fäll ut alla / Fäll ihop alla */
 .energy-page .energy-outline-button {
-  background-color: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text-muted);
-  white-space: nowrap;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    white-space: nowrap;
 }
 
-
+/* Varningssymboler */
 .energy-page .energy-warning-icon {
-  color: var(--energy-warning);
+    color: var(--energy-warning);
 }
 
 .energy-page .energy-missing-text {
-  color: var(--energy-warning);
-  font-weight: 600;
+    color: var(--energy-warning);
+    font-weight: 600;
 }
 
-/* Dashed "+ Lägg till" button (grey) ... */
-.energy-page .energy-add-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 10px;
-  border: 1px dashed var(--energy-dashed);
-  border-radius: 999px;
-  background-color: transparent;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
-
-/* ... yellow when the value is needed for the total */
-.energy-page .energy-add-button-warning {
-  border-color: var(--energy-warning);
-  background-color: var(--energy-warning-light);
-  color: var(--text);
-  font-weight: 600;
-}
-
-/* Not clickable yet, but don't fade it out like a normal disabled button */
-.energy-page .energy-add-button:disabled {
-  cursor: not-allowed;
-}
-
-/* Small round label for "Uppskattad" (grey) ... */
+/* Mätkvalitet: Uppskattad */
 .energy-page .energy-pill {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 999px;
-  background-color: var(--energy-grey-light);
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  margin-left: -10px
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background-color: var(--energy-grey-light);
+    color: #333;
+    font-size: 0.85rem;
 }
 
-
+/* Mätkvalitet: Uppmätt */
 .energy-page .energy-pill-green {
-  background-color: var(--energy-green-light);
-  color: var(--energy-green);
+    background-color: var(--energy-green-light);
+    color: var(--energy-green);
 }
 
+/* Materialviktsberäkning */
 .energy-page .energy-calculation {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-  font-size: 0.875rem;
-  color: var(--text-muted);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 0.875rem;
+    color: var(--text-muted);
 }
 
 .energy-page .energy-calculation strong {
-  color: var(--text);
+    color: var(--text);
 }
 
+/* Informationsikoner och tooltip */
 .energy-page .energy-tooltip {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  vertical-align: middle;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
 }
 
 .energy-page .energy-tooltip:hover::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 0;
-  padding: 6px 10px;
-  border-radius: 6px;
-  background-color: var(--text);
-  color: white;
-  font-size: 0.8rem;
-  font-weight: normal;
-  white-space: nowrap;
-  z-index: 10;
-  pointer-events: none;
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background-color: var(--text);
+    color: #e8eef8;
+    font-size: 0.8rem;
+    font-weight: normal;
+    white-space: nowrap;
+    z-index: 10;
+    pointer-events: none;
 }
 
 .energy-page .text-end .energy-tooltip:hover::after {
-  left: auto;
-  right: 0;
+    left: auto;
+    right: 0;
 }
 
 .energy-page th .energy-tooltip:hover::after {
-  bottom: auto;
-  top: calc(100% + 8px);
+    bottom: auto;
+    top: calc(100% + 8px);
 }
 
-/* Two columns of details  on smaller screens */
+/* Anpassning för mindre skärmar */
 @media (max-width: 768px) {
-  .energy-page .energy-details-grid {
-    grid-template-columns: 1fr 1fr;
-  }
+    .energy-page .energy-details-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .energy-page .energy-box {
+        padding: 16px;
+    }
 }
 
-.energy-page .energy-details-grid dt svg {
-  position: relative;
-  top: -2px;
+@media (max-width: 480px) {
+    .energy-page .energy-details-grid {
+        grid-template-columns: 1fr;
+    }
 }
-
-textfärg: #e8eef8 

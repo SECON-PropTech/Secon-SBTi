@@ -1,13 +1,8 @@
-import Tooltip from "../Scope311/Tooltip";
 import { useEffect, useMemo, useState } from "react";
 import { CircleCheck, TriangleAlert, Info } from "lucide-react";
 
-import type {
-    SoldProducts,
-    ProductMaterials,
-    ProductPeriodEntry,
-} from "../../types/soldProducts";
-
+import Tooltip from "../Scope311/Tooltip";
+import type { SoldProducts, ProductMaterials, ProductPeriodEntry } from "../../types/soldProducts";
 import { getProductPeriod } from "../../Services/soldProductsService";
 import FoldOutRow from "./FoldOutRow";
 
@@ -16,17 +11,14 @@ type Props = {
     productMaterials: ProductMaterials[];
     year: number;
     selectedMonth: string;
-}
+};
 
-function Table({
-    products,
-    productMaterials,
-    year,
-    selectedMonth,
-}: Props) {
+const formatNumber = (value: number) =>
+    new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 2 }).format(value);
+
+function Table({ products, productMaterials, year, selectedMonth }: Props) {
     const [openIds, setOpenIds] = useState<string[]>([]);
     const [onlyIncomplete, setOnlyIncomplete] = useState(false);
-
     const [entries, setEntries] = useState<ProductPeriodEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -42,30 +34,20 @@ function Table({
 
             try {
                 const results = await Promise.all(
-                    products.map((product) =>
-                        getProductPeriod(product.id, year)
-                    )
+                    products.map((product) => getProductPeriod(product.id, year))
                 );
 
-                if (!active) return;
-
-                setEntries(results.flat());
+                if (active) setEntries(results.flat());
             } catch {
-                if (active) {
-                    setError("Kunde inte hämta periodposter.");
-                }
+                if (active) setError("Kunde inte hämta periodposter.");
             } finally {
-                if (active) {
-                    setLoading(false);
-                }
+                if (active) setLoading(false);
             }
         }
 
         loadEntries();
 
-        return () => {
-            active = false;
-        };
+        return () => { active = false; };
     }, [products, year]);
 
     // Filtrera registreringar efter vald månad.
@@ -73,15 +55,13 @@ function Table({
         if (selectedMonth === "all") {
             return entries;
         }
-
         return entries.filter(
             (entry) => entry.date.split("-")[1] === selectedMonth
         );
     }, [entries, selectedMonth]);
 
     // Koppla material och periodposter till respektive produkt.
-    const rows = useMemo(() => {
-        return products.map((product) => {
+    const rows = useMemo(() => products.map((product) => {
             const materialData = productMaterials.find(
                 (item) => item.productId === product.id
             );
@@ -91,53 +71,35 @@ function Table({
             );
 
             const quantity = productEntries.reduce(
-                (sum, entry) => sum + entry.quantity,
-                0
+                (sum, entry) => sum + entry.quantity, 0
             );
 
-            const weightPerUnit = materialData?.materials.reduce(
-                (sum, material) => sum + material.weightKg,
-                0
-            ) ?? 0;
+        const materials = materialData?.materials ?? [];
+        const weightPerUnit = materials.reduce(
+            (sum, material) => sum + material.weightKg, 0
+        );
 
-            const missingGroup = product.groupId === null;
-            const missingMaterials =
-                !materialData || materialData.materials.length === 0;
+        return {
+            product,
+            materials,
+            entries: productEntries,
+            quantity,
+            weightPerUnit,
+            totalWeight: quantity * weightPerUnit,
+            incomplete: product.groupId === null || materials.length === 0,
+        };
+    }).filter((row) => row.quantity > 0),
+    [products, productMaterials, filteredEntries]);
 
-            return {
-                product,
-                materials: materialData?.materials ?? [],
-                entries: productEntries,
-                quantity,
-                weightPerUnit,
-                totalWeight: quantity * weightPerUnit,
-                incomplete: missingGroup || missingMaterials,
-            };
-        });
-    }, [products, productMaterials, filteredEntries]);
-
-    const incompleteCount = rows.filter(
-        (row) => row.incomplete
-    ).length;
-
-    const countedCount = rows.filter(
-        (row) => row.quantity > 0 && row.materials.length > 0
-    ).length;
-
+    const incompleteCount = rows.filter((row) => row.incomplete).length;
+    const countedCount = rows.filter((row) => row.materials.length > 0).length;
     const showIncomplete = onlyIncomplete && incompleteCount > 0;
+    const visibleRows = showIncomplete ? rows.filter((row) => row.incomplete) : rows;
 
-    const visibleRows = showIncomplete
-        ? rows.filter((row) => row.incomplete)
-        : rows;
-
-    const allOpen =
-        visibleRows.length > 0 &&
+    const allOpen = visibleRows.length > 0 &&
         visibleRows.every((row) => openIds.includes(row.product.id));
 
-    const totalWeight = rows.reduce(
-        (sum, row) => sum + row.totalWeight,
-        0
-    );
+    const totalWeight = rows.reduce((sum, row) => sum + row.totalWeight, 0);
 
     function toggleRow(productId: string) {
         setOpenIds((previous) =>
@@ -155,11 +117,6 @@ function Table({
         }
     }
 
-    const formatNumber = (value: number) =>
-        new Intl.NumberFormat("sv-SE", {
-            maximumFractionDigits: 2,
-        }).format(value);
-
     if (loading) {
         return <p className="text-secondary">Hämtar periodposter...</p>;
     }
@@ -167,59 +124,43 @@ function Table({
     if (error) {
         return <div className="alert alert-danger">{error}</div>;
     }
+        if (rows.length === 0) {
+        return <p className="text-secondary mb-0">Inga produkter registrerade för den valda perioden.</p>;
+    }
 
     return (
         <div>
             <div className="d-flex justify-content-between align-items-start gap-3 mb-3">
                 <div>
-                    <h3 className="fs-4 fw-bold mb-2">
-                        Sålda produkter
-                    </h3>
+                    <h3 className="fs-4 fw-bold mb-2">Sålda produkter</h3>
 
                     <div className="d-flex flex-wrap align-items-center gap-2">
                         <button
                             type="button"
-                            className={
-                                showIncomplete
-                                    ? "energy-chip"
-                                    : "energy-chip energy-chip-active"
-                            }
+                            className={showIncomplete ? "energy-chip" : "energy-chip energy-chip-active"}
                             onClick={() => setOnlyIncomplete(false)}
                         >
-                            Alla{" "}
-                            <span className="energy-chip-count">
-                                {rows.length}
-                            </span>
+                            Alla <span className="energy-chip-count">{rows.length}</span>
                         </button>
 
                         {incompleteCount > 0 && (
                             <button
                                 type="button"
-                                className={
-                                    showIncomplete
+                                className={showIncomplete
                                         ? "energy-chip energy-chip-warning"
                                         : "energy-chip"
                                 }
                                 onClick={() => setOnlyIncomplete(true)}
                             >
-                                <TriangleAlert
-                                    size={16}
-                                    className="energy-warning-icon"
-                                />
-                                {" "}Behöver kompletteras{" "}
-                                <span className="energy-chip-count">
-                                    {incompleteCount}
-                                </span>
+                                <TriangleAlert size={16} className="energy-warning-icon" />
+                                Behöver kompletteras
+                                <span className="energy-chip-count">{incompleteCount}</span>
                             </button>
                         )}
 
                         <span className="d-flex align-items-center gap-1 text-secondary">
-                            <CircleCheck
-                                size={16}
-                                className="text-success"
-                            />
-                            {countedCount} av {rows.length} med
-                            material och registrerat antal
+                            <CircleCheck size={16} className="text-success"/>
+                            {countedCount} av {rows.length} med material och registrerat antal
                         </span>
                     </div>
                 </div>

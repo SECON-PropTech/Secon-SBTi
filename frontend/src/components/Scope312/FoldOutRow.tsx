@@ -3,7 +3,6 @@ import { ChevronRight, Info, TriangleAlert } from "lucide-react";
 import type {
     SoldProducts,
     ProductMaterial,
-    ProductperiodEntry,
     ProductPeriodEntry,
 } from "../../types/soldProducts";
 
@@ -12,7 +11,7 @@ import ProductDetails from "./ProductDetails";
 type Props = {
     product: SoldProducts;
     materials: ProductMaterial[];
-    enteries: ProductPeriodEntry[];
+    entries: ProductPeriodEntry[];
     quantity: number;
     weightPerUnit: number;
     totalWeight: number;
