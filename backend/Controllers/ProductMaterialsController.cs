@@ -1,9 +1,8 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using SeconSbtiBackend.DTOs.Scope312;
 using SeconSbtiBackend.Services;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-
 
 namespace SeconSbtiBackend.Controllers;
 
@@ -12,6 +11,7 @@ namespace SeconSbtiBackend.Controllers;
 public sealed class ProductMaterialsController(
     ProductMaterialQueryService productMaterialQueryService) : ControllerBase
 {
+    // Hämtar materialuppgifter för en enskild produkt.
     [HttpGet("{productId:guid}")]
     public async Task<ActionResult<ProductMaterialsResponse>> GetProductMaterials(
         Guid productId,
@@ -28,11 +28,10 @@ public sealed class ProductMaterialsController(
         return Ok(product);
     }
 
-
-
+    // Hämtar alla produkter med deras materialuppgifter.
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<ProductMaterialsResponse>>> GetAllProductMaterials(
-    CancellationToken cancellationToken)
+        CancellationToken cancellationToken)
     {
         var products = await productMaterialQueryService
             .GetAllProductMaterialsAsync(cancellationToken);
@@ -40,24 +39,25 @@ public sealed class ProductMaterialsController(
         return Ok(products);
     }
 
-
+    // Hämtar en produkts registreringar för det valda året.
+    // Om månad anges begränsas hämtningen till den månaden.
     [HttpGet("{productId:guid}/entries")]
     public async Task<ActionResult<IReadOnlyList<ProductPeriodEntryResponse>>> GetProductPeriodEntries(
-    Guid productId,
-    [FromQuery, BindRequired, Range(2000, 2100)] int year,
-    CancellationToken cancellationToken)
+        Guid productId,
+        [FromQuery, BindRequired, Range(2000, 2100)] int year,
+        CancellationToken cancellationToken,
+        [FromQuery, Range(1, 12)] int? month = null)
     {
         var entries = await productMaterialQueryService
-            .GetProductPeriodEntriesAsync(
-                productId,
-                year,
-                cancellationToken);
+            .GetProductPeriodEntriesAsync(productId, year, cancellationToken, month: month);
 
+        // Tjänsten returnerar null om produkten saknas.
         if (entries is null)
         {
             return NotFound();
         }
 
+        // En befintlig produkt utan registreringar för perioden ger en tom lista.
         return Ok(entries);
     }
 }

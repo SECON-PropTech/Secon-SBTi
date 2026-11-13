@@ -13,6 +13,28 @@ namespace SeconSbtiBackend.Controllers;
 public class ProductsController(ApplicationDbContext dbContext) : ControllerBase
 {
     /// <summary>
+    /// All sold products with their standard values, sorted by name (FK-AB.3).
+    /// Should be used by the frontend to pick a product when registering a manual line.
+    /// </summary>
+    [HttpGet]
+    public async Task<IReadOnlyList<SoldProductResponse>> GetAll()
+    {
+        return await dbContext.SoldProducts
+            .OrderBy(product => product.Name)
+            .Select(product => new SoldProductResponse(
+                product.Id,
+                product.ArticleNo,
+                product.Name,
+                product.GroupId,
+                product.Group == null ? null : product.Group.Name, // "?." is not allowed in EF queries, so the null check is written out.
+                product.KwhPerYear,
+                product.LifetimeYears,
+                product.MeasurementQuality,
+                product.Comment))
+            .ToListAsync();
+    }
+
+    /// <summary>
     /// Saves manually entered data for one product. All fields are replaced, so null clears a value.
     /// 204 when saved, 404 if the product does not exist, 400 if the group does not exist.
     /// </summary>
