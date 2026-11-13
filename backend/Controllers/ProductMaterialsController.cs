@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using SeconSbtiBackend.DTOs.Scope312;
 using SeconSbtiBackend.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using SeconSbtiBackend.Data;
 
 namespace SeconSbtiBackend.Controllers;
 
@@ -59,5 +62,46 @@ public sealed class ProductMaterialsController(
 
         // En befintlig produkt utan registreringar för perioden ger en tom lista.
         return Ok(entries);
+    }
+
+
+
+    // Uppdaterar en manuell registrering som tillhör den valda produkten.
+    [Authorize]
+    [HttpPut("{productId:guid}/entries/{entryId:guid}")]
+    public async Task<IActionResult> UpdateProductPeriodEntry(
+        Guid productId,
+        Guid entryId,
+        [FromBody] UpdateProductPeriodEntryRequest request,
+        [FromServices] ApplicationDbContext dbContext,
+        CancellationToken cancellationToken)
+    {
+        var date = request.Date!.Value;
+
+        // Använd samma årsintervall som vid hämtning av registreringar.
+        if (date.Year is < 2000 or > 2100)
+        {
+            ModelState.AddModelError("date", "Ange ett datum med ett år mellan 2000 och 2100.");
+            return ValidationProblem(ModelState);
+        }
+
+        var updatedRows = await dbContext.MobigoMaterialLines
+            .Where(entry =>
+                entry.Id == entryId &&
+                entry.ProductId == productId &&
+                entry.ImportBatchId == null)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(entry => entry.Quantity, request.Quantity!.Value)
+                .SetProperty(entry => entry.Date, date)
+                .SetProperty(entry => entry.MeasurementQuality, request.MeasurementQuality!)
+                .SetProperty(entry => entry.Comment, request.Comment),
+                cancellationToken);
+
+        if (updatedRows == 0)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
     }
 }
