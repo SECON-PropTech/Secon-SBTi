@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Models;
+using SeconSbtiBackend.Validation;
 
 namespace SeconSbtiBackend.Controllers;
 
@@ -32,10 +33,17 @@ public class ProductGroupsController(ApplicationDbContext dbContext) : Controlle
     [HttpPost]
     public async Task<IActionResult> Create(ProductGroupRequest request)
     {
+        // Trimmed so "Fläktar " and "Fläktar" cannot become two groups.
+        var name = request.Name!.Trim();
+
+        if (await NameIsTaken(name))
+        {
+            return this.FieldValidationProblem("name", "Det finns redan en produktgrupp med det namnet.");
+        }
+
         var productGroup = new ProductGroup
         {
-            // Trimmed so "Fläktar " and "Fläktar" cannot become two groups.
-            Name = request.Name!.Trim(),
+            Name = name,
             Description = request.Description
         };
 
@@ -43,5 +51,12 @@ public class ProductGroupsController(ApplicationDbContext dbContext) : Controlle
         await dbContext.SaveChangesAsync();
 
         return StatusCode(StatusCodes.Status201Created, new { productGroup.Id });
+    }
+
+    // The unique index is case-sensitive, so "fläktar" would otherwise slip past it as a second group.
+    private Task<bool> NameIsTaken(string name)
+    {
+        return dbContext.ProductGroups
+            .AnyAsync(productGroup => productGroup.Name.ToLower() == name.ToLower());
     }
 }
