@@ -82,6 +82,21 @@ public class ProductGroupsController(ApplicationDbContext dbContext) : Controlle
         return NoContent();
     }
 
+    /// <summary>
+    /// Deletes a product group.
+    /// 204 when deleted, 404 if the group does not exist.
+    /// </summary>
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        // Deletes straight in the database and returns how many rows were removed (0 or 1).
+        var deletedCount = await dbContext.ProductGroups
+            .Where(productGroup => productGroup.Id == id)
+            .ExecuteDeleteAsync();
+
+        return deletedCount == 0 ? NotFound() : NoContent();
+    }
+
     // The unique index is case-sensitive, so "fläktar" would otherwise slip past it as a second group.
     // The group being updated is ignored, otherwise it could not keep its own name.
     private Task<bool> NameIsTaken(string name, Guid? ignoredProductGroupId = null)
