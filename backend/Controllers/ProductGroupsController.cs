@@ -83,12 +83,20 @@ public class ProductGroupsController(ApplicationDbContext dbContext) : Controlle
     }
 
     /// <summary>
-    /// Deletes a product group.
-    /// 204 when deleted, 404 if the group does not exist.
+    /// Deletes a product group. A group that products still belong to cannot be deleted.
+    /// 204 when deleted, 404 if the group does not exist, 409 if products still belong to it.
     /// </summary>
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
+        // The foreign key is ON DELETE RESTRICT, so without this check the delete would throw a 500.
+        if (await dbContext.SoldProducts.AnyAsync(product => product.GroupId == id))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                detail: "Produktgruppen används av en eller flera produkter. Flytta produkterna till en annan grupp innan du tar bort den.");
+        }
+
         // Deletes straight in the database and returns how many rows were removed (0 or 1).
         var deletedCount = await dbContext.ProductGroups
             .Where(productGroup => productGroup.Id == id)
