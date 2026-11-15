@@ -1,4 +1,4 @@
-
+using Testcontainers.PostgreSql;
 using System.Text.RegularExpressions;
 using Npgsql;
 using Xunit;
@@ -19,6 +19,12 @@ public sealed class PostgresFixture : IAsyncLifetime
 
     private string? _adminConnectionString;
     private string? _connectionString;
+    private readonly PostgreSqlContainer _postgres =
+    new PostgreSqlBuilder("postgres:16-alpine")
+        .WithDatabase("postgres")
+        .WithUsername("postgres")
+        .WithPassword("postgres")
+        .Build();
 
     private static string PostgresBin =>
         Environment.GetEnvironmentVariable("POSTGRES_BIN")
@@ -34,52 +40,45 @@ public sealed class PostgresFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        var configuredConnection =
-            Environment.GetEnvironmentVariable("POSTGRES_TEST_CONNECTION");
-
-        if (string.IsNullOrWhiteSpace(configuredConnection))
-        {
-            throw new InvalidOperationException(
-                "Set the POSTGRES_TEST_CONNECTION environment variable.");
-        }
-
-        var admin = new NpgsqlConnectionStringBuilder(configuredConnection)
+        //Start PostgreSQL inside Docker and connect to the PostgreSQL server inside the container
+        await _postgres.StartAsync();
+        var admin = new NpgsqlConnectionStringBuilder(
+            _postgres.GetConnectionString())
         {
             Database = "postgres",
             Pooling = false
         };
 
         _adminConnectionString = admin.ConnectionString;
-
-        // Verify PostgreSQL is reachable.
         await using (var connection =
             new NpgsqlConnection(AdminConnectionString))
         {
             await connection.OpenAsync();
         }
 
+        // Create the test database and apply migrations
         _connectionString = await CreateDatabaseAsync();
-
         await ApplyMigrationsAsync(ConnectionString);
     }
 
     public async Task DisposeAsync()
     {
-        foreach (var database in _databases)
+        try
         {
-            await using var connection =
-                new NpgsqlConnection(AdminConnectionString);
-
-            await connection.OpenAsync();
-
-            await using var command = new NpgsqlCommand(
-                $"DROP DATABASE IF EXISTS \"{database}\" WITH (FORCE)",
-                connection);
-
-            await command.ExecuteNonQueryAsync();
+            foreach (var database in _databases)
+            {
+                await using var connection = new NpgsqlConnection(AdminConnectionString);
+                await connection.OpenAsync();
+                await using var command = new NpgsqlCommand(
+                    $"DROP DATABASE IF EXISTS \"{database}\" WITH (FORCE)", connection);
+                await command.ExecuteNonQueryAsync();
+            }
         }
-
-        _databaseLock.Dispose();
+        finally
+        {
+            _databaseLock.Dispose();
+            await _postgres.DisposeAsync();
+        }
     }
 
     /// <summary>
