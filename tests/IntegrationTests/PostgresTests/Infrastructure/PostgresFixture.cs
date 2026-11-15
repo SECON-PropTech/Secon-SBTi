@@ -5,10 +5,6 @@ using Xunit;
 
 namespace tests.IntegrationTests.PostgresTests.Infrastructure;
 
-/// <summary>
-/// Uses a locally installed PostgreSQL server, creates isolated test databases,
-/// and applies the SQL migrations.
-/// </summary>
 public sealed class PostgresFixture : IAsyncLifetime
 {
     private static readonly Regex MigrationName =
@@ -25,10 +21,6 @@ public sealed class PostgresFixture : IAsyncLifetime
         .WithUsername("postgres")
         .WithPassword("postgres")
         .Build();
-
-    private static string PostgresBin =>
-        Environment.GetEnvironmentVariable("POSTGRES_BIN")
-        ?? @"C:\Program Files\PostgreSQL\16\bin";
 
     public string ConnectionString =>
         _connectionString
@@ -173,56 +165,12 @@ public sealed class PostgresFixture : IAsyncLifetime
     }
 
     /// <summary>
-    /// Runs a local PostgreSQL utility such as pg_dump or pg_restore.
+    /// Runs a command inside the PostgreSQL container (e.g. pg_dump, pg_restore).
     /// </summary>
-    public async Task<ToolResult> RunPostgresToolAsync(
-        string tool,
-        string connectionString,
-        params string[] arguments)
+    public async Task<ToolResult> RunInContainerAsync(params string[] command)
     {
-        var builder =
-            new NpgsqlConnectionStringBuilder(connectionString);
-
-        var executable = Path.Combine(PostgresBin, $"{tool}.exe");
-
-        if (!File.Exists(executable))
-        {
-            throw new FileNotFoundException(
-                $"PostgreSQL utility not found: {executable}");
-        }
-
-        var startInfo = new System.Diagnostics.ProcessStartInfo
-        {
-            FileName = executable,
-            UseShellExecute = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            CreateNoWindow = true
-        };
-
-        startInfo.Environment["PGPASSWORD"] = builder.Password;
-
-        foreach (var argument in arguments)
-        {
-            startInfo.ArgumentList.Add(argument);
-        }
-
-        using var process = new System.Diagnostics.Process
-        {
-            StartInfo = startInfo
-        };
-
-        process.Start();
-
-        var stdoutTask = process.StandardOutput.ReadToEndAsync();
-        var stderrTask = process.StandardError.ReadToEndAsync();
-
-        await process.WaitForExitAsync();
-
-        return new ToolResult(
-            process.ExitCode,
-            await stdoutTask,
-            await stderrTask);
+        var result = await _postgres.ExecAsync(command);
+        return new ToolResult((int)result.ExitCode, result.Stdout, result.Stderr);
     }
 
     public sealed record ToolResult(
