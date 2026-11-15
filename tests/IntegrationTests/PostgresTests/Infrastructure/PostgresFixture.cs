@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using Npgsql;
 using Xunit;
 
-namespace tests.PostgresTests.Infrastructure;
+namespace tests.IntegrationTests.PostgresTests.Infrastructure;
 
 /// <summary>
 /// Uses a locally installed PostgreSQL server, creates isolated test databases,

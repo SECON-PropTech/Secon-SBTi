@@ -1,6 +1,6 @@
-using tests.PostgresTests.Infrastructure;
+using tests.IntegrationTests.PostgresTests.Infrastructure;
 
-namespace tests.PostgresTests.Constraints;
+namespace tests.IntegrationTests.PostgresTests.Constraints;
 
 public sealed class FacilityEnergyTests(PostgresFixture fixture) : DbTestBase(fixture)
 {

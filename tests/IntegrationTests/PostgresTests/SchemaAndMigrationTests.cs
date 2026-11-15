@@ -1,7 +1,7 @@
 using Npgsql;
-using tests.PostgresTests.Infrastructure;
+using tests.IntegrationTests.PostgresTests.Infrastructure;
 
-namespace tests.PostgresTests;
+namespace tests.IntegrationTests.PostgresTests;
 
 public sealed class SchemaStructureTests(PostgresFixture fixture) : DbTestBase(fixture)
 {

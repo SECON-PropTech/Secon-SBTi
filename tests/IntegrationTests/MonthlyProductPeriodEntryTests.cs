@@ -4,7 +4,7 @@ using SeconSbtiBackend.DTOs.Scope312;
 using SeconSbtiBackend.Models;
 using SeconSbtiBackend.Services;
 
-namespace tests;
+namespace tests.IntegrationTests;
 
 public class MonthlyProductPeriodEntryTests
 {
