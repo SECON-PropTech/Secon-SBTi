@@ -146,7 +146,6 @@ public class MonthlyProductPeriodEntryTests
     // Kontrollerar att ett anrop utan månad returnerar båda raderna
     // från det valda året. En månad utan registreringar ska ge en tom lista.   s
 
-
     [Theory]
     [InlineData(null, 2)]
     [InlineData(2, 0)]
