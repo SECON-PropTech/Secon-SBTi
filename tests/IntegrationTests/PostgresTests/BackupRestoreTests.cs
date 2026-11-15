@@ -1,7 +1,7 @@
 using Npgsql;
 using tests.IntegrationTests.PostgresTests.Infrastructure;
 
-namespace tests.PostgresTests;
+namespace tests.IntegrationTests.PostgresTests;
 
 public sealed class BackupRestoreTests(PostgresFixture fixture) : DbTestBase(fixture)
 {
