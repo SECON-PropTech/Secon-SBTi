@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Interfaces;
-using SeconSbtiBackend.Validation;
 
 namespace SeconSbtiBackend.Controllers;
 
 [ApiController]
+// TODO: Permissions
 [Route("api/purchased-services")]
 public class PurchasedServicesController(IPurchasedServicesService purchasedServicesService) : ControllerBase
 {
@@ -14,6 +14,7 @@ public class PurchasedServicesController(IPurchasedServicesService purchasedServ
     [ProducesResponseType(
         typeof(List<PurchasedServiceResponse>),
         StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<List<PurchasedServiceResponse>>>
         GetPurchasedServices([FromQuery] PurchasedServicesQuery filter, CancellationToken cancellationToken)
     {
@@ -29,16 +30,9 @@ public class PurchasedServicesController(IPurchasedServicesService purchasedServ
         [FromBody] CreatePurchasedServiceRequest request,
         CancellationToken cancellationToken)
     {
-        var response = await purchasedServicesService.CreateAsync(request, cancellationToken);
+        var result = await purchasedServicesService.CreateAsync(request, cancellationToken);
 
-        if (response is null)
-        {
-            return this.FieldValidationProblem(
-                "accountNo",
-                "Kontot saknar en kopplad tjänstekategori. Välj ett kategoriserat konto.");
-        }
-
-        return StatusCode(StatusCodes.Status201Created, response);
+        return ToActionResult(result, StatusCodes.Status201Created);
     }
 
     [HttpPut("{reportId:guid}")]
@@ -54,12 +48,23 @@ public class PurchasedServicesController(IPurchasedServicesService purchasedServ
         var result = await purchasedServicesService.UpdateAsync(
             reportId, accountNo, request, cancellationToken);
 
+        return ToActionResult(result);
+    }
+
+    private ActionResult<PurchasedServiceResponse> ToActionResult(
+        PurchasedServiceResult result,
+        int successStatusCode = StatusCodes.Status200OK)
+    {
         return result.Status switch
         {
-            PurchasedServiceUpdateStatus.Success => Ok(result.Value),
-            PurchasedServiceUpdateStatus.ValidationError =>
-                this.FieldValidationProblem(result.Field!, result.Message!),
-            PurchasedServiceUpdateStatus.NotFound => NotFound(new { message = result.Message }),
+            PurchasedServiceStatus.Success => StatusCode(successStatusCode, result.Value),
+            PurchasedServiceStatus.ValidationError =>
+                ValidationProblem(new ValidationProblemDetails(result.Errors!)
+                {
+                    Title = "En eller flera uppgifter behöver rättas.",
+                    Status = StatusCodes.Status400BadRequest
+                }),
+            PurchasedServiceStatus.NotFound => NotFound(new { message = result.Message }),
             _ => throw new InvalidOperationException("Okänt resultat för köpta tjänster.")
         };
     }

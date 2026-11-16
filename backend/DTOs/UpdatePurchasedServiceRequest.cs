@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SeconSbtiBackend.DTOs;
 
-public sealed class UpdatePurchasedServiceRequest : IValidatableObject
+public class UpdatePurchasedServiceRequest : IValidatableObject
 {
     [Required(ErrorMessage = "Ange periodens startdatum.")]
     public DateOnly? PeriodFrom { get; init; }
@@ -23,6 +23,7 @@ public sealed class UpdatePurchasedServiceRequest : IValidatableObject
         ErrorMessage = "Välj uppmätt eller uppskattat.")]
     public string? MeasurementQuality { get; init; }
 
+    [StringLength(2000, ErrorMessage = "Kommentaren får vara högst 2 000 tecken.")]
     public string? Comment { get; init; }
 
     public IEnumerable<ValidationResult> Validate(

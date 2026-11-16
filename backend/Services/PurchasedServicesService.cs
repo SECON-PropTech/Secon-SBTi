@@ -26,22 +26,22 @@ public sealed class PurchasedServicesService(
         return await query.ToListAsync(cancellationToken);
     }
 
-    public async Task<PurchasedServiceResponse?> CreateAsync(
+    public async Task<PurchasedServiceResult> CreateAsync(
         CreatePurchasedServiceRequest request,
         CancellationToken cancellationToken)
     {
         var accountNo = request.AccountNo!.Trim();
 
-        var mapping = await context.AccountCategoryMappings
-            .AsNoTracking()
-            .Include(mapping => mapping.ServiceCategory)
-            .SingleOrDefaultAsync(
+        var mappingExists = await context.AccountCategoryMappings
+            .AnyAsync(
                 mapping => mapping.AccountNo == accountNo,
                 cancellationToken);
 
-        if (mapping is null)
+        if (!mappingExists)
         {
-            return null;
+            return PurchasedServiceResult.ValidationError(
+                "accountNo",
+                "Kontot saknar en kopplad tjänstekategori. Välj ett kategoriserat konto.");
         }
 
         var report = new ServiceSpendReport
@@ -65,28 +65,22 @@ public sealed class PurchasedServicesService(
         context.PurchasedServices.Add(service);
         await context.SaveChangesAsync(cancellationToken);
 
-        return new PurchasedServiceResponse
-        {
-            ReportId = report.Id,
-            AccountNo = service.AccountNo,
-            ServiceLabel = mapping.ServiceLabel,
-            ServiceCategoryId = mapping.ServiceCategoryId,
-            ServiceCategoryName = mapping.ServiceCategory.Name,
-            PeriodFrom = report.PeriodFrom,
-            PeriodTo = report.PeriodTo,
-            Value = service.AmountSek,
-            Unit = "sek",
-            MeasurementQuality = service.MeasurementQuality,
-            Comment = service.Comment
-        };
+        var response = await QueryServices()
+            .SingleAsync(
+                saved => saved.ReportId == report.Id && saved.AccountNo == accountNo,
+                cancellationToken);
+
+        return PurchasedServiceResult.Success(response);
     }
 
-    public async Task<PurchasedServiceUpdateResult> UpdateAsync(
+    public async Task<PurchasedServiceResult> UpdateAsync(
         Guid reportId,
         string accountNo,
         UpdatePurchasedServiceRequest request,
         CancellationToken cancellationToken)
     {
+        accountNo = accountNo.Trim();
+
         var service = await context.PurchasedServices
             .Include(service => service.Report)
             .SingleOrDefaultAsync(
@@ -95,21 +89,23 @@ public sealed class PurchasedServicesService(
 
         if (service is null)
         {
-            return PurchasedServiceUpdateResult.NotFound("Den köpta tjänsten kunde inte hittas.");
+            return PurchasedServiceResult.NotFound("Den köpta tjänsten kunde inte hittas.");
         }
 
-        var periodChanged = service.Report.PeriodFrom != request.PeriodFrom!.Value ||
-            service.Report.PeriodTo != request.PeriodTo!.Value;
+        var periodFromChanged = service.Report.PeriodFrom != request.PeriodFrom!.Value;
+        var periodToChanged = service.Report.PeriodTo != request.PeriodTo!.Value;
 
-        if (periodChanged &&
+        if ((periodFromChanged || periodToChanged) &&
             (service.Report.ImportBatchId.HasValue ||
              await context.PurchasedServices.AnyAsync(
                  other => other.ReportId == reportId && other.AccountNo != accountNo,
                  cancellationToken)))
         {
-            return PurchasedServiceUpdateResult.ValidationError(
-                "periodTo",
-                "Perioden kan bara ändras för en manuell rapport med en tjänsterad.");
+            const string message = "Perioden kan bara ändras för en manuell rapport med en tjänsterad.";
+            var errors = new Dictionary<string, string[]>();
+            if (periodFromChanged) errors["periodFrom"] = [message];
+            if (periodToChanged) errors["periodTo"] = [message];
+            return PurchasedServiceResult.ValidationError(errors);
         }
 
         service.AmountSek = request.Value!.Value;
@@ -124,7 +120,7 @@ public sealed class PurchasedServicesService(
         }
         catch (DbUpdateConcurrencyException)
         {
-            return PurchasedServiceUpdateResult.NotFound("Den köpta tjänsten kunde inte hittas.");
+            return PurchasedServiceResult.NotFound("Den köpta tjänsten kunde inte hittas.");
         }
 
         var response = await QueryServices()
@@ -132,7 +128,7 @@ public sealed class PurchasedServicesService(
                 service => service.ReportId == reportId && service.AccountNo == accountNo,
                 cancellationToken);
 
-        return PurchasedServiceUpdateResult.Success(response);
+        return PurchasedServiceResult.Success(response);
     }
 
     private IQueryable<PurchasedServiceResponse> QueryServices()
