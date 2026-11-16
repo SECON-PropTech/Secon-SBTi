@@ -62,7 +62,7 @@
 
 /* The open page: light blue background, blue left border and blue text */
 .sidebar-link.active {
-  background-color: var(--secon-blue-light);
+  background-color: var(--secon-blue-light-background);
   border-left-color: var(--secon-blue);
   color: var(--secon-blue);
   font-weight: 600;
