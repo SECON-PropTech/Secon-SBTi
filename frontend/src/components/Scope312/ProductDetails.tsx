@@ -1,11 +1,8 @@
 import { Calculator, Recycle } from "lucide-react";
 
-import type {
-    SoldProducts,
-    ProductMaterial,
-    ProductPeriodEntry,
-} from "../../types/soldProducts";
+import type { SoldProducts, ProductMaterial, ProductPeriodEntry} from "../../types/soldProducts";
 
+//// Data sent from FoldOutRow
 type Props = {
     product: SoldProducts;
     materials: ProductMaterial[];
@@ -20,16 +17,11 @@ const formatNumber = (value: number) =>
         maximumFractionDigits: 2,
     }).format(value);
 
-function ProductDetails({
-    product,
-    materials,
-    entries,
-    quantity,
-    weightPerUnit,
-    totalWeight,
-}: Props) {
+//// ProductDetails presents all the details for a specific product for the selected time period
+function ProductDetails({ product, materials, entries, quantity, weightPerUnit, totalWeight }: Props) {
     return (
         <div>
+            {/* Basic information about the product */}
             <dl className="energy-details-grid">
                 <div>
                     <dt>Antal registrerade produkter</dt>
@@ -49,15 +41,21 @@ function ProductDetails({
                 <div>
                     <dt>Mätkvalitet</dt>
                     <dd>
+                        {/* Show different colors depending on if the data is measured or estimated */}
                         {product.measurementQuality === "measured" ? (
-                            <span className="energy-pill energy-pill-green">
-                                Uppmätt
-                            </span>
+                            <span className="energy-pill energy-pill-green">Uppmätt</span>
                         ) : (
-                            <span className="energy-pill">
-                                Uppskattad
-                            </span>
+                            <span className="energy-pill">Uppskattad</span>
                         )}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Förväntad livslängd</dt>
+                    <dd>
+                        {product.lifetimeYears !== null
+                            ? `${formatNumber(product.lifetimeYears)} år`
+                            : "Ej angiven"}
                     </dd>
                 </div>
 
@@ -66,30 +64,25 @@ function ProductDetails({
                     <dd>{product.comment ?? "Ingen kommentar"}</dd>
                 </div>
             </dl>
-
+            {/* A list of the materiala and their end-of-life treatment*/}
             <h4 className="fs-6 fw-bold mt-4 mb-3 d-flex align-items-center gap-2">
-                <Recycle size={18} />
-                Material och slutbehandling
-            </h4>
+                <Recycle size={18} />Material och slutbehandling</h4>
 
             {materials.length === 0 ? (
-                <p className="energy-missing-text">
-                    Produkten saknar registrerade material.
-                </p>
+                <p className="energy-missing-text">Produkten saknar registrerade material.</p>
             ) : (
                 <div className="table-responsive">
                     <table className="table table-sm align-middle">
                         <thead>
                             <tr>
                                 <th>Material</th>
-                                <th className="text-end">
-                                    Vikt (kg)
-                                </th>
+                                <th className="text-end">Vikt (kg)</th>
                                 <th>Slutbehandling</th>
                             </tr>
                         </thead>
 
                         <tbody>
+                            {/*Displays one material per row*/}
                             {materials.map((material) => (
                                 <tr key={material.materialId}>
                                     <td>{material.materialName}</td>
@@ -105,15 +98,11 @@ function ProductDetails({
                     </table>
                 </div>
             )}
-
-            <h4 className="fs-6 fw-bold mt-4 mb-3">
-                Periodposter
-            </h4>
+            {/* Shows the registered products for the chosen time period*/}
+            <h4 className="fs-6 fw-bold mt-4 mb-3">Periodposter</h4>
 
             {entries.length === 0 ? (
-                <p className="text-secondary">
-                    Inga registreringar för vald period.
-                </p>
+                <p className="text-secondary">Inga registreringar för vald period.</p>
             ) : (
                 <div className="table-responsive">
                     <table className="table table-sm align-middle">
@@ -148,7 +137,7 @@ function ProductDetails({
                     </table>
                 </div>
             )}
-
+            {/* Shows how the material-weight is calculated*/}
             <div className="energy-calculation mt-3">
                 <Calculator size={16} />
 

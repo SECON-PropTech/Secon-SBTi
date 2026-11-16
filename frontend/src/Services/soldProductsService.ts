@@ -1,3 +1,5 @@
+// API functions for fetching sold products, groups, materials and period entries.
+
 import type {
     SoldProducts,
     ProductGroup,
@@ -5,6 +7,7 @@ import type {
     ProductPeriodEntry
 } from "../types/soldProducts";
 
+// Fetch all product groups.
 export async function getProductGroups(): Promise<ProductGroup[]> {
     const response = await fetch("/api/product-groups", {
         method: "GET",
@@ -18,6 +21,7 @@ export async function getProductGroups(): Promise<ProductGroup[]> {
     return await response.json() as ProductGroup[];
 }
 
+// Fetch all products with their registered materials and treatments.
 export async function getAllProductMaterials(): Promise<ProductMaterials[]> {
     const response = await fetch("/api/product-materials", {
         method: "GET",
@@ -31,7 +35,7 @@ export async function getAllProductMaterials(): Promise<ProductMaterials[]> {
     return await response.json() as ProductMaterials[];
 }
 
-// Hämtar periodposter för en produkt och ett år
+// Fetch period entries for a specific product and year.
 export async function getProductPeriod(
     productId: string,
     year: number
@@ -51,6 +55,7 @@ export async function getProductPeriod(
     return await response.json() as ProductPeriodEntry[];
 }
 
+// Fetch all sold products and their basic information.
 export async function getSoldProducts(): Promise<SoldProducts[]> {
     const response = await fetch("/api/products", {
         method: "GET",

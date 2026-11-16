@@ -8,6 +8,7 @@ import Table from "../components/Scope312/Table";
 import YearPicker from "../components/Scope311/YearPicker";
 import "../components/Scope312/Scope312.css";
 
+// Months for filtering the report.
 const months = [
     { value: "all", label: "Hela året" },
     { value: "01", label: "Januari" },
@@ -24,13 +25,15 @@ const months = [
     { value: "12", label: "December" },
 ];
 
+//Homepage displays sold products and their data in a table, and handles the year and month filters.
 function Scope312HomePage() {
+  // Start with the current year and month.
   const [year, setYear] = useState(new Date().getFullYear());
 
   const [selectedMonth, setSelectedMonth] = useState(
       String(new Date().getMonth() + 1).padStart(2, "0")
   );
-
+  // Store products and their registered materials.
   const [products, setProducts] = useState<SoldProducts[]>([]);
 
   const [productMaterials, setProductMaterials] = useState<ProductMaterials[]>([]);
@@ -38,6 +41,7 @@ function Scope312HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
     
+  // Fetch products and materials when the page opens.
   useEffect(() => {
       let active = true;
 
@@ -50,7 +54,7 @@ function Scope312HomePage() {
                       getSoldProducts(),
                       getAllProductMaterials(),
               ]);
-
+              // Prevent outdated requests from updating the component.
               if (!active) return;
 
               setProducts(fetchedProducts);
@@ -70,10 +74,11 @@ function Scope312HomePage() {
       };
   }, []);
 
+  // Update the selected reporting year.
   function handleYearChange(newYear: number) {
       setYear(newYear);
   }
-
+    // Decides what to display while loading, on error or when no products exist.
     let content;
 
     if (loading) {
@@ -110,6 +115,7 @@ function Scope312HomePage() {
               </div>
           </div>
 
+          {/* Filter products by month or show the entire year. */}
           <div className="mb-3">
               <label htmlFor="month-filter" className="form-label">Visa period</label>
 

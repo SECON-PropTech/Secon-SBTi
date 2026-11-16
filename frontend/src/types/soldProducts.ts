@@ -1,3 +1,4 @@
+// Basic information about a sold product from the backend.
 export type SoldProducts = {
     id: string;
     articleNo: string | null;
@@ -9,6 +10,7 @@ export type SoldProducts = {
     comment: string | null;
 }    
 
+// A material belonging to a product, including weight and end-of-life treatment.
 export type ProductMaterial = {
     materialId: string;
     materialName: string;
@@ -17,6 +19,7 @@ export type ProductMaterial = {
     treatmentName: string;
 };
 
+// A product with all its registered materials.
 export type ProductMaterials = {
     productId: string;
     productName: string;
@@ -24,6 +27,7 @@ export type ProductMaterials = {
     materials: ProductMaterial[];
 };
 
+// A registered quantity for a product on a specific date.
 export type ProductPeriodEntry = {
     id: string;
     productId: string;
@@ -33,33 +37,15 @@ export type ProductPeriodEntry = {
     comment: string | null;
 };
 
+// Information about a product group.
 export type ProductGroup = {
     id: string;
     name: string;
     description: string | null;
 };
 
+// Available views in the sold products management section.
 export type SoldProductsManagementView =
-    | "products"
-    | "materials"
-    | "topTen"
-    | "projects";
-
-export type Product = {
-    id: string;
-    articleNo?: string;
-    name: string;
-    groupId?: string | null;
-    quantity: number;
-    date: string;
-    materials: ProductMaterial[];
-    measurementQuality: "measured" | "estimated";
-    "billing-status"?: string;
-    included?: boolean;
-    "life-cycle"?: number;
-    "waste-managing"?: string;
-    projects?: string[];     
-}
-
+    | "products";
 
 export type ProductInclusion = Record<string, boolean>;

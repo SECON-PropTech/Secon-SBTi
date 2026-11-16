@@ -8,6 +8,7 @@ import type {
 
 import ProductDetails from "./ProductDetails";
 
+// Data and functions passed from Table to FoldOutRow.
 type Props = {
     product: SoldProducts;
     materials: ProductMaterial[];
@@ -24,6 +25,7 @@ const formatNumber = (value: number) =>
         maximumFractionDigits: 2,
     }).format(value);
 
+// Makes a product-row clickable and makes the row fold out into a detailed view.
 function FoldOutRow({
     product,
     materials,
@@ -33,7 +35,9 @@ function FoldOutRow({
     totalWeight,
     isOpen,
     onToggle,
+
 }: Props) {
+    // Check if the product is missing its group or material information.
     const missingGroup = product.groupId === null;
     const missingMaterials = materials.length === 0;
 
@@ -56,6 +60,7 @@ function FoldOutRow({
                 </td>
 
                 <td>
+                    {/* Alert warning pops up if product-group is missing */}
                     <div className="fw-semibold d-flex align-items-center gap-1">
                         {missingGroup && (
                             <Info
@@ -88,7 +93,7 @@ function FoldOutRow({
                 <td className="text-end">
                     {formatNumber(quantity)}
                 </td>
-
+                {/* Alert warning pops up if material and weight is missing */}
                 <td className="text-end">
                     {missingMaterials ? (
                         <TriangleAlert
@@ -109,7 +114,7 @@ function FoldOutRow({
                     )}
                 </td>
             </tr>
-
+            {/* ProductDetails only shows if the FoldOutRow is clicked */}
             {isOpen && (
                 <tr className="energy-details-row">
                     <td></td>

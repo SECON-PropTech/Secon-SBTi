@@ -6,6 +6,7 @@ import type { SoldProducts, ProductMaterials, ProductPeriodEntry } from "../../t
 import { getProductPeriod } from "../../Services/soldProductsService";
 import FoldOutRow from "./FoldOutRow";
 
+// Data and filter sent from Scope312HomePage.
 type Props = {
     products: SoldProducts[];
     productMaterials: ProductMaterials[];
@@ -16,14 +17,17 @@ type Props = {
 const formatNumber = (value: number) =>
     new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 2 }).format(value);
 
+// Table shows sold products for the chosen time-period.
 function Table({ products, productMaterials, year, selectedMonth }: Props) {
+    // Folded out product-rows.
     const [openIds, setOpenIds] = useState<string[]>([]);
+    // products that have missing data.
     const [onlyIncomplete, setOnlyIncomplete] = useState(false);
     const [entries, setEntries] = useState<ProductPeriodEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Hämtar periodposter för alla produkter under valt år.
+    // Fetches period entries from the backend when products or year change.
     useEffect(() => {
         let active = true;
 
@@ -36,7 +40,7 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
                 const results = await Promise.all(
                     products.map((product) => getProductPeriod(product.id, year))
                 );
-
+                // Prevents outdated API requests from updating the component.
                 if (active) setEntries(results.flat());
             } catch {
                 if (active) setError("Kunde inte hämta periodposter.");
@@ -50,7 +54,7 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
         return () => { active = false; };
     }, [products, year]);
 
-    // Filtrera registreringar efter vald månad.
+    // Filters periodposter after chosen time-period.
     const filteredEntries = useMemo(() => {
         if (selectedMonth === "all") {
             return entries;
@@ -60,7 +64,7 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
         );
     }, [entries, selectedMonth]);
 
-    // Koppla material och periodposter till respektive produkt.
+    // Combines each product with its materials and period entries.
     const rows = useMemo(() => products.map((product) => {
             const materialData = productMaterials.find(
                 (item) => item.productId === product.id
@@ -69,11 +73,11 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
             const productEntries = filteredEntries.filter(
                 (entry) => entry.productId === product.id
             );
-
+            // Sums up all sold product within the chosen time-period.
             const quantity = productEntries.reduce(
                 (sum, entry) => sum + entry.quantity, 0
             );
-
+        // Sums up material-weight for a product.
         const materials = materialData?.materials ?? [];
         const weightPerUnit = materials.reduce(
             (sum, material) => sum + material.weightKg, 0
@@ -88,19 +92,22 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
             totalWeight: quantity * weightPerUnit,
             incomplete: product.groupId === null || materials.length === 0,
         };
+    // Products that has not been sold will not show.
     }).filter((row) => row.quantity > 0),
     [products, productMaterials, filteredEntries]);
-
+    // Counts all the product with missing data and complete data.
     const incompleteCount = rows.filter((row) => row.incomplete).length;
     const countedCount = rows.filter((row) => row.materials.length > 0).length;
+    // Decides witch products that will be shown in the table.
     const showIncomplete = onlyIncomplete && incompleteCount > 0;
     const visibleRows = showIncomplete ? rows.filter((row) => row.incomplete) : rows;
-
+    // allOpen will be true when all the FoldOutRows are open.
     const allOpen = visibleRows.length > 0 &&
         visibleRows.every((row) => openIds.includes(row.product.id));
-
+    // Total material-weight for all the product for the chosen time-period.
     const totalWeight = rows.reduce((sum, row) => sum + row.totalWeight, 0);
 
+    // Will fold out or in a spedcifik row.
     function toggleRow(productId: string) {
         setOpenIds((previous) =>
             previous.includes(productId)
@@ -108,7 +115,7 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
                 : [...previous, productId]
         );
     }
-
+    // Will fold out or in all the rows.
     function toggleAll() {
         if (allOpen) {
             setOpenIds([]);
@@ -117,6 +124,7 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
         }
     }
 
+     // Shows if the page is loading or if an error accured or text saying no product was found.
     if (loading) {
         return <p className="text-secondary">Hämtar periodposter...</p>;
     }
@@ -143,6 +151,7 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
                             Alla <span className="energy-chip-count">{rows.length}</span>
                         </button>
 
+                        {/* Alert only shows when a product is missing data*/}
                         {incompleteCount > 0 && (
                             <button
                                 type="button"
@@ -165,6 +174,7 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
                     </div>
                 </div>
 
+                {/* Button for fold out or in all rows */}
                 <button
                     type="button"
                     className="btn energy-outline-button"
@@ -192,6 +202,7 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
                         </tr>
                     </thead>
 
+                    {/* Button for fold out or in, for a specifik product */}
                     <tbody>
                         {visibleRows.map((row) => (
                             <FoldOutRow
@@ -208,6 +219,7 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
                         ))}
                     </tbody>
 
+                    {/*Shows the total weight for all products in the selected period regardless of the incomplete-data filter.*/}
                     <tfoot>
                         <tr className="fw-bold">
                             <td></td>
