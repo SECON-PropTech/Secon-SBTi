@@ -34,7 +34,7 @@ public class ProductPeriodEntryUpdateTests
     }
 
     [PostgreSqlFact]
-    public async Task UpdateProductPeriodEntry_keeps_imported_entry_unchanged()
+    public async Task UpdateProductPeriodEntry_saves_changes_to_imported_entry()
     {
         var connectionString =
             Environment.GetEnvironmentVariable(ConnectionVariable)!;
@@ -93,10 +93,9 @@ public class ProductPeriodEntryUpdateTests
             Quantity = 28m,
             Date = new DateOnly(2025, 4, 1),
             MeasurementQuality = "estimated",
-            Comment = "Försök att redigera"
+            Comment = "Korrigerat antal"
         };
 
-        // Använd rätt produkt och registrering för att testa just importskyddet.
         var result = await controller.UpdateProductPeriodEntry(
             product.Id,
             entry.Id,
@@ -104,19 +103,18 @@ public class ProductPeriodEntryUpdateTests
             dbContext,
             CancellationToken.None);
 
-        Assert.IsType<NotFoundResult>(result);
+        Assert.IsType<NoContentResult>(result);
 
-        // Läs om raden från databasen och kontrollera att värdena bevarades.
         var savedEntry = await dbContext.MobigoMaterialLines
             .AsNoTracking()
             .SingleAsync(row => row.Id == entry.Id);
 
-        Assert.Equal(12m, savedEntry.Quantity);
-        Assert.Equal(new DateOnly(2025, 3, 1), savedEntry.Date);
-        Assert.Equal("measured", savedEntry.MeasurementQuality);
-        Assert.Equal("Importerad registrering", savedEntry.Comment);
+        Assert.Equal(28m, savedEntry.Quantity);
+        Assert.Equal(new DateOnly(2025, 4, 1), savedEntry.Date);
+        Assert.Equal("estimated", savedEntry.MeasurementQuality);
+        Assert.Equal("Korrigerat antal", savedEntry.Comment);
+        Assert.Equal(entry.ImportBatchId, savedEntry.ImportBatchId);
     }
-
 
 
 

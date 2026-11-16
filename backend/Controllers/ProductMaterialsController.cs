@@ -66,7 +66,7 @@ public sealed class ProductMaterialsController(
 
 
 
-    // Uppdaterar en manuell registrering som tillhör den valda produkten.
+    // Uppdaterar en registrering som tillhör den valda produkten.
     [Authorize]
     [HttpPut("{productId:guid}/entries/{entryId:guid}")]
     public async Task<IActionResult> UpdateProductPeriodEntry(
@@ -86,10 +86,7 @@ public sealed class ProductMaterialsController(
         }
 
         var updatedRows = await dbContext.MobigoMaterialLines
-            .Where(entry =>
-                entry.Id == entryId &&
-                entry.ProductId == productId &&
-                entry.ImportBatchId == null)
+            .Where(entry => entry.Id == entryId && entry.ProductId == productId)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(entry => entry.Quantity, request.Quantity!.Value)
                 .SetProperty(entry => entry.Date, date)
