@@ -3,33 +3,77 @@ import { formatNumber } from "../../utils/format";
 import { Calculator, Hourglass, Zap } from "lucide-react";
 import AddButton from "./AddButton";
 import Tooltip from "./Tooltip";
+import NumberField from "./NumberField"
+import { toNumber } from "../../utils/productDraft";
+import { calculateActivityKwh } from "../../utils/calculateActivityKwh";
+import type { DraftErrors, EditField, ProductDraft } from "../../types/product";
 
 type Props = {
     product: EnergyProductRow;
+    draft: ProductDraft | null;
+    errors: DraftErrors;
+    focusField: EditField;
+    onEdit: (field: EditField) => void;
+    onChange: (changes: Partial<ProductDraft>) => void;
 
 };
 //The product details-part that shows when a row is opened
-function ProductDetails({ product }: Props) {
-    // The backend decides if a lifetime is needed (not when kWh is 0)
-    const lifetimeNotNeeded = product.lifetimeYears === null && !product.missing.includes("lifetime");
-    
-    // kWh per year: the value or a button when it's missing
-    let kwhValue;
-    if (product.kwhPerYear === null) {
-        kwhValue = <AddButton text="Lägg till" warning/>;
-    } else {
-        kwhValue = formatNumber(product.kwhPerYear) + " kWh";
-    }
+// fields turn into inputs when the row is being edited.
+function ProductDetails({ product, draft, errors, focusField, onEdit, onChange, }: Props) {
+    const kwhPerYear = draft ? toNumber(draft.kwhPerYear) : product.kwhPerYear;
 
-    //lifetime: the value, "Ej aktuellt" for 0 kwh or a button when missing
+    const lifetimeYears = draft ? toNumber(draft.lifetimeYears) : product.lifetimeYears;
+
+    const activityKwh = draft ? calculateActivityKwh(product.quantity, kwhPerYear, lifetimeYears) :
+    product.activityKwh;
+
+    
+    // The backend decides if a lifetime is needed (not when kWh is 0)
+    const lifetimeNotNeeded = draft ? kwhPerYear === 0 : 
+    product.lifetimeYears === null && !product.missing.includes("lifetime");
+    
+    // kWh per year: an input, the value or a button when it's missing
+    let kwhValue;
+    if (draft) {
+        kwhValue = (
+            <NumberField 
+            label="kWh per år"
+            unit= "kWh"
+            value={draft.kwhPerYear}
+            autoFocus={focusField === "kwhPerYear"}
+            error={errors.kwhPerYear}
+            onChange={(value) => onChange({ kwhPerYear: value })}/>
+        );
+
+    } else if (product.kwhPerYear === null) {
+        kwhValue = <AddButton text="Lägg till" warning onClick={() =>
+            onEdit("kwhPerYear")}/>;
+        } else {
+          kwhValue = formatNumber(product.kwhPerYear) + " kWh";  
+        }
+
+    //lifetime: an input, the value, "Ej aktuellt" for 0 kwh or a button when missing
     let lifetimeValue;
-    if (product.lifetimeYears !== null) {
+    if (draft) {
+        lifetimeValue = (
+          <NumberField
+            label="Livslängd"
+            unit="år"
+            value={draft.lifetimeYears}
+            autoFocus={focusField === "lifetimeYears"}
+            error={errors.lifetimeYears}
+            showMissing={!lifetimeNotNeeded}
+            onChange={(value) => onChange({ lifetimeYears: value })}/>
+        );
+
+    } else if (product.lifetimeYears !== null) {
         lifetimeValue = formatNumber(product.lifetimeYears) + " år";
     } else if (lifetimeNotNeeded) {
         lifetimeValue = <span className="text-secondary">Ej aktuellt</span>;
-    } else {
-        lifetimeValue = <AddButton text ="Lägg till" warning/>;
-    }
+      } else {
+        lifetimeValue = <AddButton text="Lägg till" warning onClick={() => 
+            onEdit("lifetimeYears")}/>;
+      }    
 
     return (
         <div>
@@ -57,16 +101,47 @@ function ProductDetails({ product }: Props) {
                 <div>
                     <dt>Mätkvalitet</dt>
                     <dd>
-                        {product.measurementQuality === "measured" ? (
+                        {draft ? (
+                            //two buttons to switch between, measured or estimated
+                            <div className="energy-quality-switch">
+                                <button type="button"
+                                className={draft.measurementQuality === "measured"
+                                ? "energy-pill energy-pill-green" : "energy-pill energy-pill-off"}
+                                onClick={() => onChange({ measurementQuality: "measured"})}>
+                                    Uppmätt 
+                                </button>
+
+                                <button type="button"
+                                className={draft.measurementQuality === "estimated"
+                                 ? "energy-pill" : "energy-pill energy-pill-off"}
+                                onClick={() => onChange({ measurementQuality: "estimated" })}>
+                                  Uppskattad
+                                </button>
+                            </div> 
+
+                            ) : product.measurementQuality === "measured" ? (
                             <span className="energy-pill energy-pill-green">Uppmätt</span>) : (
                                 <span className="energy-pill">Uppskattad</span>
-                            )
-                        }
+                            
+                            )}
                     </dd>
                 </div>
                 <div>
                     <dt>Kommentar</dt>
-                    <dd>{product.comment ?? "Tomt"}</dd>
+                    <dd>
+                        {draft ? (
+                            <input
+                             type="text"
+                             aria-label="Kommentar"
+                             className="form-control form-control-sm energy-field"
+                             value={draft.comment}
+                             placeholder="Valfritt"
+                             autoFocus={focusField === "comment"}
+                             onChange={(event) => onChange ({ comment: event.target.value })}/>
+                          ) : ( 
+                            product.comment ?? "Ingen kommentar"
+                          )}
+                    </dd>
                 </div>
             </dl>
 
@@ -75,26 +150,32 @@ function ProductDetails({ product }: Props) {
                 <Calculator size={16}/>
                 <span>{formatNumber(product.quantity)} st</span>
                 <span> × </span>
-                {product.kwhPerYear === null ? (
+                {kwhPerYear === null ? (
                     <span className="energy-missing-text">? kWh</span>) : (
-                      <span>{formatNumber(product.kwhPerYear)} kWh</span>  
+                      <span>{formatNumber(kwhPerYear)} kWh</span>  
                     )}
 
                     {/* Skip lifetime when it isnt need (0 kwh)*/}
                     {!lifetimeNotNeeded && (
                         <>
                         <span> × </span>
-                        {product.lifetimeYears === null ? (
+                        {lifetimeYears === null ? (
                             <span className="energy-missing-text">? år</span>) : (
-                                <span>{formatNumber(product.lifetimeYears)} år</span>
+                                <span>{formatNumber(lifetimeYears)} år</span>
                             )}
                         </>
                     )}
+
                     <span> = </span>
-                    {product.activityKwh === null ? (
+                    {activityKwh === null ? (
                         <span className="energy-missing-text"> Räknas inte</span>) : (
-                            <strong>{formatNumber(product.activityKwh)} kWh</strong>
+                            <strong>{formatNumber(activityKwh)} kWh</strong>
                     )}
+
+                    {/*Reminder about shortcuts*/}
+                    {draft && <span className="ms-auto small">
+                        Enter (spara) / Esc (avbryt)
+                        </span>}
             </div>
         </div>
     );

@@ -6,7 +6,7 @@ type Props = {
     onSave: () => void;
 };
 
-// Askes what to do when a user clicks another pencil
+// Asks what to do when a user clicks another pencil
 // while you have changes that arent saved.
 function ConfirmSaveDialog({ productName, canSave, onKeepEditing, onDiscard, onSave } : Props) {
     return (
