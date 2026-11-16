@@ -8,6 +8,9 @@
 --   Styrsystem      0 kWh   0 %  1 product,  0 incomplete (0 kWh = complete)
 -- Expected result for year=2024: total 4960 kWh (Fläkt B 4000 + Gammal fläkt 960).
 
+-- NOTE: if scope312_test_data.sql is also loaded, "Ingen grupp" shows
+-- 2 products, 2 incomplete for year=2025 (Duschhandtag is added).
+
 INSERT INTO product_group (id, name, description) VALUES
   ('a0000000-0000-0000-0000-000000000001', 'Fläktar', 'Ventilationsfläktar'),
   ('a0000000-0000-0000-0000-000000000002', 'Styrsystem', 'Styr- och reglerutrustning')
