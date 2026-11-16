@@ -99,16 +99,19 @@ public class PurchasedGoodsControllerTests
     }
 
     [Theory]
-    [InlineData("GET", false, HttpStatusCode.Forbidden)]
-    [InlineData("POST", false, HttpStatusCode.Forbidden)]
-    [InlineData("PUT", false, HttpStatusCode.Forbidden)]
-    [InlineData("GET", true, HttpStatusCode.OK)]
-    [InlineData("POST", true, HttpStatusCode.Forbidden)]
-    [InlineData("PUT", true, HttpStatusCode.Forbidden)]
+    [InlineData("GET", null, HttpStatusCode.Forbidden)]
+    [InlineData("POST", null, HttpStatusCode.Forbidden)]
+    [InlineData("PUT", null, HttpStatusCode.Forbidden)]
+    [InlineData("GET", Permission.ReadScope31, HttpStatusCode.OK)]
+    [InlineData("POST", Permission.ReadScope31, HttpStatusCode.Forbidden)]
+    [InlineData("PUT", Permission.ReadScope31, HttpStatusCode.Forbidden)]
+    [InlineData("GET", Permission.WriteScope31, HttpStatusCode.Forbidden)]
+    [InlineData("POST", Permission.WriteScope31, HttpStatusCode.Created)]
+    [InlineData("PUT", Permission.WriteScope31, HttpStatusCode.OK)]
     public async Task Requests_require_the_correct_scope_permission(
-        string method, bool canRead, HttpStatusCode expectedStatus)
+        string method, Permission? permission, HttpStatusCode expectedStatus)
     {
-        Permission[] permissions = canRead ? [Permission.ReadScope31] : [];
+        Permission[] permissions = permission.HasValue ? [permission.Value] : [];
         await using var api = await TestApi.Start(permissions);
         var path = method == "GET" ? "/api/purchased-goods" : WritePath(method);
         var body = method == "GET" ? null : Payload();
