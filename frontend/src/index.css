@@ -3,8 +3,9 @@
 :root {
   --secon-blue: #2e56a0;
   --secon-blue-soft: #4a6fa5;
-  --secon-blue-light: #e8eef8;
-  --secon-gold: #c9a34a;
+  --secon-blue-light-label: #9ca9bb;
+  --secon-blue-light-background: #e8eef8;
+  --secon-gold: #9ca34a;
 
   --bg: #f4f2ef;
   --surface: #ffffff;

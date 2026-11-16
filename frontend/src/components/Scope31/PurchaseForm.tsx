@@ -159,7 +159,7 @@ return (
         {validationError && <p role="alert">{validationError}</p>}
         {error && <p role="alert">{error}</p>}
 
-        <button type="submit" disabled={isSaving}>
+        <button type="submit" className="scope31__primary" disabled={isSaving}>
           {isSaving ? "Sparar..." : isEditing ? "Spara ändringar" : "Lägg till"}
         </button>
         <button type="button" onClick={onCancel} disabled={isSaving}>

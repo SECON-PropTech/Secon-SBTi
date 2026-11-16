@@ -1,0 +1,231 @@
+.scope31 {
+  --scope31-primary: var(--secon-blue, #2e56a0);
+  --scope31-secondary: var(--secon-blue-soft, #4a6fa5);
+  --scope31-tint: var(--secon-blue-light-background, #e8eef8);
+  --scope31-accent: var(--secon-gold, #9ca34a);
+  --scope31-border: var(--border, #e3e0db);
+  --scope31-text: var(--text, #1f2430);
+  --scope31-muted: var(--text-muted, #6b7280);
+  --scope31-surface: var(--surface, #fff);
+  --scope31-danger: var(--danger, #a12626);
+
+  max-inline-size: 76rem;
+  margin-inline: auto;
+  padding: clamp(1rem, 3vw, 2rem);
+  color: var(--scope31-text);
+}
+
+/* .scope31 is the class on the page's outer elemetn.
+rules that start with .scope are only relevant inside this page */
+.scope31 {
+  --scope31-danger: #a12626;
+
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  color: var(--text);
+}
+
+/* Headings & introductions */
+.scope31 h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.scope31 h2 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+}
+
+/* First paragraph directly inside the page's outer element */
+.scope31 > p:first-of-type {
+  margin: 0 0 1.5rem;
+  color: var(--text-muted);
+}
+
+/* Reporting period dropdown + goods and services tabs */
+.scope31 label {
+  font-weight: 600;
+}
+
+.scope31 label[for="period"] {
+  display: block;
+  margin-bottom: 0.375rem;
+}
+
+.scope31 nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+/* shared styles for buttons and form fields */
+.scope31 button,
+.scope31 input,
+.scope31 select,
+.scope31 textarea {
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--text-muted);
+  border-radius: 0.375rem;
+  background-color: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.scope31 button {
+  color: var(--secon-blue);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.scope31 button:hover:not(:disabled) {
+  background-color: var(--secon-blue-light-background);
+}
+
+
+.scope31 nav button[aria-pressed="true"] {
+  border-color: var(--secon-blue);
+  background-color: var(--secon-blue-light-background);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* primary buttons (add and save changes) */
+.scope31 button.scope31__primary {
+  border-color: var(--secon-blue);
+  background-color: var(--secon-blue);
+  color: var(--surface);
+}
+
+.scope31 button.scope31__primary:hover:not(:disabled) {
+  border-color: var(--secon-blue-soft);
+  background-color: var(--secon-blue-soft);
+}
+
+.scope31 button.scope31__delete {
+  border-color: var(--scope31-danger);
+  color: var(--scope31-danger);
+}
+
+.scope31 button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* showing an outline when user enters a tab */
+.scope31 :focus-visible {
+  outline: 3px solid var(--secon-blue);
+  outline-offset: 3px;
+}
+
+/* Keeping the table within the page on narrow screen so user
+can scroll by the side. */
+.scope31__table-scroll {
+  max-width: 100%;
+  margin: 1rem 0;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background-color: var(--surface);
+}
+
+.scope31 table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+}
+
+.scope31 th,
+.scope31 td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.scope31 th {
+  background-color: var(--secon-blue);
+  color: var(--surface);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* adding a thin line between table rows */
+.scope31 tbody tr + tr {
+  border-top: 1px solid var(--border);
+}
+
+/* highlight a row when the pointer is over it */
+.scope31 tbody tr:hover,
+.scope31 tbody tr:focus-within {
+  background-color: var(--secon-blue-light-background);
+}
+
+/* Amounts are in the fith column. This alighs them to the right */
+.scope31 th:nth-child(5),
+.scope31 td:nth-child(5) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Panel that contains the form */
+.scope31 > section {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  background-color: var(--surface);
+}
+
+.scope31 form {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 36rem;
+}
+
+.scope31 form input,
+.scope31 form select,
+.scope31 form textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 0.5rem;
+}
+
+.scope31 textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.scope31 form button {
+  justify-self: start;
+}
+
+/* Messages: save confirmation and error message */
+.scope31 [role="status"],
+.scope31 [role="alert"] {
+  padding: 0.75rem 1rem;
+  border-left: 4px solid var(--secon-gold);
+  background-color: var(--secon-blue-light-background);
+  color: var(--text);
+}
+
+.scope31 [role="alert"] {
+  border-left-color: var(--scope31-danger);
+  background-color: var(--surface);
+  color: var(--scope31-danger);
+}
+
+/* for narrow screens */
+@media (max-width: 600px) {
+  .scope31,
+  .scope31 > section {
+    padding: 1rem;
+  }
+
+  .scope31 h1 {
+    font-size: 1.5rem;
+  }
+}
