@@ -22,6 +22,9 @@ builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
 builder.Services.AddScoped<
     IPurchasedServicesService,
     PurchasedServicesService>();
+builder.Services.AddScoped<
+    ISupplierCategoryAllocationService,
+    SupplierCategoryAllocationService>();
 
 builder.Services.AddControllers(options =>
 {
