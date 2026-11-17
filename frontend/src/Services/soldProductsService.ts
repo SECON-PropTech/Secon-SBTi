@@ -4,7 +4,8 @@ import type {
     SoldProducts,
     ProductGroup,
     ProductMaterials,
-    ProductPeriodEntry
+    ProductPeriodEntry,
+    UpdateProductPeriodEntry,
 } from "../types/soldProducts";
 
 // Fetch all product groups.
@@ -67,4 +68,27 @@ export async function getSoldProducts(): Promise<SoldProducts[]> {
     }
 
     return await response.json() as SoldProducts[];
+}
+
+// Updates an existing period entry in the backend.
+export async function updateProductPeriodEntry(
+    productId: string,
+    entryId: string,
+    data: UpdateProductPeriodEntry
+): Promise<void> {
+    const response = await fetch(
+        `/api/product-materials/${productId}/entries/${entryId}`,
+        {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Kunde inte uppdatera periodregistreringen");
+    }
 }

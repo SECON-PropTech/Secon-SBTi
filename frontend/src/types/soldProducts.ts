@@ -49,3 +49,11 @@ export type SoldProductsManagementView =
     | "products";
 
 export type ProductInclusion = Record<string, boolean>;
+
+// Data sent when updating a period entry.
+export type UpdateProductPeriodEntry = {
+    quantity: number;
+    date: string;
+    measurementQuality: "measured" | "estimated";
+    comment: string | null;
+};

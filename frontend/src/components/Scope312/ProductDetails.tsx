@@ -1,8 +1,9 @@
-import { Calculator, Recycle, TriangleAlert } from "lucide-react";
+import { Fragment, useState } from "react";
+import { Calculator, Recycle, TriangleAlert, Pencil } from "lucide-react";
+import EditPeriodEntry from "./EditPeriodEntry";
+import type { SoldProducts, ProductMaterial, ProductPeriodEntry, UpdateProductPeriodEntry} from "../../types/soldProducts";
 
-import type { SoldProducts, ProductMaterial, ProductPeriodEntry} from "../../types/soldProducts";
-
-//// Data sent from FoldOutRow
+// Data sent from FoldOutRow
 type Props = {
     product: SoldProducts;
     materials: ProductMaterial[];
@@ -17,10 +18,15 @@ const formatNumber = (value: number) =>
         maximumFractionDigits: 2,
     }).format(value);
 
-//// ProductDetails presents all the details for a specific product for the selected time period
+// ProductDetails presents all the details for a specific product for the selected time period
 function ProductDetails({ product, materials, entries, quantity, weightPerUnit, totalWeight }: Props) {
+    
     // Check if the product is missing material information.
     const missingMaterials = materials.length === 0;
+
+    // Tracks which period entry is currently being edited.
+    const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+    
     return (
         <div>
             {/* Basic information about the product */}
@@ -131,26 +137,55 @@ function ProductDetails({ product, materials, entries, quantity, weightPerUnit, 
                                 <th className="text-end">Antal</th>
                                 <th>Mätkvalitet</th>
                                 <th>Kommentar</th>
+                                <th></th> 
                             </tr>
                         </thead>
 
                         <tbody>
                             {entries.map((entry) => (
-                                <tr key={entry.id}>
-                                    <td>{entry.date}</td>
+                                <Fragment key={entry.id}>
+                                    <tr>
+                                        <td>{entry.date}</td>
 
-                                    <td className="text-end">
-                                        {formatNumber(entry.quantity)}
-                                    </td>
+                                        <td className="text-end">
+                                            {formatNumber(entry.quantity)}
+                                        </td>
 
-                                    <td>
-                                        {entry.measurementQuality === "measured"
-                                            ? "Uppmätt"
-                                            : "Uppskattad"}
-                                    </td>
+                                        <td>
+                                            {entry.measurementQuality === "measured"
+                                                ? "Uppmätt"
+                                                : "Uppskattad"}
+                                        </td>
 
-                                    <td>{entry.comment ?? "–"}</td>
-                                </tr>
+                                        <td>{entry.comment ?? "–"}</td>
+
+                                        <td className="text-end">
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-outline-secondary"
+                                                onClick={() => setEditingEntryId(entry.id)}
+                                            >
+                                                <Pencil size={14} className="me-1" />
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                    {editingEntryId === entry.id && (
+                                        <tr>
+                                            <td colSpan={5}>
+                                                <EditPeriodEntry
+                                                    entry={entry}
+                                                    onSave={async (data: UpdateProductPeriodEntry) => {
+                                                        // Saving is unavailable until the backend endpoint is ready.
+                                                        console.log("Updated period entry:", data);
+                                                    
+                                                    }}
+                                                    onCancel={() => setEditingEntryId(null)}
+                                                />
+                                            </td>
+                                        </tr>
+                                    )}
+                                </Fragment>
                             ))}
                         </tbody>
                     </table>

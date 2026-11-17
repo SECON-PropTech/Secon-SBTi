@@ -200,6 +200,17 @@
     top: calc(100% + 8px);
 }
 
+.btn.btn-sm.btn-outline-secondary {
+    color: rgb(65, 69, 74);
+    border-color: white;
+}
+
+.btn.btn-sm.btn-outline-secondary:hover {
+    color: white;
+    border-color: white;
+}
+
+
 /* Anpassning för mindre skärmar */
 @media (max-width: 768px) {
     .energy-page .energy-details-grid {
