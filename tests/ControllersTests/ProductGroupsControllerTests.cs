@@ -2,7 +2,7 @@ using FluentAssertions;
 using SeconSbtiBackend.Controllers;
 using SeconSbtiBackend.Models;
 
-namespace api_tests;
+namespace tests.ControllersTests;
 
 public class ProductGroupsControllerTests
 {

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using FluentAssertions;
 using SeconSbtiBackend.DTOs;
  
-namespace api_tests;
+namespace tests.DTOsTests;
  
 public class AuthDtoValidationTests
 {

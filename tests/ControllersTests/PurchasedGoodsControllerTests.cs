@@ -19,7 +19,7 @@ using SeconSbtiBackend.Models;
 using SeconSbtiBackend.Services;
 using Xunit;
 
-namespace api_tests;
+namespace tests.ControllersTests;
 
 public class PurchasedGoodsControllerTests
 {
