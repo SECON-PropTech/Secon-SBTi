@@ -99,6 +99,20 @@ public class PurchasedGoodsControllerTests
     }
 
     [Theory]
+    [InlineData("GET", HttpStatusCode.OK)]
+    [InlineData("POST", HttpStatusCode.Created)]
+    [InlineData("PUT", HttpStatusCode.OK)]
+    public async Task Authenticated_users_can_test_without_scope_permissions(
+        string method, HttpStatusCode expectedStatus)
+    {
+        await using var api = await TestApi.Start([]);
+        var path = method == "GET" ? "/api/purchased-goods" : WritePath(method);
+        var body = method == "GET" ? null : Payload();
+        using var response = await api.Send(method, path, body);
+        Assert.Equal(expectedStatus, response.StatusCode);
+    }
+
+    [Theory(Skip = "Scope permission checks are paused during frontend testing. Re-enable with HasPermission.")]
     [InlineData("GET", null, HttpStatusCode.Forbidden)]
     [InlineData("POST", null, HttpStatusCode.Forbidden)]
     [InlineData("PUT", null, HttpStatusCode.Forbidden)]
