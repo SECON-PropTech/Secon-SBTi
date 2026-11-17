@@ -19,6 +19,10 @@ builder.Services.AddScoped<IPurchasedGoodsService, PurchasedGoodsService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+builder.Services.AddScoped<
+    IPurchasedServicesService,
+    PurchasedServicesService>();
+
 builder.Services.AddControllers(options =>
 {
     options.ModelMetadataDetailsProviders.Add(
@@ -92,3 +96,5 @@ app.MapControllers();
 app.Run();
 
 return 0;
+
+public partial class Program { }
