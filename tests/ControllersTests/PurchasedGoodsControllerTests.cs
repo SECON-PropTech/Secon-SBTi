@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
@@ -12,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SeconSbtiBackend.Authorization;
 using SeconSbtiBackend.Controllers;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.Interfaces;
@@ -84,13 +86,51 @@ public class PurchasedGoodsControllerTests
     }
 
     [Theory]
+    [InlineData("GET")]
     [InlineData("POST")]
     [InlineData("PUT")]
-    public async Task Writes_require_authentication(string method)
+    public async Task Requests_require_authentication(string method)
     {
         await using var api = await TestApi.Start();
-        using var response = await api.Send(method, WritePath(method), Payload(), authenticated: false);
+        var path = method == "GET" ? "/api/purchased-goods" : WritePath(method);
+        var body = method == "GET" ? null : Payload();
+        using var response = await api.Send(method, path, body, authenticated: false);
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Theory]
+    [InlineData("GET", HttpStatusCode.OK)]
+    [InlineData("POST", HttpStatusCode.Created)]
+    [InlineData("PUT", HttpStatusCode.OK)]
+    public async Task Authenticated_users_can_test_without_scope_permissions(
+        string method, HttpStatusCode expectedStatus)
+    {
+        await using var api = await TestApi.Start([]);
+        var path = method == "GET" ? "/api/purchased-goods" : WritePath(method);
+        var body = method == "GET" ? null : Payload();
+        using var response = await api.Send(method, path, body);
+        Assert.Equal(expectedStatus, response.StatusCode);
+    }
+
+    [Theory(Skip = "Scope permission checks are paused during frontend testing. Re-enable with HasPermission.")]
+    [InlineData("GET", null, HttpStatusCode.Forbidden)]
+    [InlineData("POST", null, HttpStatusCode.Forbidden)]
+    [InlineData("PUT", null, HttpStatusCode.Forbidden)]
+    [InlineData("GET", Permission.ReadScope31, HttpStatusCode.OK)]
+    [InlineData("POST", Permission.ReadScope31, HttpStatusCode.Forbidden)]
+    [InlineData("PUT", Permission.ReadScope31, HttpStatusCode.Forbidden)]
+    [InlineData("GET", Permission.WriteScope31, HttpStatusCode.Forbidden)]
+    [InlineData("POST", Permission.WriteScope31, HttpStatusCode.Created)]
+    [InlineData("PUT", Permission.WriteScope31, HttpStatusCode.OK)]
+    public async Task Requests_require_the_correct_scope_permission(
+        string method, Permission? permission, HttpStatusCode expectedStatus)
+    {
+        Permission[] permissions = permission.HasValue ? [permission.Value] : [];
+        await using var api = await TestApi.Start(permissions);
+        var path = method == "GET" ? "/api/purchased-goods" : WritePath(method);
+        var body = method == "GET" ? null : Payload();
+        using var response = await api.Send(method, path, body);
+        Assert.Equal(expectedStatus, response.StatusCode);
     }
 
     [Fact]
@@ -204,7 +244,7 @@ public class PurchasedGoodsControllerTests
 
     private sealed class TestApi(WebApplication app, HttpClient client) : IAsyncDisposable
     {
-        public static async Task<TestApi> Start()
+        public static async Task<TestApi> Start(Permission[]? permissions = null)
         {
             var builder = WebApplication.CreateBuilder();
             builder.WebHost.UseTestServer();
@@ -212,6 +252,8 @@ public class PurchasedGoodsControllerTests
             var databaseName = Guid.NewGuid().ToString();
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase(databaseName));
             builder.Services.AddScoped<IPurchasedGoodsService, PurchasedGoodsService>();
+            builder.Services.AddScoped<IPermissionService, PermissionService>();
+            builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
             builder.Services.AddControllers(options => options.ModelMetadataDetailsProviders.Add(new SystemTextJsonValidationMetadataProvider()))
                 .AddApplicationPart(typeof(PurchasedGoodsController).Assembly);
             builder.Services.AddAuthentication("PurchasedGoodsTest")
@@ -225,7 +267,23 @@ public class PurchasedGoodsControllerTests
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                db.AppUsers.Add(new AppUser { Id = UserId, FirstName = "Test", LastName = "User", Email = "test@example.test", CreatedAt = DateTime.UtcNow });
+                var role = new Role { Id = Guid.NewGuid(), Name = "Test role" };
+                foreach (var permission in permissions ?? [Permission.ReadScope31, Permission.WriteScope31])
+                {
+                    role.RolePermissions.Add(new RolePermission
+                    {
+                        Permission = permission.ToString()
+                    });
+                }
+                db.AppUsers.Add(new AppUser
+                {
+                    Id = UserId,
+                    FirstName = "Test",
+                    LastName = "User",
+                    Email = "test@example.test",
+                    CreatedAt = DateTime.UtcNow,
+                    Roles = [role]
+                });
                 db.Suppliers.Add(new Supplier { Id = SupplierId, Name = "Test supplier" });
                 db.PurchasedGoods.Add(Good(GoodId, new DateOnly(2025, 6, 1)));
                 foreach (var date in new[] { new DateOnly(2024, 1, 31), new DateOnly(2024, 2, 1), new DateOnly(2024, 2, 29), new DateOnly(2024, 3, 1) })
