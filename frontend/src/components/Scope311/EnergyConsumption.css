@@ -303,12 +303,21 @@
   cursor: pointer;
   font-weight: 500;
   margin-left: 0;
+  color: var(--text);
 }
 
+.energy-page .energy-quality-switch .energy-pill-green {
+  background-color: var(--energy-green-light);
+  color: var(--energy-green);
+}
 
-.energy-page .energy-pill-off {
+.energy-page .energy-quality-switch .energy-pill-off {
   background-color: transparent;
   color: var(--text-muted);
+}
+
+.energy-page .energy-quality-switch .energy-pill-off:hover {
+  color: var(--text);
 }
 
 .energy-page .energy-pill-off:hover {
