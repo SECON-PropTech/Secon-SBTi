@@ -105,15 +105,15 @@ function ProductDetails({ product, draft, errors, focusField, onEdit, onChange, 
                             //two buttons to switch between, measured or estimated
                             <div className="energy-quality-switch">
                                 <button type="button"
-                                className={draft.measurementQuality === "measured"
-                                ? "energy-pill energy-pill-green" : "energy-pill energy-pill-off"}
+                                className={draft.measurementQuality === "measured" ?
+                                 "energy-pill energy-pill-green" : "energy-pill energy-pill-off"}
                                 onClick={() => onChange({ measurementQuality: "measured"})}>
                                     Uppmätt 
                                 </button>
 
                                 <button type="button"
-                                className={draft.measurementQuality === "estimated"
-                                 ? "energy-pill" : "energy-pill energy-pill-off"}
+                                className={draft.measurementQuality === "estimated" ?
+                                 "energy-pill" : "energy-pill energy-pill-off"}
                                 onClick={() => onChange({ measurementQuality: "estimated" })}>
                                   Uppskattad
                                 </button>
