@@ -5,7 +5,7 @@ using SeconSbtiBackend.Data;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Models;
 
-namespace api_tests;
+namespace tests.ControllersTests;
 
 public class ProductsControllerTests
 {
