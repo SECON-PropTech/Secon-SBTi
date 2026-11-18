@@ -1,15 +1,5 @@
-// Communicates with ProductsController and ProductGroupsController in backend API
-import type { ProductGroup, UpdateProductRequest } from "../types/product";
-
-//Gets the product groups used for the dropdown when a row is edited
-export async function getProductGroups(): Promise<ProductGroup[]> {
-    const response = await fetch("/api/product-groups");
-
-    if (!response.ok) {
-        throw new Error("could not fetch product groups: " + response.status);
-    }
-    return await response.json();
-}
+// Communicates with ProductsController in backend API
+import type { UpdateProductRequest } from "../types/product"
 
 // Saves one product. Backend replaces all five fields, so all of them are always sent.
 export async function updateProduct(
@@ -18,6 +8,7 @@ export async function updateProduct(
 Promise<void> {
     const response = await fetch("/api/products/" + productId, {
         method: "PUT",
+        credentials: "include",
         headers: { "Content-Type": "application/json"},
         body: JSON.stringify(body),
     });
@@ -28,9 +19,15 @@ Promise<void> {
 
     //400 - the backend found something wrong. It sends one list of messages per field.
     if (response.status === 400) {
-        const problem = await response.json();
-        throw new Error(firstErrorMessage(problem));
-    }
+        let message = "Kunde inte spara. Kontrollera värdena.";
+
+        try {
+            message = firstErrorMessage(await response.json());
+        } catch {
+            //the answer wasnt json, so we keep the general message
+        }
+        throw new Error(message);
+    }   
 
     if (response.status === 404) {
         throw new Error("Produkten finns inte längre. Ladda om sidan.")

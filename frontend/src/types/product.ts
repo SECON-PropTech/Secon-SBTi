@@ -1,12 +1,5 @@
 import type { MeasurementQuality } from "./energyConsumption";
 
-// Product group from GET /api/product-groups.
-export type ProductGroup = {
-    id: string;
-    name: string;
-    description: string | null;
-};
-
 // the body for PUT /api/products/{id}
 // The backend replaces all five fields, so we always send all of them.
 export type UpdateProductRequest = {

@@ -4,7 +4,8 @@ import ProductDetails from "./ProductDetails";
 import AddButton from "./AddButton";
 import Tooltip from "./Tooltip";
 import { ChevronRight, Info, Pencil, TriangleAlert, Check, X } from "lucide-react";
-import type { DraftErrors, EditField, ProductDraft, ProductGroup} from "../../types/product";
+import type { DraftErrors, EditField, ProductDraft} from "../../types/product";
+import type { ProductGroup } from "../../types/soldProducts";
 import { calculateActivityKwh } from "../../utils/calculateActivityKwh";
 import { firstMissingField, toNumber } from "../../utils/productDraft";
 

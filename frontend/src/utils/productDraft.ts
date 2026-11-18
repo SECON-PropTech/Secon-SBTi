@@ -10,7 +10,7 @@ export function toNumber(text: string): number | null {
         return null;
     }
     const value = Number(trimmed);
-    return Number.isNaN(value) ? null:value;
+    return Number.isFinite(value) ? value:null;
 
 }
 
@@ -18,6 +18,10 @@ export function toNumber(text: string): number | null {
 function toText(value: number | null): string {
     return value === null ? "" : String(value);
 }
+
+//The highest values the backend accepts
+const maxKwhPerYear = 1_000_000_000;
+const maxLifetimeYears = 1_000;
 
 //Builds the first draft from the product the user clicked on
 export function createDraft(product: EnergyProductRow): ProductDraft {
@@ -53,13 +57,13 @@ export function findDraftErrors(draft: ProductDraft): DraftErrors {
     const errors: DraftErrors = {};
 
     const kwh = toNumber(draft.kwhPerYear);
-    if (draft.kwhPerYear.trim() !== "" && (kwh === null || kwh < 0)) {
-        errors.kwhPerYear = "Ange 0 eller mer.";
+    if (draft.kwhPerYear.trim() !== "" && (kwh === null || kwh < 0 || kwh > maxKwhPerYear)) {
+        errors.kwhPerYear = "Ange mellan 0 och 1 000 000 000.";
     }
 
     const lifetime = toNumber(draft.lifetimeYears);
-    if (draft.lifetimeYears.trim() !== "" && (lifetime === null || lifetime <= 0)) {
-        errors.lifetimeYears = "Ange mer än 0.";
+    if (draft.lifetimeYears.trim() !== "" && (lifetime === null || lifetime <= 0 || lifetime > maxLifetimeYears)) {
+        errors.lifetimeYears = "Ange mer än 0 och högst 1 000.";
     }
     return errors;
 }

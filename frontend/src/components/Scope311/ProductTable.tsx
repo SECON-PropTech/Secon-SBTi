@@ -4,11 +4,12 @@ import { formatNumber } from "../../utils/format";
 import ProductRow from "./ProductRow"
 import Tooltip from "./Tooltip";
 import { CircleCheck, Info, TriangleAlert } from "lucide-react";
-import type { EditField, ProductDraft, ProductGroup } from "../../types/product";
+import type { EditField, ProductDraft } from "../../types/product";
+import type { ProductGroup } from "../../types/soldProducts";
 import {createDraft, draftToRequest, findDraftErrors, isDraftChanged } from "../../utils/productDraft"
 import ConfirmSaveDialog from "./ConfirmSaveDialog";
-import { getProductGroups, updateProduct } from "../../Services/productService";
-
+import { updateProduct } from "../../Services/productService";
+import { getProductGroups } from "../../Services/soldProductsService";
 //Sold products table
 //Click a row to show its details below it
 // The chips on top can show only the products that need more data.
@@ -40,11 +41,21 @@ function ProductTable({ products, total, onSaved }: Props) {
     const [flashId, setFlashId] =useState<string | null>(null);
     const [savedName, setSavedName] = useState<string | null>(null);
     const [saveError, setSaveError] = useState<string | null>(null);
+    const [groupsError, setGroupsError] = useState<string | null >(null);
     
+    // true while a save is on its way to the backend
+    const[isSaving, setIsSaving] = useState(false)
+
     //runs once when the table is shown
     useEffect(() => {
-      getProductGroups() .then((data) => setGroups(data))
-      .catch(() => setGroups([]));
+      getProductGroups().then((data) => {
+        setGroups(data);
+        setGroupsError(null);
+      })
+      .catch(() => {
+        setGroups([]);
+        setGroupsError("Kunde inte hämta produktgrupper. Ladda om sidan.");
+      });
     }, []);
     
     // Products that lack something and products that are part of the total
@@ -62,7 +73,7 @@ function ProductTable({ products, total, onSaved }: Props) {
     // the product being edited and wheter Saving changes should be possible
     const editingProduct = products.find((product) => product.productId === editingId) ?? null;
     const errors = draft ? findDraftErrors(draft) : {};
-    const canSave = draft !== null && editingProduct !== null &&
+    const canSave = !isSaving && draft !== null && editingProduct !== null &&
     isDraftChanged(draft, editingProduct) && 
     Object.keys(errors).length === 0;
 
@@ -124,6 +135,7 @@ function ProductTable({ products, total, onSaved }: Props) {
         setPending({ productId: product.productId, field });
         return
       }
+      closeEdit();
       startEdit(product, field);
     }
   
@@ -140,7 +152,9 @@ function ProductTable({ products, total, onSaved }: Props) {
         return;
       }
       const savedProduct = editingProduct;
-  
+
+      setIsSaving(true);
+
       updateProduct(savedProduct.productId, draftToRequest(draft))
         .then(() => {
           setFlashId(savedProduct.productId);
@@ -158,7 +172,8 @@ function ProductTable({ products, total, onSaved }: Props) {
           window.setTimeout(() => setFlashId(null), 1200);
           window.setTimeout(() => setSavedName(null), 3000);
         })
-        .catch((error: Error) => setSaveError(error.message));
+        .catch((error: Error) => setSaveError(error.message))
+        .finally(() => setIsSaving(false));
     }
 
     return (
@@ -198,6 +213,12 @@ function ProductTable({ products, total, onSaved }: Props) {
             {allOpen ? "Fäll ihop alla" : "Fäll ut alla"}
           </button>
         </div>
+
+            {/*Shown when the product groups couldnt be fetched */}
+            {groupsError !== null && (
+              <div className="alert alert-warning py-2"> {groupsError}</div>
+            )}
+
             {/*shown when backend refused to save */}
            {saveError !== null && (
             <div className="alert alert-danger py-2"> {saveError}</div>
