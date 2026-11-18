@@ -25,8 +25,13 @@ public class MaterialLineRequest
 
     /// <summary>
     /// Delivery date. Decides which reporting year the line counts in.
+    /// The year must be 2000–2100, the same range GET /api/material-lines accepts.
     /// </summary>
     [Required(ErrorMessage = "Ange ett leveransdatum.")]
+    [Range(typeof(DateOnly), "2000-01-01", "2100-12-31",
+        ParseLimitsInInvariantCulture = true,
+        ConvertValueInInvariantCulture = true,
+        ErrorMessage = "Ange ett datum med ett år mellan 2000 och 2100.")]
     public DateOnly? Date { get; init; }
 
     /// <summary>
