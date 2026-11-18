@@ -86,9 +86,9 @@ public class MaterialLinesController(ApplicationDbContext dbContext) : Controlle
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, MaterialLineRequest request)
     {
-        // Only manual lines (no import batch) may be edited, imported lines must match Mobigo.
+        // Manual lines AND import batch may be edited.
         var materialLine = await dbContext.MobigoMaterialLines
-            .FirstOrDefaultAsync(line => line.Id == id && line.ImportBatchId == null);
+            .FirstOrDefaultAsync(line => line.Id == id);
 
         if (materialLine is null)
         {
