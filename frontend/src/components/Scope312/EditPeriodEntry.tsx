@@ -38,7 +38,14 @@ function EditPeriodEntry({ entry, onSave, onCancel }: Props) {
             setError("Ange ett datum med ett år mellan 2000 och 2100.");
             return;
         }
+        // Ask the user to confirm before saving changes.
+        const confirmed = window.confirm(
+            "Är du säker på att du vill spara ändringarna?"
+        );
 
+        if (!confirmed) {
+            return;
+        }
         setSaving(true);
         setError(null);
 
