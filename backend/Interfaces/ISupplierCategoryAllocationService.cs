@@ -5,6 +5,7 @@ namespace SeconSbtiBackend.Interfaces;
 public interface ISupplierCategoryAllocationService
 {
     Task<List<SupplierResponse>> GetSuppliersAsync(
+        Guid? purchaseCategoryId,
         CancellationToken cancellationToken);
 
     Task<List<PurchaseCategoryResponse>> GetCategoriesAsync(

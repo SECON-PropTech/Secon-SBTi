@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Interfaces;
+using SeconSbtiBackend.Validation;
 
 namespace SeconSbtiBackend.Controllers;
 
@@ -12,9 +13,21 @@ public class SupplierCategoryAllocationsController(
     ISupplierCategoryAllocationService service) : ControllerBase
 {
     [HttpGet("suppliers")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<List<SupplierResponse>>> GetSuppliers(
-        CancellationToken cancellationToken) =>
-        Ok(await service.GetSuppliersAsync(cancellationToken));
+        [FromQuery] Guid? purchaseCategoryId,
+        CancellationToken cancellationToken)
+    {
+        if (purchaseCategoryId == Guid.Empty)
+        {
+            return this.FieldValidationProblem(
+                "purchaseCategoryId",
+                "Välj en giltig kategori.");
+        }
+
+        return Ok(await service.GetSuppliersAsync(
+            purchaseCategoryId, cancellationToken));
+    }
 
     [HttpGet("categories")]
     public async Task<ActionResult<List<PurchaseCategoryResponse>>> GetCategories(

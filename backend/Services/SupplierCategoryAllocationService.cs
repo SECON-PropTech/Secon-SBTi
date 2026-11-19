@@ -10,13 +10,25 @@ public class SupplierCategoryAllocationService(ApplicationDbContext context)
     : ISupplierCategoryAllocationService
 {
     public Task<List<SupplierResponse>> GetSuppliersAsync(
-        CancellationToken cancellationToken) =>
-        context.Suppliers.AsNoTracking()
+      Guid? purchaseCategoryId,
+      CancellationToken cancellationToken)
+    {
+        var query = context.Suppliers.AsNoTracking();
+
+        if (purchaseCategoryId is Guid categoryId)
+        {
+            query = query.Where(supplier =>
+                supplier.SupplierCategoryAllocations.Any(allocation =>
+                    allocation.PurchaseCategoryId == categoryId));
+        }
+
+        return query
             .OrderBy(supplier => supplier.Name)
             .ThenBy(supplier => supplier.Id)
             .Select(supplier => new SupplierResponse(
                 supplier.Id, supplier.Name))
             .ToListAsync(cancellationToken);
+    }
 
     public Task<List<PurchaseCategoryResponse>> GetCategoriesAsync(
         CancellationToken cancellationToken) =>
