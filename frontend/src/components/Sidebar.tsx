@@ -15,6 +15,7 @@ const menuItems: MenuItem[] = [
     {id: "scope-3.1", number: "3.1", label: "Köpta varor och tjänster"},
     {id: "scope-3.11", number: "3.11", label: "Användning av sålda produkter"},
     {id: "scope-3.12", number: "3.12", label: "Slutbehandling av sålda produkter"},
+    {id: "imports", number: "IMPORT", label: "Importering"},
 ]
 
 //ActivePage = the page that is open
