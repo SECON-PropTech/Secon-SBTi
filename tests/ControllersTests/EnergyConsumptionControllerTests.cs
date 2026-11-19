@@ -3,7 +3,7 @@ using SeconSbtiBackend.Controllers;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.Models;
 
-namespace api_tests;
+namespace tests.ControllersTests;
 
 public class EnergyConsumptionControllerTests
 {

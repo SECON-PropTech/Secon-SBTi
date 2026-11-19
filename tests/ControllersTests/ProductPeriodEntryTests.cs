@@ -4,7 +4,7 @@ using SeconSbtiBackend.DTOs.Scope312;
 using SeconSbtiBackend.Models;
 using SeconSbtiBackend.Services;
 
-namespace api_tests;
+namespace tests.IntegrationTests;
 
 public class ProductPeriodEntryTests
 {
