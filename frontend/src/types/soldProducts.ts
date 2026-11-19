@@ -35,6 +35,7 @@ export type ProductPeriodEntry = {
     date: string;
     measurementQuality: "measured" | "estimated";
     comment: string | null;
+    isManual: boolean;
 };
 
 // Information about a product group.
