@@ -44,6 +44,13 @@ export type ProductGroup = {
     description: string | null;
 };
 
+// Available filters for the product table.
+export type ProductFilter =
+    | "all"
+    | "incomplete"
+    | "missingMaterials"
+    | "missingGroup";
+
 // Available views in the sold products management section.
 export type SoldProductsManagementView =
     | "products";

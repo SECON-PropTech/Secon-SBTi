@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CircleCheck, TriangleAlert, Info } from "lucide-react";
 
 import Tooltip from "../Scope311/Tooltip";
-import type { SoldProducts, ProductMaterials, ProductPeriodEntry } from "../../types/soldProducts";
+import type { SoldProducts, ProductMaterials, ProductPeriodEntry, ProductFilter } from "../../types/soldProducts";
 import { getProductPeriod } from "../../Services/soldProductsService";
 import FoldOutRow from "./FoldOutRow";
 
@@ -21,8 +21,8 @@ const formatNumber = (value: number) =>
 function Table({ products, productMaterials, year, selectedMonth }: Props) {
     // Folded out product-rows.
     const [openIds, setOpenIds] = useState<string[]>([]);
-    // products that have missing data.
-    const [onlyIncomplete, setOnlyIncomplete] = useState(false);
+// Tracks the selected product filter.
+    const [productFilter, setProductFilter] = useState<ProductFilter>("all");
     const [entries, setEntries] = useState<ProductPeriodEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -98,9 +98,14 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
     // Counts all the product with missing data and complete data.
     const incompleteCount = rows.filter((row) => row.incomplete).length;
     const countedCount = rows.filter((row) => row.materials.length > 0).length;
-    // Decides witch products that will be shown in the table.
-    const showIncomplete = onlyIncomplete && incompleteCount > 0;
-    const visibleRows = showIncomplete ? rows.filter((row) => row.incomplete) : rows;
+    // Filters witch products that will be shown in the table.
+    const visibleRows = rows.filter((row) => {switch (productFilter) {
+            case "incomplete": return row.incomplete;
+            case "missingMaterials": return row.materials.length === 0;
+            case "missingGroup": return row.product.groupId === null;
+            default: return true;
+        }
+    });
     // allOpen will be true when all the FoldOutRows are open.
     const allOpen = visibleRows.length > 0 &&
         visibleRows.every((row) => openIds.includes(row.product.id));
@@ -142,35 +147,65 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
                 <div>
                     <h3 className="fs-4 fw-bold mb-2">Sålda produkter</h3>
 
+                    {/* Filters for products with missing information. */}
                     <div className="d-flex flex-wrap align-items-center gap-2">
+
                         <button
                             type="button"
-                            className={showIncomplete ? "energy-chip" : "energy-chip energy-chip-active"}
-                            onClick={() => setOnlyIncomplete(false)}
+                            className={
+                                productFilter === "all"
+                                    ? "energy-chip energy-chip-active"
+                                    : "energy-chip"
+                            }
+                            onClick={() => setProductFilter("all")}
                         >
-                            Alla <span className="energy-chip-count">{rows.length}</span>
+                            Alla
+                            <span className="energy-chip-count">{rows.length}</span>
                         </button>
 
-                        {/* Alert only shows when a product is missing data*/}
-                        {incompleteCount > 0 && (
-                            <button
-                                type="button"
-                                className={showIncomplete
-                                        ? "energy-chip energy-chip-warning"
-                                        : "energy-chip"
-                                }
-                                onClick={() => setOnlyIncomplete(true)}
-                            >
-                                <TriangleAlert size={16} className="energy-warning-icon" />
-                                Behöver kompletteras
-                                <span className="energy-chip-count">{incompleteCount}</span>
-                            </button>
-                        )}
+                        <button
+                            type="button"
+                            className={
+                                productFilter === "incomplete"
+                                    ? "energy-chip energy-chip-warning"
+                                    : "energy-chip"
+                            }
+                            onClick={() => setProductFilter("incomplete")}
+                        >
+                            <TriangleAlert size={16} className="energy-warning-icon" />
+                            Behöver kompletteras
+                            <span className="energy-chip-count">{incompleteCount}</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            className={
+                                productFilter === "missingMaterials"
+                                    ? "energy-chip energy-chip-active"
+                                    : "energy-chip"
+                            }
+                            onClick={() => setProductFilter("missingMaterials")}
+                        >
+                            Saknar materialuppgifter
+                        </button>
+
+                        <button
+                            type="button"
+                            className={
+                                productFilter === "missingGroup"
+                                    ? "energy-chip energy-chip-active"
+                                    : "energy-chip"
+                            }
+                            onClick={() => setProductFilter("missingGroup")}
+                        >
+                            Saknar produktgrupp
+                        </button>
 
                         <span className="d-flex align-items-center gap-1 text-secondary">
-                            <CircleCheck size={16} className="text-success"/>
+                            <CircleCheck size={16} className="text-success" />
                             {countedCount} av {rows.length} med material och registrerat antal
                         </span>
+
                     </div>
                 </div>
 
@@ -184,55 +219,60 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
                 </button>
             </div>
 
-            <div className="table-responsive">
-                <table className="table align-middle mb-0">
-                    <thead className="energy-table-header">
-                        <tr>
-                            <th className="energy-chevron-cell"></th>
-                            <th>Produkt</th>
-                            <th>Produktgrupp</th>
-                            <th className="text-end">Antal</th>
-                            <th className="text-end">Vikt/st (kg)</th>
-                            <th className="text-end">
-                                Total vikt (kg){" "}
-                                <Tooltip text="Antal registrerade produkter × materialvikt per produkt">
-                                    <Info size={14} />
-                                </Tooltip>
-                            </th>
-                        </tr>
-                    </thead>
+            {visibleRows.length === 0 ? (
+                <p className="text-secondary">Inga produkter matchar det valda filtret.</p>
+            ) : (
+                <div className="table-responsive">
+                    <table className="table align-middle mb-0">
+                        <thead className="energy-table-header">
+                            <tr>
+                                <th className="energy-chevron-cell"></th>
+                                <th>Produkt</th>
+                                <th>Produktgrupp</th>
+                                <th className="text-end">Antal</th>
+                                <th className="text-end">Vikt/st (kg)</th>
+                                <th className="text-end">
+                                    Total vikt (kg){" "}
+                                    <Tooltip text="Antal registrerade produkter × materialvikt per produkt">
+                                        <Info size={14} />
+                                    </Tooltip>
+                                </th>
+                            </tr>
+                        </thead>
 
-                    {/* Button for fold out or in, for a specifik product */}
-                    <tbody>
-                        {visibleRows.map((row) => (
-                            <FoldOutRow
-                                key={row.product.id}
-                                product={row.product}
-                                materials={row.materials}
-                                entries={row.entries}
-                                quantity={row.quantity}
-                                weightPerUnit={row.weightPerUnit}
-                                totalWeight={row.totalWeight}
-                                isOpen={openIds.includes(row.product.id)}
-                                onToggle={() => toggleRow(row.product.id)}
-                            />
-                        ))}
-                    </tbody>
+                        {/* Button for fold out or in, for a specifik product */}
+                        <tbody>
+                            {visibleRows.map((row) => (
+                                <FoldOutRow
+                                    key={row.product.id}
+                                    product={row.product}
+                                    materials={row.materials}
+                                    entries={row.entries}
+                                    quantity={row.quantity}
+                                    weightPerUnit={row.weightPerUnit}
+                                    totalWeight={row.totalWeight}
+                                    isOpen={openIds.includes(row.product.id)}
+                                    onToggle={() => toggleRow(row.product.id)}
+                                />
+                            ))}
+                        </tbody>
 
-                    {/*Shows the total weight for all products in the selected period regardless of the incomplete-data filter.*/}
-                    <tfoot>
-                        <tr className="fw-bold">
-                            <td></td>
-                            <td colSpan={4}>Totalt</td>
-                            <td className="text-end">
-                                {formatNumber(totalWeight)}
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
+                        {/*Shows the total weight for all products in the selected period regardless of the incomplete-data filter.*/}
+                        <tfoot>
+                            <tr className="fw-bold">
+                                <td></td>
+                                <td colSpan={4}>Totalt</td>
+                                <td className="text-end">
+                                    {formatNumber(totalWeight)}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+    )}
             </div>
-        </div>
-    );
-}
+        );
+    }
+
 
 export default Table;
