@@ -17,6 +17,8 @@ function Scope311() {
   const [report, setReport] = useState<EnergyConsumptionResponse | null>(null);
   //An error message if the fetch fails. not an error if null
   const [error, setError] = useState<string | null>(null);
+  // Counts up every time a product is saved
+  const [reloadCount, setReloadCount] = useState(0);
 
   //runs when the page opens and again every time the year changes
   useEffect(() => {
@@ -28,7 +30,7 @@ function Scope311() {
       setReport(null);
       setError("Kunde inte hämta data. Kontrollera att backend körs och att databasen är igång");
     });
-  }, [year]);
+  }, [year, reloadCount]);
   
   //Throws away the old data when a new year is selected
   // the page shows "Hämtar data .." until the new data comes
@@ -57,7 +59,8 @@ function Scope311() {
   } else {
     content = (
       <section className="energy-box">
-        <ProductTable products={report.products} total={report.totalActivityKwh} />
+        <ProductTable products={report.products} total={report.totalActivityKwh}
+        onSaved={() => setReloadCount(reloadCount + 1)}/>
       </section>
     );
   }
