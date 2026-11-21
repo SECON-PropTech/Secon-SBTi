@@ -7,5 +7,6 @@ public sealed record ProductPeriodEntryResponse(
     decimal Quantity,
     DateOnly Date,
     string MeasurementQuality,
-    string? Comment
+    string? Comment,
+    bool IsManual
 );

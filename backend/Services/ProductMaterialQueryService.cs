@@ -128,7 +128,8 @@ public sealed class ProductMaterialQueryService(ApplicationDbContext dbContext)
                 entry.Quantity,
                 entry.Date,
                 entry.MeasurementQuality,
-                entry.Comment
+                entry.Comment,
+                entry.ImportBatchId == null
             ))
             .ToListAsync(cancellationToken);
 
