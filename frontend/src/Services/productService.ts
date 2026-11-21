@@ -6,12 +6,17 @@ export async function updateProduct(
     productId: string,
     body: UpdateProductRequest):
 Promise<void> {
-    const response = await fetch("/api/products/" + productId, {
-        method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json"},
-        body: JSON.stringify(body),
-    });
+    let response: Response;
+    try {
+        response = await fetch("/api/products/" + productId, {
+            method: "PUT",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+    } catch {
+        throw new Error("Kunde inte nå servern. Kontrollera anslutningen och försök igen.");
+    }
 
     if (response.ok) {
         return;
