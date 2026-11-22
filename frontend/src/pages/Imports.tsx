@@ -1,7 +1,8 @@
 import { useState } from "react";
+import ImportHistory from "../components/Imports/ImportHistory";
 import ImportVisma4010 from "../components/Imports/ImportVisma4010";
 
-type ImportView = "menu" | "visma-4010";
+type ImportView = "menu" | "visma-4010" | "history";
 
 const comingImports = [
   "Visma - köpta tjänster",
@@ -15,6 +16,10 @@ function Imports() {
 
   if (view === "visma-4010") {
     return <ImportVisma4010 onBack={() => setView("menu")} />;
+  }
+
+  if (view === "history") {
+    return <ImportHistory onBack={() => setView("menu")} />;
   }
 
   return (
@@ -36,11 +41,8 @@ function Imports() {
 
       <h2 className="fs-4 mt-4">Tidigare importer</h2>
       <div className="d-flex flex-column align-items-start gap-2">
-        <button type="button" className="btn btn-outline-secondary" disabled>
+        <button type="button" className="btn btn-primary" onClick={() => setView("history")}>
           Visa tidigare importer
-        </button>
-        <button type="button" className="btn btn-outline-secondary" disabled>
-          Ångra en import
         </button>
       </div>
     </div>
