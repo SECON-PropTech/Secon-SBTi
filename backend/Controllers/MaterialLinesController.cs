@@ -9,10 +9,14 @@ using SeconSbtiBackend.Validation;
 
 namespace SeconSbtiBackend.Controllers;
 
+
 /// <summary>
-/// Delivered quantities of sold products (mobigo_material_line) for scope 3.11.
+/// Delivered quantities of sold products (mobigo_material_line) for scopes 3.11 and 3.12.
 /// Lines created here are manual, so they have no import batch.
 /// </summary>
+
+
+
 [ApiController]
 [Route("api/material-lines")]
 public class MaterialLinesController(ApplicationDbContext dbContext) : ControllerBase
@@ -80,15 +84,15 @@ public class MaterialLinesController(ApplicationDbContext dbContext) : Controlle
     }
 
     /// <summary>
-    /// Replaces all fields of a manually registered line. Imported lines cannot be changed here.
-    /// 204 when saved, 404 if no manual line has that id, 400 if the request is invalid or the product does not exist.
+    /// Replaces editable fields of a manual or imported line.
+    /// 204 when saved, 404 if the line does not exist, 400 if the request is invalid or the product does not exist.
     /// </summary>
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, MaterialLineRequest request)
     {
-        // Only manual lines (no import batch) may be edited, imported lines must match Mobigo.
+        // Manual lines AND import batch may be edited.
         var materialLine = await dbContext.MobigoMaterialLines
-            .FirstOrDefaultAsync(line => line.Id == id && line.ImportBatchId == null);
+            .FirstOrDefaultAsync(line => line.Id == id);
 
         if (materialLine is null)
         {
@@ -112,15 +116,16 @@ public class MaterialLinesController(ApplicationDbContext dbContext) : Controlle
     }
 
     /// <summary>
-    /// Deletes a manually registered line. Imported lines cannot be deleted here.
-    /// 204 when deleted, 404 if no manual line has that id.
+    /// Deletes a manual or imported line.
+    /// 204 when deleted, 404 if the line does not exist.
     /// </summary>
+
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
         // Deletes straight in the database and returns how many rows were removed (0 or 1).
         var deletedCount = await dbContext.MobigoMaterialLines
-            .Where(line => line.Id == id && line.ImportBatchId == null)
+            .Where(line => line.Id == id)
             .ExecuteDeleteAsync();
 
         return deletedCount == 0 ? NotFound() : NoContent();
