@@ -1,8 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "./components/Login";
+import Login from "./components/Authentication/Login"
 import Home from "./components/Home";
-import ProtectedRoute from "./components/ProtectedRoute";
-import PublicRoute from "./components/PublicRoute";
+import ProtectedRoute from "./components/Authentication/ProtectedRoute";
+import PublicRoute from "./components/Authentication/PublicRoute";
 
 function App() {
   return (
