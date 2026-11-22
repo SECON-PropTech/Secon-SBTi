@@ -1,4 +1,4 @@
-import { Calculator, Recycle } from "lucide-react";
+import { Calculator, Recycle, TriangleAlert } from "lucide-react";
 
 import type { SoldProducts, ProductMaterial, ProductPeriodEntry} from "../../types/soldProducts";
 
@@ -19,6 +19,8 @@ const formatNumber = (value: number) =>
 
 //// ProductDetails presents all the details for a specific product for the selected time period
 function ProductDetails({ product, materials, entries, quantity, weightPerUnit, totalWeight }: Props) {
+    // Check if the product is missing material information.
+    const missingMaterials = materials.length === 0;
     return (
         <div>
             {/* Basic information about the product */}
@@ -30,12 +32,29 @@ function ProductDetails({ product, materials, entries, quantity, weightPerUnit, 
 
                 <div>
                     <dt>Materialvikt per produkt</dt>
-                    <dd>{formatNumber(weightPerUnit)} kg</dd>
+                    <dd>
+                        {missingMaterials ? (
+                            <span className="energy-missing-text">
+                                <TriangleAlert size={16} className="energy-warning-icon" />
+                                {" "}Saknar materialuppgifter
+                            </span>
+                        ) : (
+                            <>{formatNumber(weightPerUnit)} kg</>
+                        )}
+                    </dd>
                 </div>
 
                 <div>
                     <dt>Total materialvikt</dt>
-                    <dd>{formatNumber(totalWeight)} kg</dd>
+                    <dd>
+                        {missingMaterials ? (
+                            <span className="energy-missing-text">
+                                Ej beräknad
+                            </span>
+                        ) : (
+                            <>{formatNumber(totalWeight)} kg</>
+                        )}
+                    </dd>
                 </div>
 
                 <div>
@@ -137,16 +156,23 @@ function ProductDetails({ product, materials, entries, quantity, weightPerUnit, 
                     </table>
                 </div>
             )}
-            {/* Shows how the material-weight is calculated*/}
+            {/* Show the calculation only when material information exists. */}
             <div className="energy-calculation mt-3">
-                <Calculator size={16} />
-
-                <span>{formatNumber(quantity)} st</span>
-                <span> × </span>
-                <span>{formatNumber(weightPerUnit)} kg/st</span>
-                <span> = </span>
-
-                <strong>{formatNumber(totalWeight)} kg</strong>
+                {missingMaterials ? (
+                    <>
+                        <TriangleAlert size={16} className="energy-warning-icon" />
+                        <span>Kan inte beräkna materialvikt – materialuppgifter saknas.</span>
+                    </>
+                ) : (
+                    <>
+                        <Calculator size={16} />
+                        <span>{formatNumber(quantity)} st</span>
+                        <span> × </span>
+                        <span>{formatNumber(weightPerUnit)} kg/st</span>
+                        <span> = </span>
+                        <strong>{formatNumber(totalWeight)} kg</strong>
+                    </>
+                )}
             </div>
         </div>
     );

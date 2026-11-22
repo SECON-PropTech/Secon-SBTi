@@ -3,19 +3,22 @@ import { Plus } from "lucide-react";
 
 type Props = {
     text: string;
+    onClick: () => void;
     warning?: boolean;
 };
 
 //a dashed "+ Lägg till" button for a value that is missing
-//disabled until editing is built
-function AddButton({ text, warning = false}: Props) {
+function AddButton({ text, onClick, warning = false}: Props) {
     return (
         <button
             type="button"
             className={warning ? "energy-add-button energy-add-button-warning" : "energy-add-button"}
-            disabled>
+            onClick={(event) => {
+                event.stopPropagation();
+                onClick();
+            }}>
             <Plus size={14}/> {text}
-            </button>
+        </button>
     );
 }
 
