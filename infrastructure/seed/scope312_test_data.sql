@@ -1,9 +1,13 @@
 -- Testdata för Scope 3.12. Kör lokalt efter databasmigreringarna.
 -- Fasta ID:n och ON CONFLICT DO NOTHING gör att filen kan köras flera gånger.
---
 -- Förväntat resultat för GET /api/product-materials:
---   Duschhandtag (TEST-312-001): rostfritt stål 0,30 kg och ABS-plast 0,12 kg.
+--   Duschhandtag (TEST-312-001): saknar materialuppgifter.
 --   Filterhus (TEST-312-002): ABS-plast 0,45 kg.
+--
+-- Testdata för filtrering:
+--   Duschhandtag saknar materialuppgifter.
+--   Filterhus har material men saknar produktgrupp (om group_id är NULL).
+--   Båda produkterna har periodposter i mars 2025.
 --
 -- Duschhandtagets ID: e3120000-0000-0000-0000-000000000021
 -- Förväntat resultat för GET /api/product-materials/{productId}/entries:
@@ -52,6 +56,26 @@ VALUES
      10, '2025-04-01', 'measured', NULL),
     ('e3120000-0000-0000-0000-000000000044', 'e3120000-0000-0000-0000-000000000021',
      30, '2026-03-10', 'estimated', 'Uppskattat antal för 2026')
+ON CONFLICT DO NOTHING;
+
+-- THIS IS FOR TESTING
+
+-- Remove all materials from Duschhandtag. 
+DELETE FROM sold_product_material
+WHERE product_id = 'e3120000-0000-0000-0000-000000000021';
+
+-- Add a period entry so Filterhus appears in the table.
+INSERT INTO mobigo_material_line
+    (id, product_id, quantity, date, measurement_quality, comment)
+VALUES
+    (
+        'e3120000-0000-0000-0000-000000000045',
+        'e3120000-0000-0000-0000-000000000022',
+        15,
+        '2025-03-15',
+        'measured',
+        'Testdata för produktfiltrering'
+    )
 ON CONFLICT DO NOTHING;
 
 COMMIT;
