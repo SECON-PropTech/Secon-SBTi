@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Scalar.AspNetCore;
 using SeconSbtiBackend.Authorization;
 using SeconSbtiBackend.Data;
+using SeconSbtiBackend.Importing.Visma4010;
 using SeconSbtiBackend.Interfaces;
 using SeconSbtiBackend.Services;
 using SeconSbtiBackend.Models;
@@ -19,6 +21,10 @@ builder.Services.AddScoped<IPurchasedGoodsService, PurchasedGoodsService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+builder.Services.AddScoped<
+    IPurchasedServicesService,
+    PurchasedServicesService>();
+
 builder.Services.AddControllers(options =>
 {
     options.ModelMetadataDetailsProviders.Add(
@@ -33,6 +39,9 @@ builder.Services.AddOpenApi();
 
 // Gör tjänsten tillgänglig för dependency injection.
 builder.Services.AddScoped<ProductMaterialQueryService>();
+
+builder.Services.AddScoped<IVisma4010ImportService, Visma4010ImportService>();
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -92,3 +101,5 @@ app.MapControllers();
 app.Run();
 
 return 0;
+
+public partial class Program { }
