@@ -4,35 +4,25 @@ using SeconSbtiBackend.Controllers;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Models;
+using tests.IntegrationTests.PostgresTests.Infrastructure;
 
 namespace tests.ControllersTests;
 
-public class ProductPeriodEntryUpdateTests
+/// <summary>
+/// Testar uppdatering och radering av manuella och importerade registreringar.
+/// Importkopplingen ska bevaras vid uppdatering.
+/// Upprepad radering ska ge 404.
+/// </summary>
+[Collection("db")]
+public class ProductPeriodEntryUpdateTests(PostgresFixture fixture)
+    : DbTestBase(fixture)
 {
-    private const string ConnectionVariable = "SECON_TEST_DB_CONNECTION";
-
-    public sealed class PostgreSqlTheoryAttribute : TheoryAttribute
-    {
-        public PostgreSqlTheoryAttribute()
-        {
-            if (string.IsNullOrWhiteSpace(
-                Environment.GetEnvironmentVariable(ConnectionVariable)))
-            {
-                Skip = $"Ange {ConnectionVariable} för att köra PostgreSQL-testet.";
-            }
-        }
-    }
-
-    [PostgreSqlTheory]
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task Update_saves_changes_and_preserves_origin(bool imported)
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseNpgsql(Environment.GetEnvironmentVariable(ConnectionVariable)!)
-            .Options;
-
-        await using var dbContext = new ApplicationDbContext(options);
+        await using var dbContext = CreateContext();
 
         // Alla testrader rullas tillbaka när transaktionen avslutas.
         await using var transaction =
@@ -75,21 +65,18 @@ public class ProductPeriodEntryUpdateTests
             4);
 
         var response = Assert.Single(entries);
+
         Assert.Equal(entry.Id, response.Id);
         Assert.Equal(!imported, response.IsManual);
     }
 
-    [PostgreSqlTheory]
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task Delete_removes_entry_and_returns_not_found_on_retry(
         bool imported)
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseNpgsql(Environment.GetEnvironmentVariable(ConnectionVariable)!)
-            .Options;
-
-        await using var dbContext = new ApplicationDbContext(options);
+        await using var dbContext = CreateContext();
 
         // Alla testrader rullas tillbaka när transaktionen avslutas.
         await using var transaction =
