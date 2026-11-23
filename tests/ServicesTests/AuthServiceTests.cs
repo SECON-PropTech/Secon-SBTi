@@ -5,6 +5,7 @@ using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Models;
 using SeconSbtiBackend.Services;
 using BCryptNet = BCrypt.Net.BCrypt;
+using SeconSbtiBackend.Authorization;
 
 namespace tests.ServicesTests;
 
@@ -19,7 +20,7 @@ public class AuthServiceTests
     private static ApplicationDbContext Db() => new ApplicationDbContext(NewOptions());
     private static AuthService CreateSut(ApplicationDbContext db) => new(db);
 
-
+    /**************Seeding Users: With and without Roles**************/
     private static async Task SeedUserAsync(
         ApplicationDbContext db,
         string email = "anna@secon.se",
@@ -35,6 +36,33 @@ public class AuthServiceTests
         });
 
        await db.SaveChangesAsync();
+    }
+
+    private static async Task<Guid> SeedUserWithRolesAsync(
+    ApplicationDbContext db,
+    params (string RoleName, string[] Permissions)[] roles)
+    {
+        var user = new AppUser
+        {
+            Id = Guid.NewGuid(),
+            FirstName = "Anna",
+            LastName = "Testsson",
+            Email = "anna@secon.se",
+            PasswordHash = BCryptNet.HashPassword(Password)
+        };
+
+        foreach (var (roleName, permissions) in roles)
+        {
+            var role = new Role { Id = Guid.NewGuid(), Name = roleName };
+            foreach (var permission in permissions)
+                role.RolePermissions.Add(new RolePermission { Permission = permission });
+            user.Roles.Add(role);
+        }
+
+        db.AppUsers.Add(user);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        return user.Id;
     }
 
     private static RegisterRequestDTO RegisterRequest(string email = "anna@secon.se") => new ()
@@ -61,8 +89,7 @@ public class AuthServiceTests
             => throw new DbUpdateException("Error silumation");
     }
 
-    /****************RegisterAsync*******************/
-
+    /****************RegisterAsync********************/
     [Fact]
     public async Task RegisterAsync_ReturnsUserAndPersistsIt()
     {
@@ -165,6 +192,24 @@ public class AuthServiceTests
         result.Should().BeNull();
     }
 
+    [Fact]
+    public async Task ValidateCredentialsAsync_UserWithoutPasswordHash_ReturnsNull()
+    {
+        await using var db = Db();
+        await SeedUserAsync(db, password: null);
+        var result = await CreateSut(db).ValidateCredentialsAsync("anna@secon.se", Password);
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task LoginAsync_NotActivatedAccount_ReturnsNull()
+    {
+        await using var db = Db();
+        await SeedUserAsync(db, password: null);
+        var result = await CreateSut(db).LoginAsync(LoginRequest());
+        result.Should().BeNull();
+    }
+
     /******************LoginAsync*********************/
     [Fact]
     public async Task LoginAsync_ValidRequest_ReturnsUser()
@@ -192,5 +237,97 @@ public class AuthServiceTests
         await sut.RegisterAsync(RegisterRequest());
         var result = await sut.LoginAsync(LoginRequest(email: "anna@secon.se"));
         result.Should().NotBeNull();
+    }
+
+
+
+    /*****************GetCurrentUserAsync*******************/
+    [Fact]
+    public async Task GetCurrentUserAsync_UnknownUser_ReturnsNull()
+    {
+        await using var db = Db();
+        await SeedUserWithRolesAsync(db);
+        var result = await CreateSut(db).GetCurrentUserAsync(Guid.NewGuid());
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetCurrentUserAsync_ReturnsNameAndEmail()
+    {
+        await using var db = Db();
+        var userId = await SeedUserWithRolesAsync(db);
+        var result = await CreateSut(db).GetCurrentUserAsync(userId);
+
+        result.Should().NotBeNull();
+        result!.Id.Should().Be(userId);
+        result.Name.Should().Be("Anna Testsson");
+        result.Email.Should().Be("anna@secon.se");
+    }
+
+    [Fact]
+    public async Task GetCurrentUserAsync_UserWithoutRoles_ReturnsEmptyRolesAndPermissions()
+    {
+        await using var db = Db();
+        var userId = await SeedUserWithRolesAsync(db);
+        var result = await CreateSut(db).GetCurrentUserAsync(userId);
+        result!.Roles.Should().BeEmpty();
+        result.Permissions.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetCurrentUserAsync_RolesAreSortedByName()
+    {
+        await using var db = Db();
+        var userId = await SeedUserWithRolesAsync(db,
+            ("Arbetsledare", []),
+            ("Admin", []),
+            ("Arbetare", []));
+
+        var result = await CreateSut(db).GetCurrentUserAsync(userId);
+        result!.Roles.Should().Equal("Admin", "Arbetare", "Arbetsledare");
+    }
+
+    [Fact]
+    public async Task GetCurrentUserAsync_CollectsPermissionsFromAllRoles()
+    {
+        await using var db = Db();
+        var userId = await SeedUserWithRolesAsync(db,
+            ("Importör", [nameof(Permission.ImportMobigo), nameof(Permission.ImportVisma4010)]),
+            ("Admin", [nameof(Permission.ManageRoles)]));
+
+        var result = await CreateSut(db).GetCurrentUserAsync(userId);
+        result!.Permissions.Should().BeEquivalentTo(
+            [Permission.ImportMobigo, Permission.ImportVisma4010, Permission.ManageRoles]);
+    }
+
+    [Fact]
+    public async Task GetCurrentUserAsync_SamePermissionInSeveralRoles_IsReturnedOnce()
+    {
+        await using var db = Db();
+        var userId = await SeedUserWithRolesAsync(db,
+            ("Admin", [nameof(Permission.ManageRoles)]),
+            ("Chef", [nameof(Permission.ManageRoles)]));
+
+        var result = await CreateSut(db).GetCurrentUserAsync(userId);
+        result!.Permissions.Should().ContainSingle().Which.Should().Be(Permission.ManageRoles);
+    }
+
+    [Fact]
+    public async Task GetCurrentUserAsync_NumericNameOfDefinedValue_IsSkipped()
+    {
+        // "1" = Permission.ImportMobigo through TryParse.
+        await using var db = Db();
+        var userId = await SeedUserWithRolesAsync(db, ("Konstig roll", ["1"]));
+        var result = await CreateSut(db).GetCurrentUserAsync(userId);
+        result!.Permissions.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetCurrentUserAsync_PermissionNameWithWrongCasing_IsSkipped()
+    {
+        await using var db = Db();
+        var userId = await SeedUserWithRolesAsync(db, ("Gammal roll", ["importmobigo"]));
+        var result = await CreateSut(db).GetCurrentUserAsync(userId);
+        result!.Permissions.Should().BeEmpty();
     }
 }
