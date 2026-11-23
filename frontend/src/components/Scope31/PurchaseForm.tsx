@@ -28,6 +28,18 @@ const emptyForm: PurchaseFormData = {
     comment: "",
 }
 
+const fieldLabels: Record<string, string> = {
+  supplierId: "Leverantörens ID (UUID)",
+  transactionDate: "Datum",
+  value: "Belopp (SEK)",
+  unit: "Enhet",
+  measurementQuality: "Datakvalitet",
+  goodsName: "Vara",
+  accountNo: "Konto",
+  comment: "Kommentar",
+  specification: "Specifikation"
+};
+
 /**Form used for both purchased goods and services */
 export default function PurchaseForm({
     type,
@@ -178,7 +190,7 @@ return (
 
         {Object.entries(fieldErrors).map(([field, messages]) => (
           <p role="alert" key={field}>
-            {field}: {messages.join(" ")}
+            {fieldLabels[field] ?? "Uppgift"}: {messages.join(" ")}
           </p>
         ))}
 
