@@ -1,4 +1,7 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import type { PageId } from "../types/navigation";
+import { logout } from "../Services/authService";
 import seconLogo from "../assets/secon_logo.svg";
 import "./Sidebar.css";
 
@@ -26,6 +29,29 @@ type Props = {
 };
 
 function Sidebar({activePage, onSelect}: Props){
+    const navigate = useNavigate();
+
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [logoutError, setLogoutError] = useState("");
+
+    // Logs out the user and redirects to the login page
+    async function handleLogout() {
+        setIsLoggingOut(true);
+        setLogoutError("");
+
+        try {
+            await logout();
+            navigate("/login", {replace: true, state: { loggedOut: true }});
+        } catch (error) {
+            setLogoutError(
+                error instanceof Error
+                    ? error.message
+                    : "Något gick fel vid utloggningen."
+            );
+        } finally {
+            setIsLoggingOut(false);
+        }
+    }
     return (
         <aside className="sidebar">
             <img src={seconLogo} alt="SECON" className="sidebar-logo"/>
@@ -46,10 +72,28 @@ function Sidebar({activePage, onSelect}: Props){
                 </button>
             ))}
             </nav>
+            <div className="sidebar-bottom">
+                {logoutError && (
+                    <p className="sidebar-error" role="alert">
+                        {logoutError}
+                    </p>
+                )}
 
-            <p className="sidebar-footer">SBTi-rapportering</p>
+                <button
+                    type="button"
+                    className="sidebar-logout"
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                >
+                    <span aria-hidden="true">↪</span>
+                    {isLoggingOut ? "Loggar ut..." : "Logga ut"}
+                </button>
+
+                <p className="sidebar-footer">SBTi-rapportering</p>
+            </div>
         </aside>
     )
 }
+
 
 export default Sidebar;
