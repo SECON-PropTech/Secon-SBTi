@@ -1,6 +1,6 @@
 import { useState} from "react";
 import type {FormEvent} from "react";
-import type {PurchaseFormData, PurchaseType } from "./Types";
+import type {PurchaseFormData, PurchaseType } from "./types";
 
 /**Information that the form gets from Scope31Overview --- */
 type Scope31FormProps = {
