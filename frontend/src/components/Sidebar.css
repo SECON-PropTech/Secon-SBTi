@@ -132,3 +132,43 @@
     color: #b42318;
     font-size: 0.8rem;
 }
+
+/* Darkens the background behind the confirmation modal */
+.logout-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+}
+
+/* Logout confirmation modal */
+.logout-modal {
+    width: 400px;
+    max-width: 90%;
+    padding: 24px;
+    background-color: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.logout-modal h5 {
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.logout-modal p {
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+}
+
+/* Positions the action buttons */
+.logout-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
