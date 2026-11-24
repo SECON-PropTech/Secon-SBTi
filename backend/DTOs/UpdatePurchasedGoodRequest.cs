@@ -12,7 +12,7 @@ public class UpdatePurchasedGoodRequest
     [Required(ErrorMessage = "Ange ett datum för inköpet.")]
     public DateOnly? TransactionDate { get; init; }
 
-    [Required(ErrorMessage = "Ange ett belopp.")]
+    [Required(ErrorMessage = "Ange ett belopp eller ett antal.")]
     public decimal? Value { get; init; }
 
     [Required(ErrorMessage = "Ange en enhet.")]
