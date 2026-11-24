@@ -391,6 +391,12 @@
 }
 
 
+.energy-page .energy-no-comment {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+
 /*        SMALL SCREENS */
 @media (max-width: 768px) {
   .energy-page .energy-details-grid {

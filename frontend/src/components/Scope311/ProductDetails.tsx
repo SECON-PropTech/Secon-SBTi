@@ -139,7 +139,7 @@ function ProductDetails({ product, draft, errors, focusField, onEdit, onChange, 
                              autoFocus={focusField === "comment"}
                              onChange={(event) => onChange ({ comment: event.target.value })}/>
                           ) : ( 
-                            product.comment ?? "Ingen kommentar"
+                            product.comment ?? <span className="energy-no-comment">Ingen kommentar</span>
                           )}
                     </dd>
                 </div>
