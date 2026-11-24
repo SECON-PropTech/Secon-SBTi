@@ -67,7 +67,7 @@ function Scope311() {
   }
 
   return (
-    <div className="energy-page">
+    <div className="energy-page scope311">
       <div className="d-flex justify-content-between align-items-start mb-4">
         <div>
           <p className="text-uppercase small text-secondary mb-1">Produktrapport</p>

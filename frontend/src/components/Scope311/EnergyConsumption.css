@@ -450,6 +450,15 @@
   color: var(--text-muted);
 }
 
+/* 3.12 styles the same selector through the shared .energy-page class.
+   These win by one extra class, and only on our page. */
+.energy-page.scope311 .energy-details-grid dd {
+  font-weight: 400;
+}
+
+.energy-page.scope311 .energy-details-grid dd.energy-details-number {
+  font-weight: 600;
+}
 
 /*        SMALL SCREENS */
 @media (max-width: 768px) {

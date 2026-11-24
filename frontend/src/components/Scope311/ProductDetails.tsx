@@ -89,7 +89,7 @@ function ProductDetails({ product, draft, errors, focusField, year, onEdit, onCh
                             <Zap size={14}/>
                         </Tooltip>
                     </dt>
-                    <dd>{kwhValue}</dd>
+                    <dd className="energy-details-number">{kwhValue}</dd>
                 </div>
                 <div>
                     <dt>
@@ -98,7 +98,7 @@ function ProductDetails({ product, draft, errors, focusField, year, onEdit, onCh
                             <Hourglass size={14}/>
                         </Tooltip>
                     </dt>
-                    <dd>{lifetimeValue}</dd>
+                    <dd className="energy-details-number">{lifetimeValue}</dd>
                 </div>
                 <div>
                     <dt>Mätkvalitet</dt>
