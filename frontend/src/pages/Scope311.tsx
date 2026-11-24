@@ -60,6 +60,7 @@ function Scope311() {
     content = (
       <section className="energy-box">
         <ProductTable products={report.products} total={report.totalActivityKwh}
+        year={year}
         onSaved={() => setReloadCount(reloadCount + 1)}/>
       </section>
     );
