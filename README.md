@@ -20,6 +20,7 @@ Database:
 
 The project has three parts that run on your machine: a PostgreSQL database, a backend (.NET) and a frontend (React). Do the steps below in order.
 
+> [!TIP]
 > If something goes wrong, give an AI the error message together with this README and ask for help. The README tells it how the project is set up which makes it much more likely to find the problem.
 
 ### You need
