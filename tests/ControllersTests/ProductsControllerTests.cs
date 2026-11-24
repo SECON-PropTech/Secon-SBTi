@@ -99,4 +99,95 @@ public class ProductsControllerTests
         dbContext.SoldProducts.Add(product);
         return product;
     }
+
+    /***********************Get*********************/
+    [Fact]
+    public async Task GetAll_returns_products_sorted_by_name()
+    {
+        using var dbContext = TestDatabase.Create();
+        dbContext.SoldProducts.AddRange(
+            new SoldProduct
+            {
+                Id = Guid.NewGuid(),
+                Name = "Zink",
+                MeasurementQuality = "estimated"
+            },
+            new SoldProduct
+            {
+                Id = Guid.NewGuid(),
+                Name = "Aluminium",
+                MeasurementQuality = "measured"
+            },
+            new SoldProduct
+            {
+                Id = Guid.NewGuid(),
+                Name = "Betong",
+                MeasurementQuality = "estimated"
+            });
+
+        await dbContext.SaveChangesAsync();
+
+        var controller = new ProductsController(dbContext);
+        var result = await controller.GetAll();
+        result.Select(product => product.Name).Should().ContainInOrder("Aluminium", "Betong", "Zink");
+    }
+
+    [Fact]
+    public async Task GetAll_returns_product_with_group_name()
+    {
+        using var dbContext = TestDatabase.Create();
+        var group = new ProductGroup
+        {
+            Id = Guid.NewGuid(),
+            Name = "Fläktar"
+        };
+
+        var product = new SoldProduct
+        {
+            Id = Guid.NewGuid(),
+            Name = "Ventilation",
+            MeasurementQuality = "measured",
+            GroupId = group.Id,
+            Group = group
+        };
+
+        dbContext.ProductGroups.Add(group);
+        dbContext.SoldProducts.Add(product);
+        await dbContext.SaveChangesAsync();
+
+        var controller = new ProductsController(dbContext);
+        var result = await controller.GetAll();
+        var response = result.Should().ContainSingle().Subject;
+        response.GroupId.Should().Be(group.Id);
+        response.GroupName.Should().Be("Fläktar");
+    }
+
+    [Fact]
+    public async Task GetAll_returns_null_group_name_when_product_has_no_group()
+    {
+        using var dbContext = TestDatabase.Create();
+        dbContext.SoldProducts.Add(new SoldProduct
+        {
+            Id = Guid.NewGuid(),
+            Name = "Ventilation",
+            MeasurementQuality = "estimated",
+            GroupId = null
+        });
+        await dbContext.SaveChangesAsync();
+
+        var controller = new ProductsController(dbContext);
+        var result = await controller.GetAll();
+        var response = result.Should().ContainSingle().Subject;
+        response.GroupId.Should().BeNull();
+        response.GroupName.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetAll_returns_empty_list_when_no_products_exist()
+    {
+        using var dbContext = TestDatabase.Create();
+        var controller = new ProductsController(dbContext);
+        var result = await controller.GetAll();
+        result.Should().BeEmpty();
+    }
 }
