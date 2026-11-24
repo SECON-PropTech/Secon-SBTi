@@ -170,7 +170,7 @@ public sealed class PostgresFixture : IAsyncLifetime
     public async Task<ToolResult> RunInContainerAsync(params string[] command)
     {
         var result = await _postgres.ExecAsync(command);
-        return new ToolResult((int)result.ExitCode, result.Stdout, result.Stderr);
+        return new ToolResult((int)(result.ExitCode ?? -1), result.Stdout, result.Stderr);
     }
 
     public sealed record ToolResult(
