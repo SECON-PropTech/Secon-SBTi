@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.DTOs;
+using SeconSbtiBackend.Validation;
 
 namespace SeconSbtiBackend.Controllers;
 
@@ -60,6 +61,40 @@ public class ProductsController(ApplicationDbContext dbContext) : ControllerBase
         product.MeasurementQuality = request.MeasurementQuality;
         product.Comment = request.Comment;
 
+        await dbContext.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+
+
+
+    /// <summary>
+    /// Updates the product's group. Shared by scopes 3.11 and 3.12.
+    /// </summary>
+    [HttpPut("{id:guid}/group")]
+    public async Task<IActionResult> UpdateGroup(
+        Guid id,
+        UpdateProductGroupRequest request)
+    {
+        var product = await dbContext.SoldProducts.FindAsync(id);
+
+        if (product is null)
+        {
+            return NotFound();
+        }
+
+        var groupExists = await dbContext.ProductGroups
+            .AnyAsync(group => group.Id == request.GroupId);
+
+        if (!groupExists)
+        {
+            return this.FieldValidationProblem(
+                "groupId",
+                "Produktgruppen finns inte.");
+        }
+
+        product.GroupId = request.GroupId!.Value;
         await dbContext.SaveChangesAsync();
 
         return NoContent();

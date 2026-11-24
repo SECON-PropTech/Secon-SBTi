@@ -99,4 +99,47 @@ public class ProductsControllerTests
         dbContext.SoldProducts.Add(product);
         return product;
     }
+
+
+
+    [Fact]
+    public async Task UpdateGroup_preserves_other_product_fields()
+    {
+        using var dbContext = TestDatabase.Create();
+
+        var product = AddEmptyProduct(dbContext);
+        product.KwhPerYear = 50m;
+        product.LifetimeYears = 10m;
+        product.MeasurementQuality = "measured";
+        product.Comment = "Befintlig kommentar";
+
+        var group = new ProductGroup
+        {
+            Id = Guid.NewGuid(),
+            Name = "Fläktar"
+        };
+
+        dbContext.ProductGroups.Add(group);
+        await dbContext.SaveChangesAsync();
+
+        var result = await new ProductsController(dbContext).UpdateGroup(
+            product.Id,
+            new UpdateProductGroupRequest
+            {
+                GroupId = group.Id
+            });
+
+        Assert.IsType<NoContentResult>(result);
+
+        dbContext.ChangeTracker.Clear();
+
+        var savedProduct = await dbContext.SoldProducts.FindAsync(product.Id);
+
+        Assert.NotNull(savedProduct);
+        Assert.Equal(group.Id, savedProduct.GroupId);
+        Assert.Equal(50m, savedProduct.KwhPerYear);
+        Assert.Equal(10m, savedProduct.LifetimeYears);
+        Assert.Equal("measured", savedProduct.MeasurementQuality);
+        Assert.Equal("Befintlig kommentar", savedProduct.Comment);
+    }
 }
