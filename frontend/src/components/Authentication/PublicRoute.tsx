@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { getCurrentUser } from "../Services/authService";
+import { getCurrentUser } from "../../Services/authService";
 
-function ProtectedRoute() {
+function PublicRoute() {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [hasError, setHasError] = useState(false);
 
@@ -28,10 +28,10 @@ function ProtectedRoute() {
     }
 
     if (isAuthenticated) {
-        return <Outlet />;
-    } else {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/home" replace />;
     }
+
+    return <Outlet />;
 }
 
-export default ProtectedRoute;
+export default PublicRoute;
