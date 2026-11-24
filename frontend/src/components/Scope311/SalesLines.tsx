@@ -45,7 +45,7 @@ function SalesLines({ productId, year }: Props) {
                         <tr>
                             <th>Datum</th>
                             <th className="text-end">Antal</th>
-                            <th>Kvalitet antal</th>
+                            <th>Datakvalitet</th>
                             <th>Kommentar</th>
                         </tr>
                     </thead>
