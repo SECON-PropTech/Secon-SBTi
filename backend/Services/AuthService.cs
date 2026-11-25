@@ -73,7 +73,7 @@ public class AuthService(ApplicationDbContext db) : IAuthService
         {
             // Skips names that aren't in the Permission enum
             if (Enum.TryParse(rolePermission.Permission, out Permission permission)
-                && Enum.IsDefined(permission)
+                && permission.ToString() == rolePermission.Permission
                 && !permissions.Contains(permission))
             {
                 permissions.Add(permission);

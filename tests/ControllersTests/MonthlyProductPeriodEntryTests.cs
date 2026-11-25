@@ -1,28 +1,15 @@
-using Microsoft.AspNetCore.Mvc;
 using SeconSbtiBackend.Controllers;
-using SeconSbtiBackend.DTOs.Scope312;
 using SeconSbtiBackend.Models;
-using SeconSbtiBackend.Services;
 
 namespace tests.ControllersTests;
 
 public class MonthlyProductPeriodEntryTests
 {
-
-
-
-
-
-
-    // Kontrollerar månadsfiltret för januari, skottårsfebruari och december.
-    // Första och sista dagen i månaden ska komma med. Rader utanför
-    // perioden eller för en annan produkt ska filtreras bort.
-    // Kontrollerar också datumordningen och värdena i de returnerade raderna.
     [Theory]
     [InlineData(2025, 1)]
     [InlineData(2024, 2)]
     [InlineData(2025, 12)]
-    public async Task GetProductPeriodEntries_returns_only_requested_month(
+    public async Task GetByProductAndYear_returns_only_requested_month(
         int year,
         int month)
     {
@@ -106,18 +93,12 @@ public class MonthlyProductPeriodEntryTests
 
         await dbContext.SaveChangesAsync();
 
-        var service = new ProductMaterialQueryService(dbContext);
-        var controller = new ProductMaterialsController(service);
+        var controller = new MaterialLinesController(dbContext);
 
-        var response = await controller.GetProductPeriodEntries(
+        var entries = await controller.GetByProductAndYear(
             product.Id,
             year,
-            CancellationToken.None,
-            month: month);
-
-        var okResult = Assert.IsType<OkObjectResult>(response.Result);
-        var entries = Assert.IsAssignableFrom<
-            IReadOnlyList<ProductPeriodEntryResponse>>(okResult.Value);
+            month);
 
         Assert.Collection(
             entries,
@@ -129,6 +110,7 @@ public class MonthlyProductPeriodEntryTests
                 Assert.Equal(0m, entry.Quantity);
                 Assert.Equal("measured", entry.MeasurementQuality);
                 Assert.Equal("Månadens första dag", entry.Comment);
+                Assert.True(entry.IsManual);
             },
             entry =>
             {
@@ -138,19 +120,14 @@ public class MonthlyProductPeriodEntryTests
                 Assert.Equal(25m, entry.Quantity);
                 Assert.Equal("estimated", entry.MeasurementQuality);
                 Assert.Equal("Månadens sista dag", entry.Comment);
+                Assert.True(entry.IsManual);
             });
     }
-
-
-
-    // Kontrollerar att ett anrop utan månad returnerar båda raderna
-    // från det valda året. En månad utan registreringar ska ge en tom lista.   s
-
 
     [Theory]
     [InlineData(null, 2)]
     [InlineData(2, 0)]
-    public async Task GetProductPeriodEntries_handles_full_year_and_empty_month(
+    public async Task GetByProductAndYear_handles_full_year_and_empty_month(
         int? month,
         int expectedCount)
     {
@@ -186,18 +163,12 @@ public class MonthlyProductPeriodEntryTests
 
         await dbContext.SaveChangesAsync();
 
-        var service = new ProductMaterialQueryService(dbContext);
-        var controller = new ProductMaterialsController(service);
+        var controller = new MaterialLinesController(dbContext);
 
-        var response = await controller.GetProductPeriodEntries(
+        var entries = await controller.GetByProductAndYear(
             product.Id,
             2025,
-            CancellationToken.None,
-            month: month);
-
-        var okResult = Assert.IsType<OkObjectResult>(response.Result);
-        var entries = Assert.IsAssignableFrom<
-            IReadOnlyList<ProductPeriodEntryResponse>>(okResult.Value);
+            month);
 
         Assert.Equal(expectedCount, entries.Count);
     }

@@ -1,15 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
 using SeconSbtiBackend.Controllers;
-using SeconSbtiBackend.DTOs.Scope312;
 using SeconSbtiBackend.Models;
-using SeconSbtiBackend.Services;
 
-namespace tests.IntegrationTests;
+namespace tests.ControllersTests;
 
 public class ProductPeriodEntryTests
 {
     [Fact]
-    public async Task GetProductPeriodEntries_returns_only_requested_product_and_year()
+    public async Task GetByProductAndYear_returns_only_requested_product_and_year()
     {
         using var dbContext = TestDatabase.Create();
 
@@ -69,17 +66,11 @@ public class ProductPeriodEntryTests
 
         await dbContext.SaveChangesAsync();
 
-        var service = new ProductMaterialQueryService(dbContext);
-        var controller = new ProductMaterialsController(service);
+        var controller = new MaterialLinesController(dbContext);
 
-        var response = await controller.GetProductPeriodEntries(
+        var entries = await controller.GetByProductAndYear(
             product.Id,
-            2025,
-            CancellationToken.None);
-
-        var okResult = Assert.IsType<OkObjectResult>(response.Result);
-        var entries = Assert.IsAssignableFrom<
-            IReadOnlyList<ProductPeriodEntryResponse>>(okResult.Value);
+            2025);
 
         var entry = Assert.Single(entries);
 
@@ -89,5 +80,19 @@ public class ProductPeriodEntryTests
         Assert.Equal(new DateOnly(2025, 1, 1), entry.Date);
         Assert.Equal("estimated", entry.MeasurementQuality);
         Assert.Equal("Manuellt uppskattat antal", entry.Comment);
+        Assert.True(entry.IsManual);
+    }
+
+    [Fact]
+    public async Task GetByProductAndYear_returns_empty_list_for_unknown_product()
+    {
+        using var dbContext = TestDatabase.Create();
+        var controller = new MaterialLinesController(dbContext);
+
+        var entries = await controller.GetByProductAndYear(
+            Guid.NewGuid(),
+            2025);
+
+        Assert.Empty(entries);
     }
 }

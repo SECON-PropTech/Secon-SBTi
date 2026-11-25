@@ -22,4 +22,10 @@ public enum Permission
 
     /// <summary>Create and edit purchased goods in Scope 3.1.</summary>
     WriteScope31,
+
+    /// <summary>View the list of previous imports.</summary>
+    ViewImports,
+
+    /// <summary>Revert previous imports. Give together with ViewImports, since reverting is done from the list.</summary>
+    ManageImports,
 }

@@ -42,7 +42,7 @@ export async function getProductPeriod(
     year: number
 ): Promise<ProductPeriodEntry[]> {
     const response = await fetch(
-        `/api/product-materials/${productId}/entries?year=${year}`,
+        `/api/material-lines?productId=${productId}&year=${year}`,
         {
             method: "GET",
             credentials: "include",

@@ -97,6 +97,9 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
     [products, productMaterials, filteredEntries]);
     // Counts all the product with missing data and complete data.
     const incompleteCount = rows.filter((row) => row.incomplete).length;
+    // Counts products with missing material or product group.
+    const missingMaterialsCount = rows.filter((row) => row.materials.length === 0).length;
+    const missingGroupCount = rows.filter((row) => row.product.groupId === null).length;
     const countedCount = rows.filter((row) => row.materials.length > 0).length;
     // Filters witch products that will be shown in the table.
     const visibleRows = rows.filter((row) => {switch (productFilter) {
@@ -109,8 +112,8 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
     // allOpen will be true when all the FoldOutRows are open.
     const allOpen = visibleRows.length > 0 &&
         visibleRows.every((row) => openIds.includes(row.product.id));
-    // Total material-weight for all the product for the chosen time-period.
-    const totalWeight = rows.reduce((sum, row) => sum + row.totalWeight, 0);
+    // Total known material weight for the visible products.
+    const totalWeight = visibleRows.reduce((sum, row) => sum + row.totalWeight, 0);
 
     // Will fold out or in a spedcifik row.
     function toggleRow(productId: string) {
@@ -181,24 +184,32 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
                             type="button"
                             className={
                                 productFilter === "missingMaterials"
-                                    ? "energy-chip energy-chip-active"
+                                    ? "energy-chip energy-chip-warning"
                                     : "energy-chip"
                             }
                             onClick={() => setProductFilter("missingMaterials")}
                         >
+                            <TriangleAlert size={16} className="energy-warning-icon" />
                             Saknar materialuppgifter
+                            <span className="energy-chip-count">
+                                {missingMaterialsCount}
+                            </span>
                         </button>
 
                         <button
                             type="button"
                             className={
                                 productFilter === "missingGroup"
-                                    ? "energy-chip energy-chip-active"
+                                    ? "energy-chip energy-chip-warning"
                                     : "energy-chip"
                             }
                             onClick={() => setProductFilter("missingGroup")}
                         >
+                            <TriangleAlert size={16} className="energy-warning-icon" />
                             Saknar produktgrupp
+                            <span className="energy-chip-count">
+                                {missingGroupCount}
+                            </span>
                         </button>
 
                         <span className="d-flex align-items-center gap-1 text-secondary">
@@ -261,9 +272,11 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
                         <tfoot>
                             <tr className="fw-bold">
                                 <td></td>
-                                <td colSpan={4}>Totalt</td>
+                                <td colSpan={4}>Total känd materialvikt</td>
                                 <td className="text-end">
-                                    {formatNumber(totalWeight)}
+                                    {visibleRows.every((row) => row.materials.length === 0)
+                                        ? "Ej beräknad"
+                                        : formatNumber(totalWeight)}
                                 </td>
                             </tr>
                         </tfoot>
