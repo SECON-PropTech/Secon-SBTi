@@ -17,10 +17,11 @@ import { getProductGroups } from "../../Services/soldProductsService";
 type Props = {
     products: EnergyProductRow[];
     total: number;
+    year: number;
     onSaved: () => void;
 };
 
-function ProductTable({ products, total, onSaved }: Props) {
+function ProductTable({ products, total, year, onSaved }: Props) {
     //The ids of the rows that are open. Empty list = all rows close
     const[openIds, setOpenIds] = useState<string[] > ([]);
     //if True only show the products that need more data
@@ -262,6 +263,7 @@ function ProductTable({ products, total, onSaved }: Props) {
                     groups={groups}
                     canSave={canSave}
                     isFlashing={flashId === product.productId}
+                    year={year}
                     onEdit={(field) => requestEdit(product, field)}
                     onChange={changeDraft}
                     onSave={() => save(null)}
