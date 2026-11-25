@@ -8,7 +8,7 @@ import type {
   PurchaseFormData,
   PurchaseType,
   DemoPurchase,
-} from "./types";
+} from "../../types/purchases";
 
 import {
   getPurchasedGoods,

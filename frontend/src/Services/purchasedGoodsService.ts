@@ -1,7 +1,7 @@
 import type {
   Purchase,
   PurchaseFormData,
-} from "../components/Scope31/types";
+} from "../types/purchases";
 
 /** Error response from the backend. */
 type ApiProblem = {

@@ -1,6 +1,6 @@
 import { useState} from "react";
 import type {FormEvent} from "react";
-import type {PurchaseFormData, PurchaseType } from "./types";
+import type {PurchaseFormData, PurchaseType } from "../../types/purchases";
 
 /**Information that the form gets from Scope31Overview --- */
 type Scope31FormProps = {
@@ -12,7 +12,6 @@ type Scope31FormProps = {
     onSave: (formData: PurchaseFormData) => void;
     onCancel: () => void;
 
-    //* /
     isSaving?: boolean;
     error?: string;
 }
@@ -104,7 +103,7 @@ export default function PurchaseForm({
 
 
         setValidationError("");
-        //**Sending form data to the parent component, which is Scope31overview.tsx
+        //**Sending form data to the parent component, which is Scope31Overview.tsx
         //  */
         onSave(formData);
     }

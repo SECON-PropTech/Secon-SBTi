@@ -1,4 +1,4 @@
-import type {DemoPurchase, PurchaseType} from "./types";
+import type {DemoPurchase, PurchaseType} from "../../types/purchases";
 
 /** Information and actions provided by Scope31Overview. */
 type PurchaseTableProps = {
