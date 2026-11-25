@@ -118,7 +118,7 @@ function Sidebar({activePage, onSelect}: Props){
 
                             <button
                                 type="button"
-                                className="btn btn-primary"
+                                className="btn logout-modal-confirm"
                                 onClick={handleLogout}
                                 disabled={isLoggingOut}
                             >
