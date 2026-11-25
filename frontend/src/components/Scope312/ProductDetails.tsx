@@ -1,6 +1,7 @@
 import { Fragment, useState } from "react";
 import { Calculator, Recycle, TriangleAlert, Pencil } from "lucide-react";
 import EditPeriodEntry from "./EditPeriodEntry";
+import { updateProductPeriodEntry } from "../../Services/soldProductsService";
 import type { SoldProducts, ProductMaterial, ProductPeriodEntry, UpdateProductPeriodEntry} from "../../types/soldProducts";
 
 // Data sent from FoldOutRow
@@ -11,6 +12,10 @@ type Props = {
     quantity: number;
     weightPerUnit: number;
     totalWeight: number;
+    onEntryUpdated: (
+        entryId: string,
+        data: UpdateProductPeriodEntry
+    ) => void;
 };
 
 const formatNumber = (value: number) =>
@@ -19,7 +24,7 @@ const formatNumber = (value: number) =>
     }).format(value);
 
 // ProductDetails presents all the details for a specific product for the selected time period
-function ProductDetails({ product, materials, entries, quantity, weightPerUnit, totalWeight }: Props) {
+function ProductDetails({ product, materials, entries, quantity, weightPerUnit, totalWeight, onEntryUpdated, }: Props) {
     
     // Check if the product is missing material information.
     const missingMaterials = materials.length === 0;
@@ -176,9 +181,14 @@ function ProductDetails({ product, materials, entries, quantity, weightPerUnit, 
                                                 <EditPeriodEntry
                                                     entry={entry}
                                                     onSave={async (data: UpdateProductPeriodEntry) => {
-                                                        // Saving is unavailable until the backend endpoint is ready.
-                                                        console.log("Updated period entry:", data);
-                                                    
+                                                        // Save the updated period entry to the backend.
+                                                        await updateProductPeriodEntry(product.id, entry.id, data);
+
+                                                        // Update the period entry in the table.
+                                                        onEntryUpdated(entry.id, data);
+
+                                                        // Close the edit form after a successful update.
+                                                        setEditingEntryId(null);
                                                     }}
                                                     onCancel={() => setEditingEntryId(null)}
                                                 />

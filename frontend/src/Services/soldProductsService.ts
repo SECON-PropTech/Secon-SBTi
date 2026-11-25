@@ -77,14 +77,17 @@ export async function updateProductPeriodEntry(
     data: UpdateProductPeriodEntry
 ): Promise<void> {
     const response = await fetch(
-        `/api/product-materials/${productId}/entries/${entryId}`,
+        `/api/material-lines/${entryId}`,
         {
             method: "PUT",
             credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify({
+                productId,
+                ...data,
+            }),
         }
     );
 

@@ -4,6 +4,7 @@ import type {
     SoldProducts,
     ProductMaterial,
     ProductPeriodEntry,
+    UpdateProductPeriodEntry,
 } from "../../types/soldProducts";
 
 import ProductDetails from "./ProductDetails";
@@ -18,6 +19,10 @@ type Props = {
     totalWeight: number;
     isOpen: boolean;
     onToggle: () => void;
+    onEntryUpdated: (
+        entryId: string,
+        data: UpdateProductPeriodEntry
+    ) => void;
 }
 
 const formatNumber = (value: number) =>
@@ -35,6 +40,7 @@ function FoldOutRow({
     totalWeight,
     isOpen,
     onToggle,
+    onEntryUpdated,
 
 }: Props) {
     // Check if the product is missing its group or material information.
@@ -126,6 +132,7 @@ function FoldOutRow({
                             quantity={quantity}
                             weightPerUnit={weightPerUnit}
                             totalWeight={totalWeight}
+                            onEntryUpdated={onEntryUpdated}
                         />
                     </td>
                 </tr>
