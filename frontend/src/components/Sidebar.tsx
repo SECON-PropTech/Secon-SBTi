@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
+
 import type { PageId } from "../types/navigation";
 import { logout } from "../Services/authService";
 import seconLogo from "../assets/secon_logo.svg";
@@ -92,7 +94,7 @@ function Sidebar({activePage, onSelect}: Props){
             </div>
 
             {/* Logout confirmation modal */}
-            {showLogoutModal && (
+            {showLogoutModal && createPortal(
                 <div className="logout-modal-overlay">
                     <div
                         className="logout-modal"
@@ -126,7 +128,8 @@ function Sidebar({activePage, onSelect}: Props){
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
         </aside>
