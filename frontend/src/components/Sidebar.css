@@ -172,3 +172,15 @@
     justify-content: flex-end;
     gap: 12px;
 }
+
+.logout-modal-confirm {
+    background-color: var(--secon-blue);
+    border-color: var(--secon-blue);
+    color: white;
+}
+
+.logout-modal-confirm:hover:not(:disabled) {
+    background-color: var(--secon-blue-soft);
+    border-color: var(--secon-blue-soft);
+    color: white;
+}
