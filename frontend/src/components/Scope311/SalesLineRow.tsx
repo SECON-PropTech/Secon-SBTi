@@ -20,7 +20,7 @@ function SalesLineRow({ line, onEdit }: Props) {
             <td>
                 <span className="energy-sales-quality">
                     {isMeasured ? <CircleCheckBig size={14}/> : <EqualApproximately size={14}/>}
-                    {isMeasured ? "Uppmätt" : "Uppskattad"}
+                    {isMeasured ? "Verifierad" : "Uppskattad"}
                 </span>
             </td>
 

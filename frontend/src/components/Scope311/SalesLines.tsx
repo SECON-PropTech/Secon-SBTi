@@ -144,7 +144,7 @@ function SalesLines({ productId, year, onChanged }: Props) {
             <div className="energy-sales-header">
                 <PackageCheck size={16}/>
                 <h4 className="energy-sales-title">Försäljning {year}</h4>
-                <span className="small border-start ps-2">Underlag för antal</span>
+                <span className="small border-start ps-2">Underlag för totalt antal</span>
             </div>
 
             {saveError !== null && <div className="alert alert-danger py-2">{saveError}</div>}

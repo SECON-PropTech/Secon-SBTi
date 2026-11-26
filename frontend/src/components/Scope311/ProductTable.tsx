@@ -234,7 +234,7 @@ function ProductTable({ products, total, year, onSaved }: Props) {
                   <th className="energy-chevron-cell"></th>
                   <th>Produkt</th>
                   <th>Produktgrupp</th>
-                  <th className="text-end">Antal</th>
+                  <th className="text-end">Totalt antal</th>
                   <th className="text-end">
                     Totalt kWh{" "}
                     <Tooltip text="Antal sålda × kWh per år × livslängd">

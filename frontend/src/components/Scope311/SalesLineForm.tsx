@@ -72,7 +72,7 @@ function SalesLineForm({ draft, errors, canSave, onChange, onSave, onCancel }: P
                 value={draft.measurementQuality}
                 onChange={(event) => onChange({
                     measurementQuality: event.target.value === "measured" ? "measured" : "estimated"})}>
-                    <option value="measured">Uppmätt</option>
+                    <option value="measured">Verifierad</option>
                     <option value="estimated">Uppskattad</option>
                 </select>
             </td>
