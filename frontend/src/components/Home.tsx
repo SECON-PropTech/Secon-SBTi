@@ -16,7 +16,7 @@ const pageComponents: Record<PageId, ComponentType> = {
 };
 
 function Home() {
-  const [activePage, setActivePage] = useState<PageId>("scope-3.1");
+  const [activePage, setActivePage] = useState<PageId>("imports");
 
   const Page = pageComponents[activePage];
 

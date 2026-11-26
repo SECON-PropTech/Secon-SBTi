@@ -1,0 +1,117 @@
+/* =========================================
+   IMPORTS - Monthly overview
+   ========================================= */
+
+/* White containers */
+.imports-page .imports-box {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+}
+
+/* Reporting month */
+.imports-page .imports-month {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.imports-page .imports-month-title {
+    text-transform: capitalize;
+}
+
+/* Icons */
+.imports-page .imports-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background-color: var(--secon-blue-light-background);
+    color: var(--secon-blue);
+}
+
+/* Import source rows */
+.imports-page .imports-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+}
+
+.imports-page .imports-row + .imports-row {
+    border-top: 1px solid var(--border);
+}
+
+.imports-page .imports-source {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Import buttons */
+.imports-page .imports-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--secon-blue);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s;
+}
+
+.imports-page .imports-button:hover:not(:disabled) {
+    background-color: var(--secon-blue-soft);
+}
+
+.imports-page .imports-button:disabled {
+    background-color: var(--bg);
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+/* Import history */
+.imports-page .imports-history {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    text-align: left;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.15s;
+}
+
+.imports-page .imports-history:hover {
+    border-color: var(--secon-blue);
+}
+
+.imports-page .imports-history > svg {
+    color: var(--secon-blue);
+    flex-shrink: 0;
+}
+
+.imports-page button:focus-visible {
+    outline: 2px solid var(--secon-blue);
+    outline-offset: 2px;
+}
+
+/* Smaller screens */
+@media (max-width: 768px) {
+    .imports-page .imports-box {
+        padding: 16px;
+    }
+
+    .imports-page .imports-row {
+        flex-wrap: wrap;
+    }
+}

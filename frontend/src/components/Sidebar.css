@@ -60,6 +60,16 @@
   outline-offset: 2px;
 }
 
+/* Home navigation */
+.sidebar-home {
+  margin-bottom: 24px;
+}
+
+.sidebar-home-icon {
+  width: 44px;
+  flex-shrink: 0;
+}
+
 /* The open page: light blue background, blue left border and blue text */
 .sidebar-link.active {
   background-color: var(--secon-blue-light-background);

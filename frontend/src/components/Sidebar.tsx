@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { PageId } from "../types/navigation";
 import { logout } from "../Services/authService";
 import seconLogo from "../assets/secon_logo.svg";
+import { House } from "lucide-react";
 import "./Sidebar.css";
 
 //One menu item: which page it opens, 
@@ -18,7 +19,6 @@ const menuItems: MenuItem[] = [
     {id: "scope-3.1", number: "3.1", label: "Köpta varor och tjänster"},
     {id: "scope-3.11", number: "3.11", label: "Användning av sålda produkter"},
     {id: "scope-3.12", number: "3.12", label: "Slutbehandling av sålda produkter"},
-    {id: "imports", number: "IMPORT", label: "Importering"},
 ]
 
 //ActivePage = the page that is open
@@ -55,6 +55,14 @@ function Sidebar({activePage, onSelect}: Props){
     return (
         <aside className="sidebar">
             <img src={seconLogo} alt="SECON" className="sidebar-logo"/>
+            <button
+                type="button"
+                className={activePage === "imports" ? "sidebar-link sidebar-home active" : "sidebar-link sidebar-home"}
+                onClick={() => onSelect("imports")}
+            >
+                <House size={20} className="sidebar-home-icon" />
+                <span>Startsida</span>
+            </button>
 
             <p className="sidebar-heading">Scopes</p>
 
