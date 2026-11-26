@@ -236,34 +236,27 @@ public class ProductGroupsControllerTests
     }
 
     /*******************************Delete***********************************/
-
-    /*
     [Fact]
-    public async Task Delete_removes_product_group_and_returns_204()
+    public async Task Delete_returns_409_when_products_still_belong_to_the_group()
     {
         using var dbContext = TestDatabase.Create();
-        var id = Guid.NewGuid();
-        dbContext.ProductGroups.Add(new ProductGroup
+        var groupId = Guid.NewGuid();
+    
+        dbContext.ProductGroups.Add(new ProductGroup { Id = groupId, Name = "Fläktar" });
+        dbContext.SoldProducts.Add(new SoldProduct
         {
-            Id = id,
-            Name = "Fläktar"
+            Id = Guid.NewGuid(),
+            Name = "Fläkt A",
+            GroupId = groupId,
+            MeasurementQuality = "estimated"
         });
         await dbContext.SaveChangesAsync();
-
-        var controller = new ProductGroupsController(dbContext);
-        var result = await controller.Delete(id);
-        result.Should().BeOfType<NoContentResult>();
-        dbContext.ProductGroups.Should().BeEmpty();
+    
+        var result = await new ProductGroupsController(dbContext).Delete(groupId);
+        var response = result.Should().BeOfType<ObjectResult>().Subject;
+        response.StatusCode.Should().Be(StatusCodes.Status409Conflict);
+        response.Value.Should().BeOfType<ProblemDetails>()
+            .Which.Detail.Should().Contain("används av en eller flera produkter");
+        dbContext.ProductGroups.Should().ContainSingle();
     }
-
-    [Fact]
-    public async Task Delete_returns_404_when_product_group_does_not_exist()
-    {
-        using var dbContext = TestDatabase.Create();
-        var controller = new ProductGroupsController(dbContext);
-        var result = await controller.Delete(Guid.NewGuid());
-        result.Should().BeOfType<NotFoundResult>();
-    }
-    */
-
 }
