@@ -82,7 +82,7 @@ public class ProductGroupsControllerTests
             Description = "Ventilation"
         });
 
-        var response = result.Should().BeOfType<ObjectResult>().Subject;
+        var response = result.Should().BeOfType<BadRequestObjectResult>().Subject;
         response.Value.Should().BeOfType<ValidationProblemDetails>();
         dbContext.ProductGroups.Should().HaveCount(1);
     }
@@ -104,7 +104,7 @@ public class ProductGroupsControllerTests
             Name = "FLÄKTAR"
         });
 
-        var response = result.Should().BeOfType<ObjectResult>().Subject;
+        var response = result.Should().BeOfType<BadRequestObjectResult>().Subject;
         response.Value.Should().BeOfType<ValidationProblemDetails>();
     }
 
@@ -169,7 +169,7 @@ public class ProductGroupsControllerTests
             Name = "Fläktar"
         });
 
-        var response = result.Should().BeOfType<ObjectResult>().Subject;
+        var response = result.Should().BeOfType<BadRequestObjectResult>().Subject;
         response.Value.Should().BeOfType<ValidationProblemDetails>();
 
         (await dbContext.ProductGroups.FindAsync(secondId))!.Name.Should().Be("Pumpar");
@@ -187,7 +187,7 @@ public class ProductGroupsControllerTests
         await dbContext.SaveChangesAsync();
     
         var result = await new ProductGroupsController(dbContext).Update(pumpsId, new ProductGroupRequest { Name = "fläktar" });
-        var response = result.Should().BeOfType<ObjectResult>().Subject;
+        var response = result.Should().BeOfType<BadRequestObjectResult>().Subject;
         response.Value.Should().BeOfType<ValidationProblemDetails>();
         (await dbContext.ProductGroups.FindAsync(pumpsId))!.Name.Should().Be("Pumpar");
     }
