@@ -4,6 +4,7 @@ using NSubstitute;
 using SeconSbtiBackend.Controllers;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Xunit;
 
 namespace tests.CalculationsTests;
@@ -37,13 +38,19 @@ public class SupplierCategoryAllocationsControllerTests
     [Fact]
     public async Task GetSuppliers_ReturnsBadRequest_WhenCategoryIdIsEmpty()
     {
-        var result = await _controller.GetSuppliers(Guid.Empty, CancellationToken.None);
+        var categoryId = Guid.Empty;
+        var result = await _controller.GetSuppliers(categoryId, CancellationToken.None);
+        var objectResult = Assert.IsType<BadRequestObjectResult>(result.Result);
 
-        result.Result.Should().BeAssignableTo<ObjectResult>()
-            .Which.StatusCode.Should().Be(400);
+        Assert.Equal(StatusCodes.Status400BadRequest, objectResult.StatusCode);
 
-        await _service.DidNotReceive().GetSuppliersAsync(
-            Arg.Any<Guid?>(), Arg.Any<CancellationToken>());
+        var problemDetails = Assert.IsType<ValidationProblemDetails>(objectResult.Value);
+
+        Assert.Equal("En eller flera uppgifter behöver rättas.", problemDetails.Title);
+        Assert.Contains("purchaseCategoryId", problemDetails.Errors.Keys);
+        Assert.Contains("Välj en giltig kategori.", problemDetails.Errors["purchaseCategoryId"]);
+
+        await _service.DidNotReceive().GetSuppliersAsync(Arg.Any<Guid?>(),Arg.Any<CancellationToken>());
     }
 
     [Fact]
