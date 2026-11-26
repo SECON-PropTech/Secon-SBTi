@@ -129,7 +129,7 @@ public class ProductsControllerTests
 
         var controller = new ProductsController(dbContext);
         var result = await controller.GetAll();
-        result.Select(product => product.Name).Should().ContainInOrder("Aluminium", "Betong", "Zink");
+        result.Select(product => product.Name).Should().Equal("Aluminium", "Betong", "Zink");
     }
 
     [Fact]
