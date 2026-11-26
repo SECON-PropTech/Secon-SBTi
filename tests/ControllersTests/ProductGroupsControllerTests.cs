@@ -176,6 +176,23 @@ public class ProductGroupsControllerTests
     }
 
     [Fact]
+    public async Task Update_returns_400_when_name_matches_another_group_with_different_case()
+    {
+        using var dbContext = TestDatabase.Create();
+        var pumpsId = Guid.NewGuid();
+    
+        dbContext.ProductGroups.AddRange(
+            new ProductGroup { Id = Guid.NewGuid(), Name = "Fläktar" },
+            new ProductGroup { Id = pumpsId, Name = "Pumpar" });
+        await dbContext.SaveChangesAsync();
+    
+        var result = await new ProductGroupsController(dbContext).Update(pumpsId, new ProductGroupRequest { Name = "fläktar" });
+        var response = result.Should().BeOfType<ObjectResult>().Subject;
+        response.Value.Should().BeOfType<ValidationProblemDetails>();
+        (await dbContext.ProductGroups.FindAsync(pumpsId))!.Name.Should().Be("Pumpar");
+    }
+
+    [Fact]
     public async Task Update_allows_same_group_to_keep_its_name()
     {
         using var dbContext = TestDatabase.Create();
