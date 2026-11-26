@@ -5,6 +5,8 @@ export type ImportBatch = {
     importedBy: string;
     fileNames: string[];
     rowCount: number;
+    // False for a Mobigo import that has a later Mobigo import, which has to be reverted first.
+    canRevert: boolean;
 };
 
 export type ImportBatchesOutcome =

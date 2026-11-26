@@ -27,6 +27,7 @@ public class ImportsController(IImportBatchService importBatchService) : Control
     /// <summary>
     /// Reverts an import by deleting it and every row it imported, also rows that have been edited since.
     /// The same file can then be imported again. 404 if the import does not exist or has already been reverted.
+    /// 409 if it is a Mobigo import and there is a later Mobigo import, which has to be reverted first.
     /// </summary>
     [HttpDelete("{id:guid}")]
     [HasPermission(Permission.ManageImports)]
@@ -34,10 +35,20 @@ public class ImportsController(IImportBatchService importBatchService) : Control
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        var deleted = await importBatchService.DeleteAsync(id, cancellationToken);
+        var result = await importBatchService.DeleteAsync(id, cancellationToken);
 
-        return deleted ? NoContent() : NotFound();
+        return result switch
+        {
+            ImportBatchDeleteResult.Deleted => NoContent(),
+            ImportBatchDeleteResult.NotFound => NotFound(),
+            ImportBatchDeleteResult.LaterImportExists => Conflict(new
+            {
+                message = "Det finns en senare import från Mobigo. Ångra den först."
+            }),
+            _ => throw new InvalidOperationException("Okänt resultat när en import ångras.")
+        };
     }
 }

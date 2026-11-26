@@ -16,7 +16,7 @@ public sealed class MobigoImportService(ApplicationDbContext context) : IMobigoI
 {
     public const long MaxFileSize = 10 * 1024 * 1024;
 
-    private const string Source = "mobigo";
+    public const string Source = "mobigo";
 
     private static readonly string[] AllowedExtensions = [".xlsx", ".xls"];
     private static readonly Regex Whitespace = new(@"\s+");
