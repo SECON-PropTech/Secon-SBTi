@@ -25,6 +25,7 @@ type Props = {
     canSave: boolean;
     isFlashing: boolean;
     year: number;
+    onSaved: () => void;
     onEdit: (field: EditField) => void;
     onChange: (changes: Partial<ProductDraft>) => void;
     onSave: () => void;
@@ -47,7 +48,7 @@ function missingTotalText(product: EnergyProductRow): string {
 //One product in the table, the row itself and the details below it when the row is open
 function ProductRow(props: Props) {
     const { product, isOpen, onToggle, draft, errors, focusField, groups} = props;
-    const { canSave, isFlashing, year, onEdit, onChange, onSave, onCancel} = props;
+    const { canSave, isFlashing, year, onSaved, onEdit, onChange, onSave, onCancel} = props;
     const isEditing = draft !== null;
     const missingGroup = product.missing.includes("group");
 
@@ -186,6 +187,7 @@ function ProductRow(props: Props) {
                     errors={errors}
                     focusField={focusField}
                     year={year}
+                    onSaved={onSaved}
                     onEdit={onEdit}
                     onChange={onChange}/>
                 </td>

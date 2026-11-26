@@ -264,6 +264,7 @@ function ProductTable({ products, total, year, onSaved }: Props) {
                     canSave={canSave}
                     isFlashing={flashId === product.productId}
                     year={year}
+                    onSaved={onSaved}
                     onEdit={(field) => requestEdit(product, field)}
                     onChange={changeDraft}
                     onSave={() => save(null)}

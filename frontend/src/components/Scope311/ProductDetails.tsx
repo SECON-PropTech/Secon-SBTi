@@ -17,11 +17,12 @@ type Props = {
     year: number;
     onEdit: (field: EditField) => void;
     onChange: (changes: Partial<ProductDraft>) => void;
+    onSaved: () => void;
 
 };
 //The product details-part that shows when a row is opened
 // fields turn into inputs when the row is being edited.
-function ProductDetails({ product, draft, errors, focusField, year, onEdit, onChange, }: Props) {
+function ProductDetails({ product, draft, errors, focusField, year, onEdit, onChange, onSaved }: Props) {
     const kwhPerYear = draft ? toNumber(draft.kwhPerYear) : product.kwhPerYear;
 
     const lifetimeYears = draft ? toNumber(draft.lifetimeYears) : product.lifetimeYears;
@@ -180,7 +181,7 @@ function ProductDetails({ product, draft, errors, focusField, year, onEdit, onCh
                         </span>}
             </div>
             {/*The sales behind the quantity column */}
-            <SalesLines productId={product.productId} year={year}/>
+            <SalesLines productId={product.productId} year={year} onChanged={onSaved}/>
         </div>
     );
 }
