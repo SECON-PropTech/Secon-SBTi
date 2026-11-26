@@ -20,6 +20,11 @@ using SeconSbtiBackend.Interfaces;
 using SeconSbtiBackend.Models;
 using SeconSbtiBackend.Services;
 using Xunit;
+using NSubstitute;
+using FluentAssertions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using SeconSbtiBackend.DTOs;
 
 namespace tests.ControllersTests;
 
@@ -29,6 +34,32 @@ public class PurchasedGoodsControllerTests
     private static readonly Guid UserId = Guid.Parse("20000000-0000-0000-0000-000000000001");
     private static readonly Guid GoodId = Guid.Parse("30000000-0000-0000-0000-000000000001");
     private static readonly string[] RequiredFields = ["supplierId", "transactionDate", "value", "unit", "measurementQuality"];
+
+    private readonly IPurchasedGoodsService _service;
+    private readonly PurchasedGoodsController _controller;
+
+    public PurchasedGoodsControllerTests()
+    {
+        _service = Substitute.For<IPurchasedGoodsService>();
+        _controller = new PurchasedGoodsController(_service);
+    }
+
+    private void SetUser(Guid userId)
+    {
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+        };
+
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(
+                    new ClaimsIdentity(claims, "Test"))
+            }
+        };
+    }
 
     public static IEnumerable<object[]> MissingFields()
     {
@@ -325,5 +356,189 @@ public class PurchasedGoodsControllerTests
             var identity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, userId.ToString())], "PurchasedGoodsTest");
             return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), "PurchasedGoodsTest")));
         }
+    }
+
+    [Fact]
+    public async Task GetPurchasedGoods_ReturnsOk_WhenSuccessful()
+    {
+        var expected = new List<PurchasedGoodResponse>();
+
+        _service.GetAllAsync(2025, 3, Arg.Any<CancellationToken>())
+            .Returns(PurchasedGoodsResult<List<PurchasedGoodResponse>>.Success(expected));
+
+        var result = await _controller.GetPurchasedGoods(2025, 3, CancellationToken.None);
+        var response = result.Result.Should().BeOfType<ObjectResult>().Subject;
+
+        response.StatusCode.Should().Be(200);
+        response.Value.Should().BeSameAs(expected);
+    }
+
+    [Fact]
+    public async Task GetPurchasedGoods_ReturnsBadRequest_WhenValidationFails()
+    {
+        _service.GetAllAsync(null, null, Arg.Any<CancellationToken>())
+            .Returns(PurchasedGoodsResult<List<PurchasedGoodResponse>>
+            .ValidationError("year", "Ogiltigt år."));
+
+        var result = await _controller.GetPurchasedGoods(null, null, CancellationToken.None);
+        result.Result.Should().BeAssignableTo<ObjectResult>().Which.StatusCode.Should().Be(400);
+    }
+
+    [Fact]
+    public async Task CreatePurchasedGood_ReturnsCreated_WhenSuccessful()
+    {
+        var userId = Guid.NewGuid();
+        SetUser(userId);
+        var request = new CreatePurchasedGoodRequest();
+        var expected = new PurchasedGoodResponse();
+
+        _service.CreateAsync(request, userId, Arg.Any<CancellationToken>())
+            .Returns(PurchasedGoodsResult<PurchasedGoodResponse>.Success(expected));
+
+        var result = await _controller.CreatePurchasedGood(request, CancellationToken.None);
+
+        var response = result.Result.Should().BeOfType<ObjectResult>().Subject;
+        response.StatusCode.Should().Be(201);
+        response.Value.Should().BeSameAs(expected);
+
+        await _service.Received(1).CreateAsync(request, userId, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task CreatePurchasedGood_ReturnsUnauthorized_WhenUserIdIsMissing()
+    {
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext()
+        };
+
+        var result = await _controller.CreatePurchasedGood(new CreatePurchasedGoodRequest(),CancellationToken.None);
+
+        result.Result.Should().BeOfType<UnauthorizedObjectResult>();
+        await _service.DidNotReceive().CreateAsync(
+            Arg.Any<CreatePurchasedGoodRequest>(),
+            Arg.Any<Guid>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task CreatePurchasedGood_ReturnsUnauthorized_WhenUserIdIsInvalid()
+    {
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, "not-a-guid")
+        };
+
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(new ClaimsIdentity(claims, "Test"))
+            }
+        };
+
+        var result = await _controller.CreatePurchasedGood(new CreatePurchasedGoodRequest(), CancellationToken.None);
+        result.Result.Should().BeOfType<UnauthorizedObjectResult>();
+    }
+
+    [Fact]
+    public async Task CreatePurchasedGood_ReturnsUnauthorized_WhenUserIdIsEmpty()
+    {
+        SetUser(Guid.Empty);
+
+        var result = await _controller.CreatePurchasedGood(
+            new CreatePurchasedGoodRequest(),
+            CancellationToken.None);
+
+        result.Result.Should().BeOfType<UnauthorizedObjectResult>();
+    }
+
+    [Fact]
+    public async Task CreatePurchasedGood_ReturnsBadRequest_WhenValidationFails()
+    {
+        var userId = Guid.NewGuid();
+        SetUser(userId);
+
+        var request = new CreatePurchasedGoodRequest();
+
+        _service.CreateAsync(request, userId, Arg.Any<CancellationToken>())
+            .Returns(PurchasedGoodsResult<PurchasedGoodResponse>
+            .ValidationError("value", "Ogiltigt värde."));
+
+        var result = await _controller.CreatePurchasedGood(request, CancellationToken.None);
+        result.Result.Should().BeAssignableTo<ObjectResult>()
+            .Which.StatusCode.Should().Be(400);
+    }
+
+    [Fact]
+    public async Task CreatePurchasedGood_ReturnsNotFound_WhenServiceReturnsNotFound()
+    {
+        var userId = Guid.NewGuid();
+        SetUser(userId);
+        var request = new CreatePurchasedGoodRequest();
+
+        _service.CreateAsync(request, userId, Arg.Any<CancellationToken>())
+            .Returns(PurchasedGoodsResult<PurchasedGoodResponse>
+            .NotFound("Leverantören finns inte."));
+
+        var result = await _controller.CreatePurchasedGood(request, CancellationToken.None);
+        result.Result.Should().BeOfType<NotFoundObjectResult>();
+    }
+
+    [Fact]
+    public async Task CreatePurchasedGood_ReturnsUnauthorized_WhenServiceReturnsInvalidUser()
+    {
+        var userId = Guid.NewGuid();
+        SetUser(userId);
+        var request = new CreatePurchasedGoodRequest();
+
+        _service.CreateAsync(request, userId, Arg.Any<CancellationToken>())
+            .Returns(PurchasedGoodsResult<PurchasedGoodResponse>
+            .InvalidUser("Användaren är ogiltig."));
+
+        var result = await _controller.CreatePurchasedGood(request, CancellationToken.None);
+        result.Result.Should().BeOfType<UnauthorizedObjectResult>();
+    }
+
+    [Fact]
+    public async Task UpdatePurchasedGood_ReturnsOk_WhenSuccessful()
+    {
+        var id = Guid.NewGuid();
+        var request = new UpdatePurchasedGoodRequest();
+        var expected = new PurchasedGoodResponse();
+
+        _service.UpdateAsync(id, request, Arg.Any<CancellationToken>())
+            .Returns(PurchasedGoodsResult<PurchasedGoodResponse>.Success(expected));
+
+        var result = await _controller.UpdatePurchasedGood(id, request, CancellationToken.None);
+        var response = result.Result.Should().BeOfType<ObjectResult>().Subject;
+        response.StatusCode.Should().Be(200);
+        response.Value.Should().BeSameAs(expected);
+    }
+
+    [Fact]
+    public async Task UpdatePurchasedGood_ReturnsBadRequest_WhenValidationFails()
+    {
+        var id = Guid.NewGuid();
+        var request = new UpdatePurchasedGoodRequest();
+
+        _service.UpdateAsync(id, request, Arg.Any<CancellationToken>())
+            .Returns(PurchasedGoodsResult<PurchasedGoodResponse>
+            .ValidationError("value", "Ogiltigt värde."));
+
+        var result = await _controller.UpdatePurchasedGood(id, request, CancellationToken.None);
+        result.Result.Should().BeAssignableTo<ObjectResult>().Which.StatusCode.Should().Be(400);
+    }
+
+    [Fact]
+    public async Task UpdatePurchasedGood_ReturnsNotFound_WhenRecordDoesNotExist()
+    {
+        var id = Guid.NewGuid();
+        var request = new UpdatePurchasedGoodRequest();
+        _service.UpdateAsync(id, request, Arg.Any<CancellationToken>())
+            .Returns(PurchasedGoodsResult<PurchasedGoodResponse>.NotFound("Registreringen finns inte."));
+
+        var result = await _controller.UpdatePurchasedGood(id, request, CancellationToken.None);
+        result.Result.Should().BeOfType<NotFoundObjectResult>();
     }
 }
