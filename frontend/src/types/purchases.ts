@@ -38,3 +38,13 @@ export type PurchaseFormData = {
   measurementQuality: "measured" | "estimated";
   comment: string;
 };
+
+/** Shared row for saved goods and demo services. */
+export type DemoPurchase = {
+  id: string;
+  type: PurchaseType;
+  data: PurchaseFormData;
+
+  // Keep the supplier's category allocations from the API.
+  categories?: Purchase["categories"];
+};
