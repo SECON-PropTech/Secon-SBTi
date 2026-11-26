@@ -11,6 +11,8 @@ public static class ValidationErrorExtensions
     {
         controller.ModelState.AddModelError(field, message);
 
-        return controller.ValidationProblem(title: "En eller flera uppgifter behöver rättas.");
+        return controller.ValidationProblem(
+            statusCode: 400,
+            title: "En eller flera uppgifter behöver rättas.");
     }
 }
