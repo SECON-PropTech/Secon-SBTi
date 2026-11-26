@@ -253,7 +253,10 @@ public class ProductGroupsControllerTests
         await dbContext.SaveChangesAsync();
     
         var result = await new ProductGroupsController(dbContext).Delete(groupId);
-        var response = result.Should().BeOfType<BadRequestObjectResult>().Subject;
-        response.Value.Should().BeOfType<ValidationProblemDetails>();
+        var response = result.Should().BeOfType<ObjectResult>().Subject;
+        response.StatusCode.Should().Be(StatusCodes.Status409Conflict);
+        response.Value.Should().BeOfType<ProblemDetails>()
+            .Which.Detail.Should().Contain("används av en eller flera produkter");
+        dbContext.ProductGroups.Should().ContainSingle();
     }
 }
