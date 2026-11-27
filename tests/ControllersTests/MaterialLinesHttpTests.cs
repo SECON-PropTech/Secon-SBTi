@@ -118,6 +118,50 @@ public class MaterialLinesHttpTests(PostgresFixture fixture)
     }
 
     [Fact]
+    public async Task Update_returns_400_for_decimal_quantity()
+    {
+        var entry = await AddEntryAsync();
+
+        try
+        {
+            using var factory =
+                new MaterialLinesFactory(Fixture.ConnectionString);
+
+            using var client = factory.CreateClient(
+                new WebApplicationFactoryClientOptions
+                {
+                    BaseAddress = new Uri("https://localhost"),
+                    AllowAutoRedirect = false
+                });
+
+            using var response = await client.PutAsJsonAsync(
+                $"/api/material-lines/{entry.Id}",
+                new
+                {
+                    productId = entry.ProductId,
+                    quantity = 3.5m,
+                    date = "2025-04-01",
+                    measurementQuality = "measured",
+                    comment = "Ska inte sparas"
+                });
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            var problem = await response.Content
+                .ReadFromJsonAsync<ValidationProblemDetails>();
+
+            Assert.NotNull(problem);
+            Assert.Contains("quantity", problem.Errors.Keys);
+
+            await AssertEntryUnchangedAsync(entry);
+        }
+        finally
+        {
+            await DeleteTestDataAsync(entry);
+        }
+    }
+
+    [Fact]
     public async Task Update_returns_404_for_unknown_entry()
     {
         var entry = await AddEntryAsync();
