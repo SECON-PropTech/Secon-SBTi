@@ -103,6 +103,24 @@ public sealed class SupplierCategoryAllocationServiceTests(PostgresFixture fixtu
         Assert.Equal(0.4m, saved[secondCategory]);
     }
 
+    [Fact]
+    public async Task Update_returns_not_found_for_unknown_supplier()
+    {
+        var category = await InsertPurchaseCategoryAsync();
+
+        var request = new UpdateSupplierCategoryAllocationsRequest
+        {
+            Allocations = [new() { PurchaseCategoryId = category, Share = 1m }]
+        };
+
+        await using var context = CreateContext();
+        var service = new SupplierCategoryAllocationService(context);
+        var result = await service.UpdateAsync(Guid.NewGuid(), request, CancellationToken.None);
+
+        Assert.Equal(SupplierCategoryAllocationStatus.NotFound, result.Status);
+        Assert.Equal("Leverantören finns inte.", result.Message);
+    }
+
     private Task InsertAllocationAsync(Guid supplierId, Guid categoryId, decimal share) =>
         ExecAsync(
             "INSERT INTO supplier_category_allocation(supplier_id,purchase_category_id,share) VALUES($1,$2,$3)",
