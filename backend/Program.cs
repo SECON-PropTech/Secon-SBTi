@@ -1,83 +1,19 @@
-using System.Text;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
-
 using Scalar.AspNetCore;
-using SeconSbtiBackend.Authorization;
 using SeconSbtiBackend.Data;
-using SeconSbtiBackend.Importing.ImportBatches;
-using SeconSbtiBackend.Importing.Visma4010;
-using SeconSbtiBackend.Interfaces;
-using SeconSbtiBackend.Services;
-using SeconSbtiBackend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IPurchasedGoodsService, PurchasedGoodsService>();
-builder.Services.AddScoped<IPermissionService, PermissionService>();
-builder.Services.AddScoped<IRoleService, RoleService>();
-builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
-builder.Services.AddScoped<
-    IPurchasedServicesService,
-    PurchasedServicesService>();
-builder.Services.AddScoped<
-    ISupplierCategoryAllocationService,
-    SupplierCategoryAllocationService>();
-
-builder.Services.AddControllers(options =>
-{
-    options.ModelMetadataDetailsProviders.Add(
-        new SystemTextJsonValidationMetadataProvider());
-
-    // Swedish text when a [BindRequired] parameter is missing, e.g. no year in the query (IF-G.01).
-    options.ModelBindingMessageProvider.SetMissingBindRequiredValueAccessor(
-        fieldName => $"Värdet för {fieldName} saknas.");
-});
+builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// Gör tjänsten tillgänglig för dependency injection.
-builder.Services.AddScoped<ProductMaterialQueryService>();
-
-builder.Services.AddScoped<IVisma4010ImportService, Visma4010ImportService>();
-builder.Services.AddScoped<IImportBatchService, ImportBatchService>();
-Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
 var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-//Cookie Authentication
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(dbConnectionString));
-
-builder.Services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.Cookie.Name = "secon.auth";
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Cookie.SameSite = SameSiteMode.Lax;
-        options.ExpireTimeSpan = TimeSpan.FromHours(8);
-        options.SlidingExpiration = true;
-
-        options.Events.OnRedirectToLogin = ctx =>
-        {
-            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            return Task.CompletedTask;
-        };
-        options.Events.OnRedirectToAccessDenied = ctx =>
-        {
-            ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
-            return Task.CompletedTask;
-        };
-    });
-
-builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -97,8 +33,6 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseHttpsRedirection();
-app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
@@ -106,5 +40,3 @@ app.MapControllers();
 app.Run();
 
 return 0;
-
-public partial class Program { }
