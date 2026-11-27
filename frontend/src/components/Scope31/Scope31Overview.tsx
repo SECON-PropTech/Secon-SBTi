@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from "react";
 import PurchaseForm from "./PurchaseForm";
 import PurchaseTable from "./PurchaseTable";
-import "./scope31.css";
+import "./Scope31.css";
 
 import type {
   Purchase,

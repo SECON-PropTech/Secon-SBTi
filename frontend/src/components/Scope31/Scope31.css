@@ -1,0 +1,268 @@
+/* .scope31 is the class on the page's outer element.
+   These rules only affect Scope 3.1.
+   Shared colors come from index.css. */
+.scope31 {
+  --scope31-danger: #a12626;
+  --scope31-row-hover: #f4f6f8;
+
+  max-width: 76rem;
+  margin: 0 auto;
+  color: var(--text);
+}
+
+/* Headings & introductions */
+.scope31 h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.scope31 h2 {
+  color: var(--text);
+}
+
+/* First paragraph directly inside the page's outer element */
+.scope31 > p:first-of-type {
+  margin: 0 0 1.5rem;
+  color: var(--text-muted);
+}
+
+/* Reporting period dropdown + goods and services tabs */
+.scope31 label[for="period"] {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.scope31 #period {
+  min-height: 2.5rem;
+  padding: 0.375rem 2rem 0.375rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background-color: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.scope31 nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.scope31 nav button {
+  min-height: 2.5rem;
+  padding: 0.375rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background-color: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.scope31 nav button:hover:not(:disabled) {
+  background-color: var(--secon-blue-light-background);
+}
+
+.scope31 nav button[aria-pressed="true"] {
+  border-color: var(--secon-blue);
+  background-color: var(--secon-blue-light-background);
+  color: var(--secon-blue);
+  font-weight: 600;
+}
+
+/* primary buttons (add and save changes) */
+.scope31 .scope31__primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--secon-blue);
+  border-radius: 0.5rem;
+  background-color: var(--secon-blue);
+  color: var(--surface);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.scope31 .scope31__primary:hover:not(:disabled) {
+  border-color: var(--secon-blue-soft);
+  background-color: var(--secon-blue-soft);
+  color: var(--surface);
+}
+
+.scope31 .scope31__secondary {
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background-color: var(--surface);
+  color: var(--text);
+}
+
+.scope31 .scope31__secondary:hover:not(:disabled) {
+  border-color: var(--secon-blue-soft);
+  background-color: var(--secon-blue-light-background);
+  color: var(--text);
+}
+
+.scope31 button:disabled,
+.scope31 #period:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Showing an outline when navigating with the keyboard */
+.scope31 :focus-visible {
+  outline: 3px solid var(--secon-blue);
+  outline-offset: 3px;
+}
+
+/*White panels. Same as the other scopes */
+.scope31 .scope31__table-panel,
+.scope31 .scope31__form-panel {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background-color: var(--surface);
+}
+
+/* Keeping the table within the page on narrow screens. so the user
+   can scroll sideways. */
+.scope31 .scope31__table-scroll {
+  max-width: 100%;
+}
+
+.scope31 .scope31__table-scroll table {
+  width: 100%;
+  color: var(--text);
+}
+
+.scope31 .scope31__table-scroll th,
+.scope31 .scope31__table-scroll td {
+  padding: 0.875rem 1rem;
+  vertical-align: middle;
+}
+
+/* Blue table headings match the other scopes */
+.scope31 .scope31__table-header th {
+  background-color: var(--secon-blue-soft);
+  color: var(--surface);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/*thin line between table rows */
+.scope31 .scope31__table-scroll td {
+  border-color: var(--border);
+}
+
+/* Highlight row when the pointer is over it */
+.scope31 .scope31__table-scroll tbody tr:hover > td,
+.scope31 .scope31__table-scroll tbody tr:focus-within > td {
+  background-color: var(--scope31-row-hover);
+}
+
+/* Amounts are aligned with Bootstrap's text-end class */
+.scope31 .scope31__amount {
+  font-variant-numeric: tabular-nums;
+}
+
+.scope31 .scope31__supplier-cell {
+  min-width: 10rem;
+  overflow-wrap: anywhere;
+}
+
+.scope31 .scope31__quality {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background-color: var(--secon-blue-light-background);
+  color: var(--secon-blue);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+/* Pencil button follows the other scopes without using their CSS classes */
+.scope31 .scope31__edit-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  color: var(--text-muted);
+}
+
+.scope31 .scope31__edit-button:hover:not(:disabled) {
+  background-color: var(--secon-blue-light-background);
+  color: var(--secon-blue);
+}
+
+/* Panel that contains the form */
+.scope31 .scope31__form-panel form {
+  max-width: 48rem;
+}
+
+.scope31 .scope31__form-panel .form-label {
+  font-weight: 600;
+}
+
+.scope31 .scope31__form-panel .form-control,
+.scope31 .scope31__form-panel .form-select {
+  min-height: 2.75rem;
+}
+
+.scope31 .scope31__form-panel textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+/* Required fields are identified by both the label and required attribute */
+.scope31 .scope31__required {
+  color: var(--scope31-danger);
+  font-weight: 700;
+}
+
+.scope31 .scope31__form-panel .invalid-feedback {
+  color: var(--scope31-danger);
+}
+
+/* Messages: save confirmation and error message.
+   Form messages use Bootstrap's alert classes. */
+.scope31 > [role="status"],
+.scope31 > [role="alert"] {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--secon-gold);
+  border-radius: 0.5rem;
+  background-color: var(--secon-blue-light-background);
+  color: var(--text);
+}
+
+.scope31 > [role="alert"] {
+  border-left-color: var(--scope31-danger);
+  background-color: var(--surface);
+  color: var(--scope31-danger);
+}
+
+/* For narrow screens */
+@media (max-width: 600px) {
+  .scope31 h1 {
+    font-size: 1.5rem;
+  }
+
+  .scope31 .scope31__table-panel,
+  .scope31 .scope31__form-panel {
+    padding: 1rem;
+  }
+}
