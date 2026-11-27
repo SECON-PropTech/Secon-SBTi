@@ -100,7 +100,8 @@ function ImportHistory({ onBack }: Props) {
                     type="button"
                     className="btn btn-sm btn-outline-danger"
                     onClick={() => handleRevert(batch)}
-                    disabled={isWorking}
+                    disabled={isWorking || !batch.canRevert}
+                    title={batch.canRevert ? undefined : "Ångra först den senare importen från Mobigo."}
                   >
                     Ångra
                   </button>

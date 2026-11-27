@@ -8,6 +8,7 @@ using Scalar.AspNetCore;
 using SeconSbtiBackend.Authorization;
 using SeconSbtiBackend.Data;
 using SeconSbtiBackend.Importing.ImportBatches;
+using SeconSbtiBackend.Importing.Mobigo;
 using SeconSbtiBackend.Importing.Visma4010;
 using SeconSbtiBackend.Interfaces;
 using SeconSbtiBackend.Services;
@@ -45,6 +46,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<ProductMaterialQueryService>();
 
 builder.Services.AddScoped<IVisma4010ImportService, Visma4010ImportService>();
+builder.Services.AddScoped<IMobigoImportService, MobigoImportService>();
 builder.Services.AddScoped<IImportBatchService, ImportBatchService>();
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 

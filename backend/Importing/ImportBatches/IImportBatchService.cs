@@ -9,7 +9,8 @@ public interface IImportBatchService
 
     /// <summary>
     /// Reverts an import by deleting it together with every row it imported.
-    /// False if there is no import with the id, e.g. because it has already been reverted.
+    /// NotFound if there is no import with the id, e.g. because it has already been reverted.
+    /// LaterImportExists if it is a Mobigo import and there is a later Mobigo import.
     /// </summary>
-    Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken);
+    Task<ImportBatchDeleteResult> DeleteAsync(Guid id, CancellationToken cancellationToken);
 }

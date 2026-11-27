@@ -41,6 +41,12 @@ export async function revertImportBatch(id: string): Promise<RevertImportOutcome
         return { kind: "error", message: "Importen finns inte längre. Den kan redan ha ångrats." };
     }
 
+    // A later Mobigo import has to be reverted first.
+    if (response.status === 409) {
+        const body = await response.json().catch(() => null) as { message?: string } | null;
+        return { kind: "error", message: body?.message ?? "Importen kan inte ångras. Ångra senare importer först." };
+    }
+
     return { kind: "error", message: otherErrorMessage(response.status) };
 }
 

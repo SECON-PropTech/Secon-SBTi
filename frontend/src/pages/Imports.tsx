@@ -1,12 +1,12 @@
 import { useState } from "react";
 import ImportHistory from "../components/Imports/ImportHistory";
+import ImportMobigo from "../components/Imports/ImportMobigo";
 import ImportVisma4010 from "../components/Imports/ImportVisma4010";
 
-type ImportView = "menu" | "visma-4010" | "history";
+type ImportView = "menu" | "visma-4010" | "mobigo" | "history";
 
 const comingImports = [
   "Visma - köpta tjänster",
-  "Mobigo - sålda produkter",
   "OKQ8 - drivmedel",
   "Autoplan - drivmedel",
 ];
@@ -16,6 +16,10 @@ function Imports() {
 
   if (view === "visma-4010") {
     return <ImportVisma4010 onBack={() => setView("menu")} />;
+  }
+
+  if (view === "mobigo") {
+    return <ImportMobigo onBack={() => setView("menu")} />;
   }
 
   if (view === "history") {
@@ -30,6 +34,10 @@ function Imports() {
       <div className="d-flex flex-column align-items-start gap-2">
         <button type="button" className="btn btn-primary" onClick={() => setView("visma-4010")}>
           Visma - köpta varor
+        </button>
+
+        <button type="button" className="btn btn-primary" onClick={() => setView("mobigo")}>
+          Mobigo - sålda produkter
         </button>
 
         {comingImports.map((label) => (
