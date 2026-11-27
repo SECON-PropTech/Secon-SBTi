@@ -63,5 +63,5 @@ function firstErrorMessage(problem: { errors?: Record<string, string[] > }): str
     if (problem.errors && fields.length > 0) {
         return problem.errors[fields[0]][0];
     }
-   return "Kunde inte spara. Kontrollera värdena";
+   return "Kunde inte spara. Kontrollera värdena.";
 }

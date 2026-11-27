@@ -7,7 +7,7 @@ export function defaultDate(year: number): string {
     const now = new Date();
 
     if (year === now.getFullYear()) {
-        return now.toISOString().slice(0, 10);
+        return now.toLocaleDateString("sv-SE");
     }
     return year + "-01-01";
 }
@@ -41,6 +41,8 @@ export function findLineErrors(draft: MaterialLineDraft): MaterialLineErrors {
     const quantity = toNumber(draft.quantity);
     if (quantity === null || quantity < 0) {
         errors.quantity = "Ange 0 eller mer.";
+    } else if (quantity > 1_000_000_000) {
+        errors.quantity = "Högst 1 000 000 000.";
     }
 
     if (draft.date === "") {
