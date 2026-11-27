@@ -1,0 +1,41 @@
+using Microsoft.AspNetCore.Mvc;
+using SeconSbtiBackend.DTOs.Scope312;
+using SeconSbtiBackend.Services;
+
+namespace SeconSbtiBackend.Controllers;
+
+[ApiController]
+[Route("api/product-materials")]
+public sealed class ProductMaterialsController(
+    ProductMaterialQueryService productMaterialQueryService) : ControllerBase
+{
+    // Hämtar materialuppgifter för en enskild produkt.
+    [HttpGet("{productId:guid}")]
+    public async Task<ActionResult<ProductMaterialsResponse>> GetProductMaterials(
+        Guid productId,
+        CancellationToken cancellationToken)
+    {
+        var product = await productMaterialQueryService
+            .GetProductMaterialsAsync(productId, cancellationToken);
+
+        if (product is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(product);
+    }
+
+    // Hämtar alla produkter med deras materialuppgifter.
+    [HttpGet]
+    public async Task<ActionResult<IReadOnlyList<ProductMaterialsResponse>>> GetAllProductMaterials(
+        CancellationToken cancellationToken)
+    {
+        var products = await productMaterialQueryService
+            .GetAllProductMaterialsAsync(cancellationToken);
+
+        return Ok(products);
+    }
+
+
+}

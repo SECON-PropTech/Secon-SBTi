@@ -1,0 +1,31 @@
+using System.Text.Json.Serialization;
+
+namespace SeconSbtiBackend.Authorization;
+
+/// <summary>
+/// All availalbe permissions in the system.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<Permission>))]
+public enum Permission
+{
+    /// <summary>Import supplier invoices from the Visma 4010 export.</summary>
+    ImportVisma4010,
+
+    /// <summary>Import material lines from Mobigo.</summary>
+    ImportMobigo,
+
+    /// <summary>Create, edit, delete roles and choose which permissions they give. Assign roles to users.</summary>
+    ManageRoles,
+
+    /// <summary>Read purchased goods in Scope 3.1.</summary>
+    ReadScope31,
+
+    /// <summary>Create and edit purchased goods in Scope 3.1.</summary>
+    WriteScope31,
+
+    /// <summary>View the list of previous imports.</summary>
+    ViewImports,
+
+    /// <summary>Revert previous imports. Give together with ViewImports, since reverting is done from the list.</summary>
+    ManageImports,
+}

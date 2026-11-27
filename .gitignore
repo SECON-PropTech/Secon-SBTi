@@ -127,6 +127,7 @@ out/
 ## Testing
 coverage/
 *.lcov
+coveragereport/
  
 ## Logs
 npm-debug.log*
@@ -203,4 +204,6 @@ appsettings.Development.json
 
 # Test output
 TestResults/
+
+Directory.Build.props
  
