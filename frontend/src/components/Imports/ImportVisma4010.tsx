@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { ArrowLeft, Upload, FileSpreadsheet, Trash2 } from "lucide-react";
 import type { ChangeEvent } from "react";
 import type { Visma4010ImportOutcome, Visma4010ImportResponse } from "../../types/visma4010Import";
 import { importVisma4010, previewVisma4010 } from "../../Services/visma4010ImportService";
@@ -38,12 +39,24 @@ function ImportVisma4010({ onBack }: Props) {
   const [outcome, setOutcome] = useState<Visma4010ImportOutcome | null>(null);
   const [isImported, setIsImported] = useState(false);
   const [isWorking, setIsWorking] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     setFile(event.target.files?.[0] ?? null);
     setOutcome(null);
     setIsImported(false);
   }
+
+// Clear the selected file and previous import results.
+function handleRemoveFile() {
+  setFile(null);
+  setOutcome(null);
+  setIsImported(false);
+
+  if (fileInputRef.current) {
+    fileInputRef.current.value = "";
+  }
+}
 
   async function handlePreview() {
     if (file === null) return;
@@ -67,26 +80,69 @@ function ImportVisma4010({ onBack }: Props) {
   const canImport = !isWorking && !isImported && outcome?.kind === "ok" && outcome.data.canImport;
 
   return (
-    <div className="p-4">
-      <button type="button" className="btn btn-link p-0 mb-3" onClick={onBack} disabled={isWorking}>
-        ← Tillbaka till importer
-      </button>
-
-      <h1 className="fs-2">Import från Visma, konto 4010</h1>
+    <div className="imports-page">
+      <div className="mb-4">
+        <div className="imports-header">
+          <h1 className="fs-2 my-1">Import från Visma, konto 4010</h1>
+          <button type="button" className="imports-back" onClick={onBack} disabled={isWorking}>
+            <ArrowLeft size={18} />
+            Tillbaka till startsidan
+          </button>
+      </div>
       <p>
         Välj en huvudbok exporterad från Visma som Excel-fil (.xlsx eller .xls, max 10 MB).
         Leverantörsfakturorna sparas som köpta varor i scope 3.1.
       </p>
+    </div>
 
-      <input type="file" accept=".xlsx,.xls" onChange={handleFileChange} disabled={isWorking} />
+    {/* File upload */}
+    <div className="imports-box mb-4">
+      <h2 className="fs-4 mb-3">Ladda upp underlag</h2>
+      
+        <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={handleFileChange} disabled={isWorking} hidden/>
+        {file === null ? (
+          <button type="button" className="imports-upload" onClick={() => fileInputRef.current?.click()} disabled={isWorking}>
+            <Upload size={32} />
 
-      <div className="my-3">
-        <button type="button" className="btn btn-secondary me-2" onClick={handlePreview} disabled={file === null || isWorking}>
-          Förhandsgranska
-        </button>
-        <button type="button" className="btn btn-primary" onClick={handleImport} disabled={!canImport}>
-          Importera
-        </button>
+            <span className="fw-semibold">Klicka för att välja en fil</span>
+
+            <span className="small text-secondary">Excel (.xlsx eller .xls) · Max 10 MB</span>
+          </button>
+        ) : (
+
+          <div className="imports-selected-file">
+            <div className="imports-icon">
+              <FileSpreadsheet size={24} />
+            </div>
+
+            <div className="imports-source">
+              <p className="fw-semibold mb-1">{file.name}</p>
+              <p className="small text-secondary mb-0">{(file.size / 1024).toFixed(1)} KB</p>
+            </div>
+
+            <button type="button" className="imports-outline-button" onClick={handleRemoveFile} disabled={isWorking}>
+              <Trash2 size={16} />
+              Ta bort
+            </button>
+          </div>
+        )}
+
+        {/* Import actions */}
+        <div className="imports-actions">
+          <button type="button" className="imports-outline-button" onClick={onBack} disabled={isWorking}>
+            {isImported ? "Tillbaka" : "Avbryt"}
+          </button>
+
+          <div className="imports-action-buttons">
+            <button type="button" className="imports-button" onClick={handlePreview} disabled={file === null || isWorking || isImported}>
+              Förhandsgranska
+            </button>
+
+            <button type="button" className="imports-button" onClick={handleImport} disabled={!canImport}>
+              Importera
+            </button>
+          </div>
+        </div>
       </div>
 
       {isWorking && <p>Läser filen ..</p>}

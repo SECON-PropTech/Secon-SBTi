@@ -1,5 +1,5 @@
 /* =========================================
-   IMPORTS - Monthly overview
+   IMPORTS 
    ========================================= */
 
 /* White containers */
@@ -104,6 +104,118 @@
     outline: 2px solid var(--secon-blue);
     outline-offset: 2px;
 }
+
+/* Page heading */
+.imports-page .imports-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+/* Back navigation */
+.imports-page .imports-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--secon-blue);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.imports-page .imports-back:hover:not(:disabled) {
+    text-decoration: underline;
+}
+
+.imports-page .imports-back:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* File upload */
+.imports-page .imports-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 32px 16px;
+    border: 2px dashed var(--secon-blue-light-label);
+    border-radius: 8px;
+    background-color: var(--bg);
+    color: var(--secon-blue);
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.imports-page .imports-upload:hover:not(:disabled) {
+    background-color: var(--secon-blue-light-background);
+}
+
+/* Selected file */
+.imports-page .imports-selected-file {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.imports-page .imports-selected-file p {
+    overflow-wrap: anywhere;
+}
+
+/* Secondary buttons */
+.imports-page .imports-outline-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background-color: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.imports-page .imports-outline-button:hover:not(:disabled) {
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.imports-page .imports-outline-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Import actions */
+.imports-page .imports-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.imports-page .imports-action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+
 
 /* Smaller screens */
 @media (max-width: 768px) {
