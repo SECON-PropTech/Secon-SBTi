@@ -60,13 +60,14 @@ function Scope311() {
     content = (
       <section className="energy-box">
         <ProductTable products={report.products} total={report.totalActivityKwh}
+        year={year}
         onSaved={() => setReloadCount(reloadCount + 1)}/>
       </section>
     );
   }
 
   return (
-    <div className="energy-page">
+    <div className="energy-page scope311">
       <div className="d-flex justify-content-between align-items-start mb-4">
         <div>
           <p className="text-uppercase small text-secondary mb-1">Produktrapport</p>

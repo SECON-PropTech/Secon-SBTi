@@ -1,9 +1,10 @@
 import { useState} from "react";
 import type {FormEvent} from "react";
-import type {PurchaseFormData, PurchaseType } from "./Types";
+import type {PurchaseFormData, PurchaseType } from "../../types/purchases";
 
 /**Information that the form gets from Scope31Overview --- */
 type Scope31FormProps = {
+    fieldErrors?: Record<string, string[]>;
     type: PurchaseType;
     initialData?: PurchaseFormData;
     isEditing: boolean;
@@ -11,7 +12,6 @@ type Scope31FormProps = {
     onSave: (formData: PurchaseFormData) => void;
     onCancel: () => void;
 
-    //* temporary optional props for error and saving/
     isSaving?: boolean;
     error?: string;
 }
@@ -27,6 +27,18 @@ const emptyForm: PurchaseFormData = {
     comment: "",
 }
 
+const fieldLabels: Record<string, string> = {
+  supplierId: "Leverantörens ID (UUID)",
+  transactionDate: "Datum",
+  value: "Belopp (SEK)",
+  unit: "Enhet",
+  measurementQuality: "Datakvalitet",
+  goodsName: "Vara",
+  accountNo: "Konto",
+  comment: "Kommentar",
+  specification: "Specifikation"
+};
+
 /**Form used for both purchased goods and services */
 export default function PurchaseForm({
     type,
@@ -37,6 +49,7 @@ export default function PurchaseForm({
     onCancel,
     isSaving = false,
     error = "",
+    fieldErrors = {},
 }: Scope31FormProps) {
     //**Storing what the user types into the form */
     const [formData, setFormData] = useState<PurchaseFormData>(
@@ -55,16 +68,23 @@ export default function PurchaseForm({
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        const amount = Number(formData.amount);
-        const missingRequiredField =
-        !formData.name.trim() ||
-        !formData.transactionDate ||
-        !formData.amount.trim() ||
-        (type === "goods" && !formData.supplierId.trim());
+        if (isSaving) return;
 
-        if (missingRequiredField || !Number.isFinite(amount) || amount <0 ) {
-            setValidationError("Kontrollera att alla obligatoriska fält är ifyllda.")
-            return;
+        const amount = Number(formData.amount);
+
+        const missingRequiredField =
+          (type === "services" && !formData.name.trim()) ||
+          !formData.transactionDate ||
+          !formData.amount.trim() ||
+          (type === "goods" && !formData.supplierId.trim());
+
+        if (
+          missingRequiredField ||
+          !Number.isFinite(amount) ||
+          (type === "services" && amount < 0)
+        ) {
+          setValidationError("Kontrollera att alla obligatoriska fält är ifyllda.");
+          return;
         }
 
         // Check that the purchase date matches the selected reporting year.
@@ -73,8 +93,17 @@ export default function PurchaseForm({
           return;
         }
 
+        //check supplier ID format before sending to the backend
+        const uuidPattern = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
+
+        if (type === "goods" && !uuidPattern.test(formData.supplierId.trim())) {
+          setValidationError("Ange ett giltigt leverantörs ID i UUID-format.");
+          return
+        }
+
+
         setValidationError("");
-        //**Sending form data to the parent component, which is Scope31overview.tsx
+        //**Sending form data to the parent component, which is Scope31Overview.tsx
         //  */
         onSave(formData);
     }
@@ -96,7 +125,7 @@ return (
           onChange={(event) => handleChange("name", event.target.value)}
         />
 
-        {/* NOTE: Goods currently use a supplier ID. Potential dropdown later. */}
+        {/* Reminder: Goods currently use a supplier ID. Potential dropdown later. */}
         {type === "goods" && (
           <>
             <label htmlFor="supplierId">Leverantörens ID (UUID)</label>
@@ -106,7 +135,7 @@ return (
               value={formData.supplierId}
               onChange={(event) => handleChange("supplierId", event.target.value)}
             />
-            <p>Leverantörsväljare kan läggas till när backend är ansluten.</p>
+            <p>Ange Id för en befintlig leverantör.</p>
           </>
         )}
 
@@ -122,7 +151,7 @@ return (
         <input
           id="amount"
           type="number"
-          min="0"
+          min={type === "services" ? "0" : undefined}
           step="0.01"
           value={formData.amount}
           onChange={(event) => handleChange("amount", event.target.value)}
@@ -155,9 +184,14 @@ return (
           onChange={(event) => handleChange("comment", event.target.value)}
         />
 
-        {/* Feedback for validation and future API errors */}
         {validationError && <p role="alert">{validationError}</p>}
         {error && <p role="alert">{error}</p>}
+
+        {Object.entries(fieldErrors).map(([field, messages]) => (
+          <p role="alert" key={field}>
+            {fieldLabels[field] ?? "Uppgift"}: {messages.join(" ")}
+          </p>
+        ))}
 
         <button type="submit" className="scope31__primary" disabled={isSaving}>
           {isSaving ? "Sparar..." : isEditing ? "Spara ändringar" : "Lägg till"}

@@ -391,6 +391,75 @@
 }
 
 
+/*        THE SALES LINES (the Antal column) */
+
+.energy-page .energy-sales {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.energy-page .energy-sales-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: var(--text-muted);
+}
+
+.energy-page .energy-sales-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.energy-page .energy-sales-table {
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+.energy-page .energy-sales-table th {
+  padding: 4px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.energy-page .energy-sales-table td {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.energy-page .energy-sales-table tr:last-child td {
+  border-bottom: none;
+}
+
+.energy-page .energy-sales-quality {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.energy-page .energy-no-comment {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+/* 3.12 styles the same selector through the shared .energy-page class.
+   These win by one extra class, and only on our page. */
+.energy-page.scope311 .energy-details-grid dd {
+  font-weight: 400;
+}
+
+.energy-page.scope311 .energy-details-grid dd.energy-details-number {
+  font-weight: 600;
+}
+
 /*        SMALL SCREENS */
 @media (max-width: 768px) {
   .energy-page .energy-details-grid {

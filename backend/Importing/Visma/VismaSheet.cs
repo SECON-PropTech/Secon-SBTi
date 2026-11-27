@@ -1,6 +1,7 @@
 using System.Globalization;
 using ExcelDataReader;
 using ExcelDataReader.Exceptions;
+using System.Text;
 
 namespace SeconSbtiBackend.Importing.Visma;
 
@@ -10,6 +11,7 @@ public static class VismaSheet
     {
         try
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             using var reader = ExcelReaderFactory.CreateReader(stream);
             var rows = new List<SheetRow>();
 
@@ -67,5 +69,6 @@ public record SheetRow(int Number, object?[] Cells)
         }
     }
 
+    //TODO: Handle negative column indexes (e.g. column = -1) by returning null or throwing an exception.
     public object? Value(int column) => column < Cells.Length ? Cells[column] : null;
 }

@@ -117,11 +117,18 @@ public sealed class PurchasedGoodsService(
                 "Leverantören finns inte. Välj en annan leverantör.");
         }
 
-        if (request.Unit != "sek")
+        if (request.Unit is not ("sek" or "st"))
         {
             return PurchasedGoodsResult<PurchasedGoodResponse>.ValidationError(
                 "unit",
-                "Endast belopp i SEK stöds för köpta varor.");
+                "Välj SEK eller styck.");
+        }
+
+        if (request.Unit == "st" && request.Value is < 0m)
+        {
+            return PurchasedGoodsResult<PurchasedGoodResponse>.ValidationError(
+                "value",
+                "Antal får inte vara negativt.");
         }
 
         if (!IsValidMeasurementQuality(request.MeasurementQuality))
@@ -168,11 +175,19 @@ public sealed class PurchasedGoodsService(
                 "Den köpta varan kunde inte hittas.");
         }
 
-        if (good.Unit != "sek" || request.Unit != "sek")
+        if (good.Unit is not ("sek" or "st") ||
+        request.Unit is not ("sek" or "st"))
         {
             return PurchasedGoodsResult<PurchasedGoodResponse>.ValidationError(
                 "unit",
-                "Endast inköp i SEK kan redigeras i detta flöde.");
+                "Välj SEK eller styck.");
+        }
+
+        if (request.Unit == "st" && request.Value is < 0m)
+        {
+            return PurchasedGoodsResult<PurchasedGoodResponse>.ValidationError(
+                "value",
+                "Antal får inte vara negativt.");
         }
 
         if (!IsValidMeasurementQuality(request.MeasurementQuality))

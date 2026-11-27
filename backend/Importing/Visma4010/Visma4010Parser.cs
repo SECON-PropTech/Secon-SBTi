@@ -41,6 +41,8 @@ public static class Visma4010Parser
             throw new VismaFileFormatException("Filen innehåller inget konto.");
         }
 
+        ValidateAccountAndPeriod(file);
+
         var transactions = file.Accounts.SelectMany(account => account.Transactions).ToList();
         UseMostFrequentSpelling(transactions);
 
@@ -52,6 +54,39 @@ public static class Visma4010Parser
         ValidateUniqueInvoiceNumbers(transactions, file.Issues);
 
         return file;
+    }
+
+    private static void ValidateAccountAndPeriod(ParsedVisma4010File file)
+    {
+        if (file.Accounts.Any(account => account.Number != "4010"))
+        {
+            throw new VismaFileFormatException(
+                "Filen får endast innehålla konto 4010. Exportera en huvudbok för konto 4010 från Visma.");
+        }
+
+        if (file.PeriodFrom is not DateOnly periodFrom ||
+            file.PeriodTo is not DateOnly periodTo)
+        {
+            throw new VismaFileFormatException(
+                "Rapportperioden saknas eller är ogiltig. Exportera filen med en angiven period.");
+        }
+
+        if (periodFrom > periodTo)
+        {
+            throw new VismaFileFormatException(
+                "Rapportperiodens startdatum måste vara före eller samma dag som slutdatumet.");
+        }
+
+        var outsidePeriod = file.Accounts
+            .SelectMany(account => account.Transactions)
+            .FirstOrDefault(transaction =>
+                transaction.Date < periodFrom || transaction.Date > periodTo);
+
+        if (outsidePeriod is not null)
+        {
+            throw new VismaFileFormatException(
+                $"Rad {outsidePeriod.RowNumber} har ett datum utanför rapportperioden. Kontrollera Visma-exporten.");
+        }
     }
 
     private static ColumnMap LocateColumns(IEnumerable<SheetRow> headerRows)
@@ -137,32 +172,52 @@ public static class Visma4010Parser
             previousTransaction = transaction;
         }
     }
-
-    private static ParsedTransaction? ReadTransaction(SheetRow row, ColumnMap columns, string accountNumber)
+    private static ParsedTransaction? ReadTransaction(
+        SheetRow row,
+        ColumnMap columns,
+        string accountNumber)
     {
         var voucher = row.Text(columns.Voucher);
-        var date = row.Date(columns.Date);
 
-        if (voucher is null || !VoucherPattern.IsMatch(voucher) || date is null)
+        if (voucher is null || !VoucherPattern.IsMatch(voucher))
         {
             return null;
         }
 
+        var date = row.Date(columns.Date)
+            ?? throw new VismaFileFormatException(
+                $"Rad {row.Number} saknar ett giltigt datum.");
+
+        var debit = row.AmountOrNull(columns.Debit);
+        var credit = row.AmountOrNull(columns.Credit);
+
+        if (debit is null && credit is null)
+        {
+            throw new VismaFileFormatException(
+                $"Rad {row.Number} saknar belopp i både Debet och Kredit.");
+        }
+
+        var balance = row.AmountOrNull(columns.Balance)
+            ?? throw new VismaFileFormatException(
+                $"Rad {row.Number} saknar saldo.");
+
         var text = row.Text(columns.Text) ?? "";
+
         var transaction = new ParsedTransaction
         {
             RowNumber = row.Number,
             Account = accountNumber,
             Voucher = voucher,
-            Date = date.Value,
+            Date = date,
             Text = text,
-            Debit = row.Amount(columns.Debit),
-            Credit = row.Amount(columns.Credit),
-            Balance = row.Amount(columns.Balance)
+            Debit = debit ?? 0m,
+            Credit = credit ?? 0m,
+            Balance = balance
         };
 
         // Preferred over the Transinfo row, where supplier names are cut off at 36 characters.
         var match = InvoiceTextPattern.Match(text);
+
         if (match.Success)
         {
             transaction.InvoiceNumber = match.Groups[2].Value;
@@ -171,7 +226,6 @@ public static class Visma4010Parser
 
         return transaction;
     }
-
     private static void ApplyTransInfo(ParsedTransaction transaction, string transInfo)
     {
         var match = TransInfoPattern.Match(transInfo);
