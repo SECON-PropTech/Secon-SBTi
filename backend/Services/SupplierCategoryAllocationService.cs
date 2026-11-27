@@ -192,7 +192,7 @@ public class SupplierCategoryAllocationService(ApplicationDbContext context)
 
         var totalShare = allocations.Sum(allocation => allocation.Share!.Value);
 
-        if (Math.Round(totalShare, 6) != 1m)
+        if (totalShare != 1m)
         {
             return SupplierCategoryAllocationResult.ValidationError(
                 "allocations",
