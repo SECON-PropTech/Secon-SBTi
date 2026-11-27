@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
+
 import type { PageId } from "../types/navigation";
 import { logout } from "../Services/authService";
 import seconLogo from "../assets/secon_logo.svg";
@@ -33,6 +35,9 @@ function Sidebar({activePage, onSelect}: Props){
 
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [logoutError, setLogoutError] = useState("");
+
+    // Controls the visibility of the logout confirmation modal
+    const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
 
     // Logs out the user and redirects to the login page
     async function handleLogout() {
@@ -81,16 +86,12 @@ function Sidebar({activePage, onSelect}: Props){
             ))}
             </nav>
             <div className="sidebar-bottom">
-                {logoutError && (
-                    <p className="sidebar-error" role="alert">
-                        {logoutError}
-                    </p>
-                )}
-
                 <button
                     type="button"
                     className="sidebar-logout"
-                    onClick={handleLogout}
+                    onClick={() => {setLogoutError("");
+                    setShowLogoutModal(true);
+}}
                     disabled={isLoggingOut}
                 >
                     <span aria-hidden="true">↪</span>
@@ -99,6 +100,46 @@ function Sidebar({activePage, onSelect}: Props){
 
                 <p className="sidebar-footer">SBTi-rapportering</p>
             </div>
+
+            {/* Logout confirmation modal */}
+            {showLogoutModal && createPortal(
+                <div className="logout-modal-overlay">
+                    <div
+                        className="logout-modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="logout-modal-title"
+                    >
+                        <h5 id="logout-modal-title">Logga ut</h5>
+
+                        <p>Är du säker på att du vill logga ut?</p>
+
+                        {logoutError && (<p className="sidebar-error" role="alert">{logoutError}</p>)}
+
+                        <div className="logout-modal-actions">
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary"
+                                onClick={() => setShowLogoutModal(false)}
+                                disabled={isLoggingOut}
+                            >
+                                Avbryt
+                            </button>
+
+                            <button
+                                type="button"
+                                className="btn logout-modal-confirm"
+                                onClick={handleLogout}
+                                disabled={isLoggingOut}
+                            >
+                                {isLoggingOut ? "Loggar ut..." : "Logga ut"}
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
         </aside>
     )
 }

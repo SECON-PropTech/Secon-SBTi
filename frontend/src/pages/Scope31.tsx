@@ -1,5 +1,5 @@
 
-import Scope31Overview from "../components/Scope31/Scope31overview";
+import Scope31Overview from "../components/Scope31/Scope31Overview";
 
 function Scope31() {
   return <Scope31Overview />;

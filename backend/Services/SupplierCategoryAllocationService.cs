@@ -186,15 +186,17 @@ public class SupplierCategoryAllocationService(ApplicationDbContext context)
             {
                 return SupplierCategoryAllocationResult.ValidationError(
                     $"allocations[{index}].share",
-                    "Andelen måste vara större än 0 och högst 100 procent.");
+                    "Ange en andel större än 0 och högst 1, till exempel 0,2 för 20 procent.");
             }
         }
 
-        if (allocations.Sum(allocation => allocation.Share!.Value) != 1m)
+        var totalShare = allocations.Sum(allocation => allocation.Share!.Value);
+
+        if (Math.Round(totalShare, 6) != 1m)
         {
             return SupplierCategoryAllocationResult.ValidationError(
                 "allocations",
-                "Fördelningen måste bli exakt 100 procent innan den kan sparas.");
+                "Fördelningen måste summera till 100 procent innan den kan sparas.");
         }
 
         return null;
