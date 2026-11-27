@@ -18,9 +18,11 @@ public class MaterialLineRequest
 
     /// <summary>
     /// Number of units delivered. 0 is allowed, negative is not (#44).
+    /// Whole numbers only: products are counted in pieces ("st"), as in the Mobigo export.
     /// </summary>
     [Required(ErrorMessage = "Ange ett antal.")]
     [Range(0d, 1_000_000_000d, ErrorMessage = "Ange ett antal mellan 0 och 1 000 000 000.")]
+    [WholeNumber(ErrorMessage = "Ange ett helt antal, till exempel 3.")]
     public decimal? Quantity { get; init; }
 
     /// <summary>
