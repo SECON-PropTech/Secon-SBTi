@@ -87,23 +87,28 @@ public class Visma4010ParserTests
         Parse(Visma4010FileBuilder.Standard()).Issues.Should().BeEmpty();
     }
 
-    [Fact]
-    public void Parse_keeps_transactions_with_the_account_they_belong_to()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Parse_rejects_other_accounts_even_when_4010_is_present(bool includes4010)
     {
-        var file = Parse(new Visma4010FileBuilder()
-            .Account("4010", "Inköp material", opening: 1000m)
-            .Invoice("L1", Jan1, "Levfkt 1 A AB", debit: 200m)
-            .Totals()
-            .Account("4020", "Underentreprenad")
-            .Invoice("L2", Jan1, "Levfkt 2 B AB", debit: 300m)
-            .Totals());
+        var builder = new Visma4010FileBuilder();
 
-        file.Accounts.Select(account => account.Number).Should().Equal("4010", "4020");
-        file.Accounts[0].OpeningBalance.Should().Be(1000m);
-        file.Accounts[0].Transactions.Should().ContainSingle().Which.Account.Should().Be("4010");
-        file.Accounts[1].OpeningBalance.Should().Be(0);
-        file.Accounts[1].Transactions.Should().ContainSingle().Which.Account.Should().Be("4020");
-        file.Issues.Should().BeEmpty();
+        if (includes4010)
+        {
+            builder.Account("4010", "Inköp material", opening: 1000m)
+                .Invoice("L1", Jan1, "Levfkt 1 A AB", debit: 200m)
+                .Totals();
+        }
+
+        builder.Account("4020", "Underentreprenad")
+            .Invoice("L2", Jan1, "Levfkt 2 B AB", debit: 300m)
+            .Totals();
+
+        var act = () => Parse(builder);
+
+        act.Should().Throw<VismaFileFormatException>()
+            .WithMessage("Filen får endast innehålla konto 4010.*");
     }
 
     [Fact]
