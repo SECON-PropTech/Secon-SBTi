@@ -9,7 +9,9 @@ namespace SeconSbtiBackend.Controllers;
 [ApiController]
 [Route("api/imports/visma-4010")]
 [HasPermission(Permission.ImportVisma4010)]
-public class Visma4010ImportsController(IVisma4010ImportService importService) : ControllerBase
+public class Visma4010ImportsController(
+    IVisma4010ImportService importService,
+    ILogger<Visma4010ImportsController>? logger = null) : ControllerBase
 {
     // A little more than the largest allowed file, to leave room for the multipart form around it.
     private const long MaxRequestSize = Visma4010ImportService.MaxFileSize + 1024 * 1024;
@@ -43,6 +45,7 @@ public class Visma4010ImportsController(IVisma4010ImportService importService) :
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(Visma4010ImportResponse), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(Visma4010ImportResponse), StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Visma4010ImportResponse>> Import(
         IFormFile? file,
         CancellationToken cancellationToken)
@@ -62,10 +65,24 @@ public class Visma4010ImportsController(IVisma4010ImportService importService) :
             return this.FieldValidationProblem("file", "Välj en fil.");
         }
 
-        await using var content = file.OpenReadStream();
-        var result = await importService.ImportAsync(content, file.FileName, importedBy, cancellationToken);
+        try
+        {
+            await using var content = file.OpenReadStream();
+            var result = await importService.ImportAsync(content, file.FileName, importedBy, cancellationToken);
 
-        return ToActionResult(result, StatusCodes.Status201Created);
+            return ToActionResult(result, StatusCodes.Status201Created);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            logger?.LogError(exception, "Visma 4010 import could not be completed.");
+
+            return Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Importen kunde inte slutföras.",
+                detail:
+                    "Förhandsgranska filen igen innan du försöker importera på nytt. " +
+                    "Kontakta en administratör om felet kvarstår.");
+        }
     }
 
     private ActionResult<Visma4010ImportResponse> ToActionResult(

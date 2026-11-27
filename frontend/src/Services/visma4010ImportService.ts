@@ -1,5 +1,8 @@
 import type { Visma4010ImportOutcome, Visma4010ImportResponse } from "../types/visma4010Import";
 
+const retryMessage = "Resultatet kunde inte bekräftas. " +
+    "Förhandsgranska filen igen innan du försöker importera på nytt.";
+
 export function previewVisma4010(file: File): Promise<Visma4010ImportOutcome> {
     return upload("/api/imports/visma-4010/preview", file);
 }
@@ -21,16 +24,17 @@ async function upload(path: string, file: File): Promise<Visma4010ImportOutcome>
             body: formData,
         });
     } catch {
-        return { kind: "error", message: "Kunde inte nå servern. Kontrollera att backend körs." };
-    }
-
-    if (response.ok) {
-        return { kind: "ok", data: await response.json() as Visma4010ImportResponse };
+        return { kind: "error", message: retryMessage };
     }
 
     // 409 = the file has been imported before, 422 = another blocker. Both have the same body as the preview.
-    if (response.status === 409 || response.status === 422) {
-        return { kind: "blocked", data: await response.json() as Visma4010ImportResponse };
+    if (response.ok || response.status === 409 || response.status === 422) {
+        try {
+            const data = await response.json() as Visma4010ImportResponse;
+            return response.ok ? { kind: "ok", data } : { kind: "blocked", data };
+        } catch {
+            return { kind: "error", message: retryMessage };
+        }
     }
 
     if (response.status === 400) {
@@ -48,6 +52,15 @@ async function upload(path: string, file: File): Promise<Visma4010ImportOutcome>
 
     if (response.status === 413) {
         return { kind: "error", message: "Filen är större än 10 MB." };
+    }
+
+    if (response.status >= 500) {
+        const problem = await response.json().catch(() => null) as { detail?: unknown } | null;
+        const detail = problem?.detail;
+        return {
+            kind: "error",
+            message: typeof detail === "string" && detail.trim() ? detail : retryMessage,
+        };
     }
 
     return { kind: "error", message: "Något gick fel: " + response.status };
