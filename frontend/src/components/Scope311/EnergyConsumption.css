@@ -450,10 +450,16 @@
   color: var(--text-muted);
 }
 
-/* 3.12 styles the same selector through the shared .energy-page class.
-   These win by one extra class, and only on our page. */
+.energy-page .energy-sales-date-field {
+  width: 150px;
+}
+
 .energy-page.scope311 .energy-details-grid dd {
   font-weight: 400;
+}
+
+.energy-page .energy-sales-footer {
+  margin-top: 12px;
 }
 
 .energy-page.scope311 .energy-details-grid dd.energy-details-number {
