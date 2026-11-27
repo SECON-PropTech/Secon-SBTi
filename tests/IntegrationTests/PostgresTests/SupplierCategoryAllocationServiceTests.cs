@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using SeconSbtiBackend.DTOs;
 using SeconSbtiBackend.Services;
@@ -64,9 +65,12 @@ public sealed class SupplierCategoryAllocationServiceTests(PostgresFixture fixtu
     }
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task Invalid_update_leaves_existing_allocations_unchanged(bool hasUnknownCategory)
+    [InlineData(false, "0.4")]
+    [InlineData(true, "0.5")]
+    [InlineData(false, "0.4999996")]
+    [InlineData(false, "0.5000004")]
+    public async Task Invalid_update_leaves_existing_allocations_unchanged(
+        bool hasUnknownCategory, string secondShare)
     {
         var supplier = await InsertSupplierAsync();
         var firstCategory = await InsertPurchaseCategoryAsync();
@@ -82,7 +86,7 @@ public sealed class SupplierCategoryAllocationServiceTests(PostgresFixture fixtu
                 new()
                 {
                     PurchaseCategoryId = hasUnknownCategory ? Guid.NewGuid() : secondCategory,
-                    Share = hasUnknownCategory ? 0.5m : 0.4m
+                    Share = decimal.Parse(secondShare, CultureInfo.InvariantCulture)
                 }
             ]
         };
