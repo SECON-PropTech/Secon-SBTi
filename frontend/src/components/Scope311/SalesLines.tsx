@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { PackageCheck } from "lucide-react";
+import { PackageCheck, CircleCheck } from "lucide-react";
 import type { MaterialLine, MaterialLineDraft } from "../../types/materialLine";
 import { getProductPeriod } from "../../Services/soldProductsService";
 import SalesLineRow from "./SalesLineRow";
@@ -24,6 +24,7 @@ function SalesLines({ productId, year, onChanged }: Props) {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [draft, setDraft] = useState<MaterialLineDraft | null>(null);
     const [saveError, setSaveError] = useState<string | null>(null);
+    const [movedToYear, setMovedToYear] = useState<string | null>(null);
 
     //true while a save is on its way to backend
     const [isSaving, setIsSaving] = useState(false);
@@ -78,7 +79,7 @@ function SalesLines({ productId, year, onChanged }: Props) {
             return;
         }
         const body = lineDraftToRequest(draft, productId);
-
+        const savedYear = draft.date.slice(0, 4);
         setIsSaving(true);
 
         const request = editingLine === null
@@ -90,6 +91,10 @@ function SalesLines({ productId, year, onChanged }: Props) {
             setReloadCount(reloadCount + 1);
             //the page fetches the report again, so Antal and the total come from the backend
             onChanged();
+            if (savedYear !== String(year)) {
+                setMovedToYear(savedYear);
+                window.setTimeout(() => setMovedToYear(null), 4000);
+            }
         })
         .catch((error: Error) => setSaveError(error.message))
         .finally(() => setIsSaving(false));
@@ -154,6 +159,13 @@ function SalesLines({ productId, year, onChanged }: Props) {
             <div className="energy-sales-footer">
                 <AddButton text="Lägg till försäljning" onClick={startAdd}/>
             </div>
+
+            {/* The line left the year on screen, say where it went */}
+            {movedToYear !== null && (
+                <div className="energy-saved-toast">
+                    <CircleCheck size={16}/> Raden flyttades till {movedToYear}
+                </div>
+            )}
         </div>
     )
 }
