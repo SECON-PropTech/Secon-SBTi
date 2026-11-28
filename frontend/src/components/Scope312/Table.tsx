@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CircleCheck, TriangleAlert, Info } from "lucide-react";
 
 import Tooltip from "../Scope311/Tooltip";
-import type { SoldProducts, ProductMaterials, ProductPeriodEntry, ProductFilter } from "../../types/soldProducts";
+import type { SoldProducts, ProductMaterials, ProductPeriodEntry, ProductFilter, UpdateProductPeriodEntry } from "../../types/soldProducts";
 import { getProductPeriod } from "../../Services/soldProductsService";
 import FoldOutRow from "./FoldOutRow";
 
@@ -114,6 +114,22 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
         visibleRows.every((row) => openIds.includes(row.product.id));
     // Total known material weight for the visible products.
     const totalWeight = visibleRows.reduce((sum, row) => sum + row.totalWeight, 0);
+
+    // Updates the period entry in the table after a successful save.
+    function handleEntryUpdated(
+        entryId: string,
+        data: UpdateProductPeriodEntry
+    ) {
+        setEntries((previous) =>
+            previous.map((entry) =>
+                entry.id === entryId
+                    ? { ...entry, ...data }
+                    : entry
+            ).filter(
+                (entry) => Number(entry.date.slice(0, 4)) === year
+            )
+        );
+    }
 
     // Will fold out or in a spedcifik row.
     function toggleRow(productId: string) {
@@ -264,6 +280,7 @@ function Table({ products, productMaterials, year, selectedMonth }: Props) {
                                     totalWeight={row.totalWeight}
                                     isOpen={openIds.includes(row.product.id)}
                                     onToggle={() => toggleRow(row.product.id)}
+                                    onEntryUpdated={handleEntryUpdated}
                                 />
                             ))}
                         </tbody>
